@@ -1,0 +1,87 @@
+.auth {
+  min-height: calc(100vh - 140px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 16px;
+}
+
+.auth__card {
+  width: min(420px, 92vw);
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08);
+  padding: 32px 32px 36px;
+  text-align: center;
+}
+
+.auth__logo {
+  font-family: 'Playfair Display', serif;
+  color: #1f7a46;
+  margin: 0 0 6px;
+  font-size: 28px;
+}
+
+.auth__subtitle {
+  color: #6f6f6f;
+  margin-bottom: 20px;
+}
+
+.auth__form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 18px 0;
+}
+
+.auth__forgot {
+  text-align: right;
+  font-size: 12px;
+  color: #1f7a46;
+  cursor: pointer;
+}
+
+.auth__divider {
+  text-transform: uppercase;
+  font-size: 12px;
+  color: #9a9a9a;
+  margin: 18px 0 12px;
+  position: relative;
+}
+
+.auth__divider::before,
+.auth__divider::after {
+  content: '';
+  height: 1px;
+  width: 40%;
+  background: #e6e3df;
+  position: absolute;
+  top: 50%;
+}
+
+.auth__divider::before {
+  left: 0;
+}
+
+.auth__divider::after {
+  right: 0;
+}
+
+.auth__footer {
+  margin-top: 18px;
+  font-size: 13px;
+}
+
+.auth__footer a {
+  color: #0f8a4e;
+  font-weight: 600;
+}
+
+.auth__error {
+  background: #fff2f0;
+  color: #b42318;
+  border: 1px solid #f2b8b5;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+}
