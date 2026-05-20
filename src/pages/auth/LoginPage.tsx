@@ -17,15 +17,17 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (user) {
-      navigate(PATHS.home)
+      const isAdmin = user.roles?.some((role) => role === 'ADMIN')
+      navigate(isAdmin ? PATHS.admin : PATHS.home)
     }
   }, [navigate, user])
 
   useEffect(() => {
-    if (loginMutation.isSuccess) {
-      navigate(PATHS.home)
+    if (loginMutation.isSuccess && user) {
+      const isAdmin = user.roles?.some((role) => role === 'ADMIN')
+      navigate(isAdmin ? PATHS.admin : PATHS.home)
     }
-  }, [loginMutation.isSuccess, navigate])
+  }, [loginMutation.isSuccess, navigate, user])
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()

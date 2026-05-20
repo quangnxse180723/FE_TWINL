@@ -2,8 +2,30 @@ import axios from 'axios'
 
 export const getApiErrorMessage = (error: unknown) => {
   if (axios.isAxiosError(error)) {
-    const data = error.response?.data as { message?: string }
-    return data?.message ?? error.message
+    const data = error.response?.data as {
+      message?: string
+      detail?: string
+      error?: string
+      title?: string
+    } | string | undefined
+
+    if (typeof data === 'string' && data.trim()) {
+      return data
+    }
+
+    if (data && typeof data === 'object') {
+      return data.message || data.detail || data.error || data.title || error.message
+    }
+
+    if (error.response?.status === 401) {
+      return error.message || 'Invalid credentials'
+    }
+
+    if (error.response?.status === 403) {
+      return 'Tài khoản của bạn đã bị khóa, vui lòng liên hệ admin qua gmail: twinl2hand@gmail.com'
+    }
+
+    return error.message
   }
 
   if (error instanceof Error) {

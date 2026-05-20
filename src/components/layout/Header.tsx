@@ -1,16 +1,49 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { PATHS } from '../../routes/paths'
 import SearchBar from '../shared/SearchBar'
 import { authApi } from '../../api/auth/authApi'
+import cartApi from '../../api/cart/cartApi'
 import { logout } from '../../store/slices/authSlice'
 import { clearAuth } from '../../utils/authStorage'
+import { API_BASE_URL } from '../../config/constants'
+import logo from '../../assets/images/logo-removebg.png'
 import type { RootState } from '../../store'
 import '../../styles/components/header.css'
 
 export default function Header() {
   const dispatch = useDispatch()
   const user = useSelector((state: RootState) => state.auth.user)
+  const [cartCount, setCartCount] = useState(0)
+  const avatarSrc = user?.avatarUrl
+    ? user.avatarUrl.startsWith('http')
+      ? user.avatarUrl
+      : `${API_BASE_URL}${user.avatarUrl}`
+    : null
+
+  useEffect(() => {
+    if (!user) {
+      setCartCount(0)
+      return
+    }
+
+    let active = true
+    const fetchCart = async () => {
+      try {
+        const response = await cartApi.getCart()
+        if (!active) return
+        setCartCount(response.data.totalQuantity ?? response.data.items?.length ?? 0)
+      } catch {
+        if (active) setCartCount(0)
+      }
+    }
+
+    fetchCart()
+    return () => {
+      active = false
+    }
+  }, [user])
 
   const handleLogout = async () => {
     try {
@@ -28,13 +61,35 @@ export default function Header() {
       </div>
       <div className="header__main">
         <Link to={PATHS.home} className="header__logo">
-          Twinl
+          <img src={logo} alt="Twinl" />
         </Link>
         <SearchBar />
         <nav className="header__actions">
+          <Link to={PATHS.cart} className="header__cart" aria-label="Giỏ hàng">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path
+                d="M7 4h-2l-1 2m2 0h13l-1.6 7.2a2 2 0 0 1-2 1.6h-6.9a2 2 0 0 1-2-1.6l-1.5-6.2zm2.5 13.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm8 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            {cartCount > 0 ? <span className="header__cart-count">{cartCount}</span> : null}
+          </Link>
           {user ? (
             <>
-              <span>Xin chào, {user.displayName}</span>
+              <Link to={PATHS.profile} className="header__user">
+                <span className="header__avatar">
+                  {avatarSrc ? (
+                    <img src={avatarSrc} alt={user.displayName} />
+                  ) : (
+                    <span>{user.displayName?.charAt(0).toUpperCase() || 'U'}</span>
+                  )}
+                </span>
+                <span>Xin chào, {user.displayName}</span>
+              </Link>
               <button type="button" className="header__link" onClick={handleLogout}>
                 Đăng xuất
               </button>
@@ -51,13 +106,12 @@ export default function Header() {
         </nav>
       </div>
       <div className="header__nav">
-        <Link to={PATHS.home}>Nữ</Link>
-        <Link to={PATHS.home}>Nam</Link>
-        <Link to={PATHS.home}>Trẻ em</Link>
-        <Link to={PATHS.home}>Thương hiệu</Link>
-        <Link to={PATHS.home}>Thể thao</Link>
-        <Link to={PATHS.home}>Xu hướng</Link>
-        <Link to={PATHS.home}>Liên hệ</Link>
+        <Link to={PATHS.women}>Nữ</Link>
+        <Link to={PATHS.men}>Nam</Link>
+        <Link to={PATHS.kids}>Trẻ em</Link>
+        <Link to={PATHS.brands}>Thương hiệu</Link>
+        <Link to={PATHS.sport}>Thể thao</Link>
+        <Link to={PATHS.contact}>Liên hệ</Link>
       </div>
     </header>
   )

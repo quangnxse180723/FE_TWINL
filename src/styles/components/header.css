@@ -1,6 +1,9 @@
 .header {
   background: #ffffff;
   border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
 }
 
 .header__promo {
@@ -14,14 +17,22 @@
 .header__main {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 16px 24px 8px;
+  gap: 20px;
+  padding: 5px 24px 5px;
 }
 
 .header__logo {
   font-family: 'Playfair Display', serif;
   font-size: 22px;
   font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+}
+
+.header__logo img {
+  height: 85px;
+  width: auto;
+  display: block;
 }
 
 .header__actions {
@@ -30,6 +41,68 @@
   align-items: center;
   gap: 16px;
   font-size: 14px;
+}
+
+.header__cart {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid #e4e4e4;
+  display: grid;
+  place-items: center;
+  color: #1a1a1a;
+  background: #ffffff;
+}
+
+.header__cart svg {
+  width: 18px;
+  height: 18px;
+}
+
+.header__cart-count {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #111111;
+  color: #ffffff;
+  font-size: 10px;
+  display: grid;
+  place-items: center;
+}
+
+.header__user {
+  color: inherit;
+  text-decoration: none;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header__user:hover {
+  text-decoration: underline;
+}
+
+.header__avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #111111;
+  color: #ffffff;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+  overflow: hidden;
+}
+
+.header__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .header__link {

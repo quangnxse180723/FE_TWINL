@@ -1,4 +1,5 @@
 import type { AuthResponse } from '../types/auth'
+import type { AuthUser } from '../types/auth'
 
 const STORAGE_KEY = 'twinil_auth'
 
@@ -24,3 +25,9 @@ export const loadAuth = () => {
 }
 
 export const getAccessToken = () => loadAuth()?.accessToken ?? null
+
+export const updateAuthUser = (user: AuthUser) => {
+  const current = loadAuth()
+  if (!current) return
+  saveAuth({ ...current, user })
+}
