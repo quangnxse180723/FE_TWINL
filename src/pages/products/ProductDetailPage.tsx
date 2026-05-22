@@ -113,12 +113,6 @@ export default function ProductDetailPage() {
         </div>
 
         <aside className="product-detail__info">
-          <div className="product-detail__title">
-            <h1>{product.name}</h1>
-            <button type="button" className="product-detail__wishlist" aria-label="Yêu thích">
-              ❤
-            </button>
-          </div>
           <div className="product-detail__price">{formatPrice(product.price)}</div>
           <div className="product-detail__meta">
             <span className="product-detail__badge">Size {product.sizes?.[0] || 'Free'}</span>

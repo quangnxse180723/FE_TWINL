@@ -277,6 +277,16 @@ export default function ProfilePage() {
                 </button>
               )}
             </div>
+
+            <div className="profile__actions">
+              <button
+                type="button"
+                className="profile__button profile__button--secondary"
+                onClick={() => navigate(PATHS.orders)}
+              >
+                Lịch sử đơn hàng
+              </button>
+            </div>
           </div>
         )}
       </div>

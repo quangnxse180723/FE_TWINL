@@ -18,14 +18,16 @@ export default function LoginPage() {
   useEffect(() => {
     if (user) {
       const isAdmin = user.roles?.some((role) => role === 'ADMIN')
-      navigate(isAdmin ? PATHS.admin : PATHS.home)
+      const isStaff = user.roles?.some((role) => role === 'STAFF')
+      navigate(isAdmin ? PATHS.admin : isStaff ? PATHS.staff : PATHS.home)
     }
   }, [navigate, user])
 
   useEffect(() => {
     if (loginMutation.isSuccess && user) {
       const isAdmin = user.roles?.some((role) => role === 'ADMIN')
-      navigate(isAdmin ? PATHS.admin : PATHS.home)
+      const isStaff = user.roles?.some((role) => role === 'STAFF')
+      navigate(isAdmin ? PATHS.admin : isStaff ? PATHS.staff : PATHS.home)
     }
   }, [loginMutation.isSuccess, navigate, user])
 

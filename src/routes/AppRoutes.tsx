@@ -11,6 +11,9 @@ import SportCategoryPage from '../pages/category/SportCategoryPage'
 import ProductDetailPage from '../pages/products/ProductDetailPage'
 import CartPage from '../pages/cart/CartPage'
 import ContactPage from '../pages/contact/ContactPage'
+import VnpayReturnPage from '../pages/payment/VnpayReturnPage'
+import OrderHistoryPage from '../pages/orders/OrderHistoryPage'
+import OrderTrackingPage from '../pages/orders/OrderTrackingPage'
 import LoginPage from '../pages/auth/LoginPage'
 import RegisterPage from '../pages/auth/RegisterPage'
 import ProfilePage from '../pages/profile/ProfilePage'
@@ -21,6 +24,9 @@ import AdminProductsPage from '../admin/pages/AdminProductsPage'
 import AdminProductFormPage from '../admin/pages/AdminProductFormPage'
 import AdminUsersPage from '../admin/pages/AdminUsersPage'
 import AdminOrdersPage from '../admin/pages/AdminOrdersPage'
+import StaffGuard from '../staff/components/StaffGuard'
+import StaffLayout from '../staff/layout/StaffLayout'
+import StaffOrdersPage from '../staff/pages/StaffOrdersPage'
 
 export default function AppRoutes() {
   return (
@@ -33,6 +39,9 @@ export default function AppRoutes() {
         <Route path={PATHS.brands} element={<BrandsCategoryPage />} />
         <Route path={PATHS.sport} element={<SportCategoryPage />} />
         <Route path={PATHS.cart} element={<CartPage />} />
+        <Route path={PATHS.vnpayReturn} element={<VnpayReturnPage />} />
+        <Route path={PATHS.orders} element={<OrderHistoryPage />} />
+        <Route path={PATHS.orderTracking} element={<OrderTrackingPage />} />
         <Route path={PATHS.contact} element={<ContactPage />} />
         <Route path={PATHS.productDetail} element={<ProductDetailPage />} />
         <Route path={PATHS.profile} element={<ProfilePage />} />
@@ -55,6 +64,17 @@ export default function AppRoutes() {
         <Route path={PATHS.adminProductEdit.replace('/admin/', '')} element={<AdminProductFormPage />} />
         <Route path={PATHS.adminUsers.replace('/admin/', '')} element={<AdminUsersPage />} />
         <Route path={PATHS.adminOrders.replace('/admin/', '')} element={<AdminOrdersPage />} />
+      </Route>
+      <Route
+        path={PATHS.staff}
+        element={
+          <StaffGuard>
+            <StaffLayout />
+          </StaffGuard>
+        }
+      >
+        <Route index element={<StaffOrdersPage />} />
+        <Route path={PATHS.staffOrders.replace('/staff/', '')} element={<StaffOrdersPage />} />
       </Route>
     </Routes>
   )

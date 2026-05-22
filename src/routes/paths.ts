@@ -6,6 +6,9 @@ export const PATHS = {
   brands: '/category/brands',
   sport: '/category/sport',
   cart: '/cart',
+  vnpayReturn: '/payment/vnpay-return',
+  orders: '/orders',
+  orderTracking: '/orders/:code',
   contact: '/contact',
   productDetail: '/products/:id',
   login: '/login',
@@ -17,4 +20,6 @@ export const PATHS = {
   adminProductEdit: '/admin/products/:id/edit',
   adminUsers: '/admin/users',
   adminOrders: '/admin/orders',
+  staff: '/staff',
+  staffOrders: '/staff/orders',
 }

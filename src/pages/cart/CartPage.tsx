@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import cartApi from '../../api/cart/cartApi'
+import vnpayApi from '../../api/payment/vnpayApi'
 import { PATHS } from '../../routes/paths'
 import type { CartResponse } from '../../types/cart'
 import type { RootState } from '../../store'
@@ -16,6 +17,7 @@ export default function CartPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [actionError, setActionError] = useState('')
+  const [checkoutLoading, setCheckoutLoading] = useState(false)
 
   const totals = useMemo(() => {
     const subtotal = cart?.subtotal ?? 0
@@ -62,10 +64,21 @@ export default function CartPage() {
     }
   }
 
-  const handleCheckout = () => {
+  const handleCheckout = async () => {
     if (!user?.address || !user?.phone || !user?.displayName) {
       navigate(PATHS.profile)
       return
+    }
+
+    setCheckoutLoading(true)
+    setActionError('')
+    try {
+      const response = await vnpayApi.createPayment()
+      window.location.href = response.data.paymentUrl
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : 'Không thể tạo thanh toán VNPay')
+    } finally {
+      setCheckoutLoading(false)
     }
   }
 
@@ -227,7 +240,14 @@ export default function CartPage() {
                 <span>Tổng</span>
                 <strong>{formatPrice(totals.total)}</strong>
               </div>
-              <button type="button" className="cart__checkout" onClick={handleCheckout}>Thanh toán</button>
+              <button
+                type="button"
+                className="cart__checkout"
+                onClick={handleCheckout}
+                disabled={checkoutLoading}
+              >
+                {checkoutLoading ? 'Đang chuyển đến VNPay...' : 'Thanh toán'}
+              </button>
               <div className="cart__coupon">
                 <input type="text" placeholder="Mã giảm giá" />
                 <button type="button">Áp dụng</button>
