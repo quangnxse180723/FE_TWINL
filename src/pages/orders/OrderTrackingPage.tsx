@@ -14,7 +14,16 @@ const formatDateTime = (value: string) => {
   return parsed.toLocaleString('vi-VN')
 }
 
-const statusSteps: OrderStatus[] = ['PENDING', 'PROCESSING', 'COMPLETED']
+const STATUS_LABELS: Record<string, string> = {
+  PENDING: 'Chờ xử lý',
+  ASSIGNED: 'Đã giao Shipper',
+  PICKED_UP: 'Đang giao hàng',
+  DELIVERED: 'Đã giao thành công',
+  COMPLETED: 'Hoàn thành',
+  CANCELED: 'Đã huỷ',
+}
+
+const statusSteps: OrderStatus[] = ['PENDING', 'ASSIGNED', 'PICKED_UP', 'DELIVERED', 'COMPLETED']
 
 export default function OrderTrackingPage() {
   const { code } = useParams()
@@ -74,7 +83,7 @@ export default function OrderTrackingPage() {
               </div>
               <div>
                 <span>Trạng thái</span>
-                <strong>{order.status}</strong>
+                <strong>{STATUS_LABELS[order.status] || order.status}</strong>
               </div>
               {order.paymentStatus ? (
                 <div>
@@ -82,17 +91,35 @@ export default function OrderTrackingPage() {
                   <strong>{order.paymentStatus}</strong>
                 </div>
               ) : null}
+              {order.shipperName ? (
+                <div>
+                  <span>Shipper</span>
+                  <strong>{order.shipperName}</strong>
+                </div>
+              ) : null}
+              {order.deliveredAt ? (
+                <div>
+                  <span>Thời gian giao</span>
+                  <strong>{formatDateTime(order.deliveredAt)}</strong>
+                </div>
+              ) : null}
+              {order.note ? (
+                <div>
+                  <span>Ghi chú từ Shipper</span>
+                  <strong>{order.note}</strong>
+                </div>
+              ) : null}
             </div>
 
             <div className="orders__timeline">
               {statusSteps.map((step, index) => (
                 <div key={step} className={`orders__step ${index <= activeIndex ? 'is-active' : ''}`}>
-                  <span>{step}</span>
+                  <span>{STATUS_LABELS[step]}</span>
                 </div>
               ))}
-              {order.status === 'CANCELLED' ? (
+              {order.status === 'CANCELED' ? (
                 <div className="orders__step orders__step--cancelled is-active">
-                  <span>CANCELLED</span>
+                  <span>{STATUS_LABELS['CANCELED']}</span>
                 </div>
               ) : null}
             </div>

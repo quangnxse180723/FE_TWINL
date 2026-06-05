@@ -1,4 +1,4 @@
-export type Role = 'ADMIN' | 'USER' | 'STAFF'
+export type Role = 'ADMIN' | 'USER' | 'STAFF' | 'SHIPPER'
 
 export interface AuthUser {
   id: number
@@ -8,6 +8,9 @@ export interface AuthUser {
   avatarUrl?: string | null
   phone?: string | null
   address?: string | null
+  wardCode?: string | null
+  districtId?: number | null
+  provinceId?: number | null
   gender?: string | null
   dateOfBirth?: string | null
 }

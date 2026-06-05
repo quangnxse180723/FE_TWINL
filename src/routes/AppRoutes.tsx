@@ -3,6 +3,8 @@ import { PATHS } from './paths'
 import MainLayout from '../components/layout/MainLayout'
 import AuthLayout from '../components/layout/AuthLayout'
 import HomePage from '../pages/home/HomePage'
+import AiResultPage from '../pages/home/AiResultPage'
+import LegitResultPage from '../pages/ai/LegitResultPage'
 import WomenCategoryPage from '../pages/category/WomenCategoryPage'
 import MenCategoryPage from '../pages/category/MenCategoryPage'
 import KidsCategoryPage from '../pages/category/KidsCategoryPage'
@@ -17,8 +19,10 @@ import OrderTrackingPage from '../pages/orders/OrderTrackingPage'
 import LoginPage from '../pages/auth/LoginPage'
 import RegisterPage from '../pages/auth/RegisterPage'
 import ProfilePage from '../pages/profile/ProfilePage'
+import SellerDashboardPage from '../pages/seller/SellerDashboardPage'
 import AdminGuard from '../admin/components/AdminGuard'
 import AdminLayout from '../admin/layout/AdminLayout'
+import AdminTrafficAnalyticsPage from '../admin/pages/AdminTrafficAnalyticsPage'
 import AdminDashboardPage from '../admin/pages/AdminDashboardPage'
 import AdminProductsPage from '../admin/pages/AdminProductsPage'
 import AdminProductFormPage from '../admin/pages/AdminProductFormPage'
@@ -27,12 +31,17 @@ import AdminOrdersPage from '../admin/pages/AdminOrdersPage'
 import StaffGuard from '../staff/components/StaffGuard'
 import StaffLayout from '../staff/layout/StaffLayout'
 import StaffOrdersPage from '../staff/pages/StaffOrdersPage'
+import ShipperGuard from '../shipper/components/ShipperGuard'
+import ShipperLayout from '../shipper/layout/ShipperLayout'
+import ShipperOrdersPage from '../shipper/pages/ShipperOrdersPage'
 
 export default function AppRoutes() {
   return (
     <Routes>
       <Route element={<MainLayout />}>
         <Route path={PATHS.home} element={<HomePage />} />
+        <Route path={PATHS.aiResult} element={<AiResultPage />} />
+        <Route path={PATHS.legitResult} element={<LegitResultPage />} />
         <Route path={PATHS.women} element={<WomenCategoryPage />} />
         <Route path={PATHS.men} element={<MenCategoryPage />} />
         <Route path={PATHS.kids} element={<KidsCategoryPage />} />
@@ -45,6 +54,7 @@ export default function AppRoutes() {
         <Route path={PATHS.contact} element={<ContactPage />} />
         <Route path={PATHS.productDetail} element={<ProductDetailPage />} />
         <Route path={PATHS.profile} element={<ProfilePage />} />
+        <Route path={PATHS.sellerDashboard} element={<SellerDashboardPage />} />
       </Route>
       <Route element={<AuthLayout />}>
         <Route path={PATHS.login} element={<LoginPage />} />
@@ -59,6 +69,7 @@ export default function AppRoutes() {
         }
       >
         <Route index element={<AdminDashboardPage />} />
+        <Route path={PATHS.adminTraffic.replace('/admin/', '')} element={<AdminTrafficAnalyticsPage />} />
         <Route path={PATHS.adminProducts.replace('/admin/', '')} element={<AdminProductsPage />} />
         <Route path={PATHS.adminProductNew.replace('/admin/', '')} element={<AdminProductFormPage />} />
         <Route path={PATHS.adminProductEdit.replace('/admin/', '')} element={<AdminProductFormPage />} />
@@ -75,6 +86,18 @@ export default function AppRoutes() {
       >
         <Route index element={<StaffOrdersPage />} />
         <Route path={PATHS.staffOrders.replace('/staff/', '')} element={<StaffOrdersPage />} />
+      </Route>
+      {/* ── Shipper routes ── */}
+      <Route
+        path={PATHS.shipper}
+        element={
+          <ShipperGuard>
+            <ShipperLayout />
+          </ShipperGuard>
+        }
+      >
+        <Route index element={<ShipperOrdersPage />} />
+        <Route path={PATHS.shipperOrders.replace('/shipper/', '')} element={<ShipperOrdersPage />} />
       </Route>
     </Routes>
   )

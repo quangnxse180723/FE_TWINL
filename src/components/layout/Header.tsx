@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { PATHS } from '../../routes/paths'
 import SearchBar from '../shared/SearchBar'
+import NotificationBell from '../shared/NotificationBell'
 import { authApi } from '../../api/auth/authApi'
 import cartApi from '../../api/cart/cartApi'
 import { logout } from '../../store/slices/authSlice'
@@ -33,15 +34,26 @@ export default function Header() {
       try {
         const response = await cartApi.getCart()
         if (!active) return
-        setCartCount(response.data.totalQuantity ?? response.data.items?.length ?? 0)
+        setCartCount(response.data.items?.length ?? 0)
       } catch {
         if (active) setCartCount(0)
       }
     }
 
     fetchCart()
+
+    const onCartUpdated = (e: Event) => {
+      if (e instanceof CustomEvent && typeof e.detail === 'number') {
+        setCartCount(e.detail)
+      } else {
+        fetchCart()
+      }
+    }
+    window.addEventListener('cart-updated', onCartUpdated)
+
     return () => {
       active = false
+      window.removeEventListener('cart-updated', onCartUpdated)
     }
   }, [user])
 
@@ -65,7 +77,7 @@ export default function Header() {
         </Link>
         <SearchBar />
         <nav className="header__actions">
-          <Link to={PATHS.cart} className="header__cart" aria-label="Giỏ hàng">
+          <Link to={PATHS.cart} id="header-cart-icon" className="header__cart" aria-label="Giỏ hàng">
             <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path
                 d="M7 4h-2l-1 2m2 0h13l-1.6 7.2a2 2 0 0 1-2 1.6h-6.9a2 2 0 0 1-2-1.6l-1.5-6.2zm2.5 13.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm8 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z"
@@ -80,6 +92,7 @@ export default function Header() {
           </Link>
           {user ? (
             <>
+              <NotificationBell />
               <Link to={PATHS.profile} className="header__user">
                 <span className="header__avatar">
                   {avatarSrc ? (
@@ -100,9 +113,6 @@ export default function Header() {
               <Link to={PATHS.login}>Đăng nhập</Link>
             </>
           )}
-          <button type="button" className="header__cta">
-            Bán ngay
-          </button>
         </nav>
       </div>
       <div className="header__nav">

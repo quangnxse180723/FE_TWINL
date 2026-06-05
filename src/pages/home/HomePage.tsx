@@ -1,93 +1,182 @@
-import womenHero from '../../assets/images/hero-women.png'
-import menHero from '../../assets/images/hero-men.png'
+import { Link, useNavigate } from 'react-router-dom'
+import { ShieldCheck, Lock, Truck, Clock, CheckSquare } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
+import { useSelector } from 'react-redux'
+import { toast } from 'react-toastify'
+import type { RootState } from '../../store'
+import productsApi from '../../api/products/productsApi'
+import type { Product } from '../../api/products/productsApi'
+import { PATHS } from '../../routes/paths'
 import '../../styles/pages/home.css'
 
 export default function HomePage() {
-  const womenItems = [
-    { name: 'Áo khoác da, cổ bẻ', price: '199.000 đ', size: 'S', tone: 'warm' },
-    { name: 'Áo khoác hai hàng cúc', price: '189.000 đ', size: 'XS', tone: 'cool' },
-    { name: 'Áo khoác blazer dáng ôm', price: '179.000 đ', size: 'S', tone: 'dark' },
-    { name: 'Áo khoác vai rộng', price: '179.000 đ', size: 'XS', tone: 'neutral' },
-    { name: 'Áo khoác nhung lụa', price: '179.000 đ', size: 'M', tone: 'green' },
-    { name: 'Áo khoác da màu đen', price: '179.000 đ', size: 'S', tone: 'night' },
+  const user = useSelector((state: RootState) => state.auth.user)
+  const navigate = useNavigate()
+
+  // Fetch women products
+  const { data: womenData } = useQuery({
+    queryKey: ['products', 'home-women'],
+    queryFn: () => productsApi.getProducts({ gender: 'Nữ', sizePage: 5 }),
+  })
+  const womenItems = womenData?.data?.content || []
+
+  // Fetch men products
+  const { data: menData } = useQuery({
+    queryKey: ['products', 'home-men'],
+    queryFn: () => productsApi.getProducts({ gender: 'Nam', sizePage: 5 }),
+  })
+  const menItems = menData?.data?.content || []
+
+  const brands = [
+    { name: 'ZARA', img: 'https://images.unsplash.com/photo-1542272201-b1ca555f8505?w=500&q=80' },
+    { name: 'HM', img: 'https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=500&q=80' },
+    { name: 'HERMES', img: 'https://images.unsplash.com/photo-1584916201218-f4242ceb4809?w=500&q=80' },
+    { name: 'GUCCI', img: 'https://images.unsplash.com/photo-1549439602-43ebca2327af?w=500&q=80' },
+    { name: 'CHANEL', img: 'https://images.unsplash.com/photo-1605733513597-a8f8341084e6?w=500&q=80' }
   ]
 
-  const menItems = [
-    { name: 'Áo khoác dáng ngắn', price: '199.000 đ', size: 'M', tone: 'charcoal' },
-    { name: 'Áo khoác vải cổ Đức', price: '189.000 đ', size: 'L', tone: 'blue' },
-    { name: 'Áo khoác Crane', price: '179.000 đ', size: 'S', tone: 'sand' },
-    { name: 'Áo khoác da đen', price: '179.000 đ', size: 'L', tone: 'graphite' },
-    { name: 'Áo khoác gió', price: '179.000 đ', size: 'M', tone: 'navy' },
-    { name: 'Áo khoác da nâu', price: '179.000 đ', size: 'M', tone: 'brown' },
-  ]
+  const formatPrice = (price: number) => {
+    return price.toLocaleString('vi-VN') + ' đ'
+  }
 
-  const brands = ['ZARA', 'HM', 'HERMES', 'GUCCI', 'CHANEL']
+  const handleSellClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    if (!user) {
+      toast.info('Vui lòng đăng nhập để đăng bán.')
+      navigate(PATHS.login)
+    } else {
+      navigate(PATHS.sellerDashboard)
+    }
+  }
+
+  const renderProductCard = (item: Product) => {
+    const imageUrl = item.imageUrls && item.imageUrls.length > 0 
+      ? item.imageUrls[0] 
+      : 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&q=80'
+
+    return (
+      <Link key={item.id} to={`/products/${item.id}`} className="home__card-link">
+        <article className="home__card">
+          <div className="home__card-media">
+            <img src={imageUrl} alt={item.name} loading="lazy" />
+          </div>
+          <div className="home__card-body">
+            <h5>{item.name}</h5>
+            <p>Size: {item.sizes && item.sizes.length > 0 ? item.sizes[0] : 'S'}</p>
+            <strong>{formatPrice(item.price)}</strong>
+          </div>
+        </article>
+      </Link>
+    )
+  }
 
   return (
     <section className="home">
-      <div className="home__hero">
-        <div className="home__panel">
-          <img src={womenHero} alt="Women" />
-          <h2>Nữ</h2>
+      {/* 1. HERO SECTION (ESCROW) */}
+      <div className="home-hero">
+        <div className="home-hero__icon">
+          <ShieldCheck size={48} color="#fff" strokeWidth={1.5} />
         </div>
-        <div className="home__panel home__panel--dark">
-          <img src={menHero} alt="Men" />
-          <h2>Nam</h2>
+        <h1 className="home-hero__title">Mua Sắm Thảnh Thơi - Giao Dịch An Toàn 100%</h1>
+        <p className="home-hero__subtitle">
+          TWINL giữ tiền an toàn cho đến khi bạn hài lòng với món đồ. <strong>Không</strong> lo lừa đảo, không sợ hàng lỗi.
+        </p>
+        <div className="home-hero__actions">
+          <Link to={PATHS.women} className="btn-hero-primary">Khám phá ngay hàng tuyển chọn</Link>
+          <button type="button" onClick={handleSellClick} className="btn-hero-secondary" style={{ border: 'none', cursor: 'pointer', fontSize: '1rem', fontFamily: 'inherit' }}>
+            Đăng bán món đồ đầu tiên
+          </button>
         </div>
-      </div>
-      <div className="home__cta">
-        <h3>Mua với giá rẻ hơn, thời trang đẳng cấp hơn!</h3>
-        <button type="button" className="home__cta-btn">Săn ngay</button>
       </div>
 
+      {/* 2. TRUST TIMELINE */}
+      <div className="trust-timeline">
+        <div className="trust-timeline__line"></div>
+        <div className="trust-step">
+          <div className="trust-step__icon"><Lock size={20} color="#fff" /></div>
+          <h4>Thanh toán & Giữ tiền 🔒</h4>
+          <p>Tiền được giữ an toàn bởi hệ thống TWINL.</p>
+        </div>
+        <div className="trust-step">
+          <div className="trust-step__icon"><Truck size={20} color="#fff" /></div>
+          <h4>Vận chuyển an tâm 🚚</h4>
+          <p>Đơn hàng được theo dõi ra bảo hiểm toàn diện.</p>
+        </div>
+        <div className="trust-step">
+          <div className="trust-step__icon"><Clock size={20} color="#fff" /></div>
+          <h4>Bảo chứng 48h ⏱</h4>
+          <p>Bạn có 48h để kiểm tra hàng trước khi tiền được chuyển.</p>
+        </div>
+        <div className="trust-step">
+          <div className="trust-step__icon"><CheckSquare size={20} color="#fff" /></div>
+          <h4>Hoàn tất giao dịch ✅</h4>
+          <p>Giao dịch thành công, nụ cười hài lòng từ cả hai bên.</p>
+        </div>
+      </div>
+
+      {/* 3. ESCROW FAQ */}
+      <div className="faq-section">
+        <div className="faq-box">
+          <div className="faq-box__header">
+            <div className="faq-icon faq-icon--blue">👤</div>
+            <span>Người bán thắc mắc</span>
+          </div>
+          <h4>"Lỡ khách hàng cố tình phá hàng rồi đòi trả lại thì sao?"</h4>
+          <p>TWINL có quy trình xác minh qua video mở/đóng gói hàng. Nếu phát hiện gian lận, người bán được đền bù 100%.</p>
+        </div>
+        <div className="faq-box">
+          <div className="faq-box__header">
+            <div className="faq-icon faq-icon--blue">🛍</div>
+            <span>Người mua thắc mắc</span>
+          </div>
+          <h4>"Thủ tục hoàn tiền có lâu không?"</h4>
+          <p>Hoàn tiền cái rụp! Ngay khi yêu cầu trả hàng được duyệt, tiền sẽ về ví TWINL hoặc tài khoản của bạn trong 24h.</p>
+        </div>
+      </div>
+
+      {/* 4. PRODUCTS: ÁO KHOÁC NỮ */}
       <section className="home__section">
         <div className="home__section-header">
           <h4>Áo khoác Nữ</h4>
-          <button type="button" className="home__section-link">Xem các sản phẩm tương tự</button>
+          <Link to={PATHS.women} className="home__section-link">Xem các sản phẩm tương tự</Link>
         </div>
         <div className="home__card-grid">
-          {womenItems.map((item, index) => (
-            <article key={`${item.name}-${index}`} className="home__card">
-              <div className={`home__card-media home__card-media--${item.tone}`}>
-                <span>{item.name.split(' ')[0]}</span>
-              </div>
-              <div className="home__card-body">
-                <h5>{item.name}</h5>
-                <p>Size: {item.size}</p>
-                <strong>{item.price}</strong>
-              </div>
-            </article>
-          ))}
+          {womenItems.map(renderProductCard)}
+          {womenItems.length === 0 && (
+            <div style={{ padding: 40, textAlign: 'center', gridColumn: '1 / -1', color: '#64748b' }}>
+              Chưa có sản phẩm nữ nào trong hệ thống
+            </div>
+          )}
         </div>
-        <div className="home__section-footer">
-          <button type="button" className="home__section-button">Xem bộ sưu tập</button>
-        </div>
+        {womenItems.length > 0 && (
+          <div className="home__section-footer">
+            <Link to={PATHS.women} className="home__section-button">Xem bộ sưu tập</Link>
+          </div>
+        )}
       </section>
 
+      {/* 5. PRODUCTS: ÁO KHOÁC NAM */}
       <section className="home__section">
         <div className="home__section-header">
           <h4>Áo khoác Nam</h4>
-          <button type="button" className="home__section-link">Xem các sản phẩm tương tự</button>
+          <Link to={PATHS.men} className="home__section-link">Xem các sản phẩm tương tự</Link>
         </div>
         <div className="home__card-grid">
-          {menItems.map((item, index) => (
-            <article key={`${item.name}-${index}`} className="home__card">
-              <div className={`home__card-media home__card-media--${item.tone}`}>
-                <span>{item.name.split(' ')[0]}</span>
-              </div>
-              <div className="home__card-body">
-                <h5>{item.name}</h5>
-                <p>Size: {item.size}</p>
-                <strong>{item.price}</strong>
-              </div>
-            </article>
-          ))}
+          {menItems.map(renderProductCard)}
+          {menItems.length === 0 && (
+            <div style={{ padding: 40, textAlign: 'center', gridColumn: '1 / -1', color: '#64748b' }}>
+              Chưa có sản phẩm nam nào trong hệ thống
+            </div>
+          )}
         </div>
-        <div className="home__section-footer">
-          <button type="button" className="home__section-button">Xem bộ sưu tập</button>
-        </div>
+        {menItems.length > 0 && (
+          <div className="home__section-footer">
+            <Link to={PATHS.men} className="home__section-button">Xem bộ sưu tập</Link>
+          </div>
+        )}
       </section>
 
+      {/* 6. BRANDS */}
       <section className="home__section home__section--brands">
         <div className="home__section-header">
           <h4>Thương hiệu</h4>
@@ -95,8 +184,9 @@ export default function HomePage() {
         </div>
         <div className="home__brand-grid">
           {brands.map((brand) => (
-            <div key={brand} className="home__brand-card">
-              {brand}
+            <div key={brand.name} className="home__brand-card-new">
+              <img src={brand.img} alt={brand.name} loading="lazy" />
+              <span>{brand.name}</span>
             </div>
           ))}
         </div>

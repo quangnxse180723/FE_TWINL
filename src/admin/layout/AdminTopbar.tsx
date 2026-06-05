@@ -22,11 +22,7 @@ export default function AdminTopbar() {
   }
 
   return (
-    <div className="admin__topbar">
-      <div className="admin__search">
-        <span className="admin__search-icon">🔍</span>
-        <input type="text" placeholder="Tìm kiếm nhanh..." />
-      </div>
+    <div className="admin__topbar" style={{ justifyContent: 'flex-end' }}>
       <div className="admin__topbar-actions">
         <button type="button" className="admin__icon-button">🔔</button>
         <button type="button" className="admin__icon-button">⚙️</button>

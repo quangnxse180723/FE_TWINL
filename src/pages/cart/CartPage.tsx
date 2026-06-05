@@ -19,6 +19,17 @@ export default function CartPage() {
   const [actionError, setActionError] = useState('')
   const [checkoutLoading, setCheckoutLoading] = useState(false)
 
+  const hasShippingInfo = Boolean(
+    user?.displayName &&
+    user?.phone &&
+    user?.address &&
+    user?.wardCode &&
+    user?.districtId &&
+    user?.districtId > 0 &&
+    user?.provinceId &&
+    user?.provinceId > 0
+  )
+
   const totals = useMemo(() => {
     const subtotal = cart?.subtotal ?? 0
     const shipping = 0
@@ -65,7 +76,7 @@ export default function CartPage() {
   }
 
   const handleCheckout = async () => {
-    if (!user?.address || !user?.phone || !user?.displayName) {
+    if (!hasShippingInfo) {
       navigate(PATHS.profile)
       return
     }
@@ -87,6 +98,9 @@ export default function CartPage() {
       const response = await cartApi.removeItem(itemId)
       setCart(response.data)
       setActionError('')
+      
+      const newTotal = response.data?.items?.length ?? 0
+      window.dispatchEvent(new CustomEvent('cart-updated', { detail: newTotal }))
     } catch (err) {
       setActionError(err instanceof Error ? err.message : 'Không thể xóa sản phẩm')
     }
@@ -97,6 +111,8 @@ export default function CartPage() {
       const response = await cartApi.clearCart()
       setCart(response.data)
       setActionError('')
+      
+      window.dispatchEvent(new CustomEvent('cart-updated', { detail: 0 }))
     } catch (err) {
       setActionError(err instanceof Error ? err.message : 'Không thể làm trống giỏ hàng')
     }
@@ -222,7 +238,19 @@ export default function CartPage() {
                 <span>Địa chỉ</span>
                 <span>{user.address || 'Chưa cập nhật'}</span>
               </div>
-              {!user.address || !user.phone || !user.displayName ? (
+              <div className="cart__summary-row">
+                <span>Ward Code</span>
+                <span>{user.wardCode || 'Chưa cập nhật'}</span>
+              </div>
+              <div className="cart__summary-row">
+                <span>District ID</span>
+                <span>{user.districtId || 'Chưa cập nhật'}</span>
+              </div>
+              <div className="cart__summary-row">
+                <span>Province ID</span>
+                <span>{user.provinceId || 'Chưa cập nhật'}</span>
+              </div>
+              {!hasShippingInfo ? (
                 <div className="cart__summary-alert">
                   Vui lòng cập nhật đầy đủ thông tin để thanh toán.
                   <button type="button" onClick={() => navigate(PATHS.profile)}>Cập nhật ngay</button>

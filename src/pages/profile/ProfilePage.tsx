@@ -26,6 +26,9 @@ export default function ProfilePage() {
   const [displayName, setDisplayName] = useState('')
   const [phone, setPhone] = useState('')
   const [address, setAddress] = useState('')
+  const [wardCode, setWardCode] = useState('')
+  const [districtId, setDistrictId] = useState('')
+  const [provinceId, setProvinceId] = useState('')
   const [gender, setGender] = useState('')
   const [dateOfBirth, setDateOfBirth] = useState('')
 
@@ -82,6 +85,9 @@ export default function ProfilePage() {
     setDisplayName(data.displayName ?? '')
     setPhone(data.phone ?? '')
     setAddress(data.address ?? '')
+    setWardCode(data.wardCode ?? '')
+    setDistrictId(data.districtId ? String(data.districtId) : '')
+    setProvinceId(data.provinceId ? String(data.provinceId) : '')
     setGender(data.gender ?? '')
     setDateOfBirth(data.dateOfBirth ?? '')
   }
@@ -95,6 +101,9 @@ export default function ProfilePage() {
         displayName: displayName.trim() || null,
         phone: phone.trim() || null,
         address: address.trim() || null,
+        wardCode: wardCode.trim() || null,
+        districtId: districtId ? Number(districtId) : null,
+        provinceId: provinceId ? Number(provinceId) : null,
         gender: gender.trim() || null,
         dateOfBirth: dateOfBirth || null,
       }
@@ -219,6 +228,42 @@ export default function ProfilePage() {
                 )}
               </div>
               <div className="profile__item">
+                <span>Ward Code</span>
+                {isEditing ? (
+                  <input
+                    type="text"
+                    value={wardCode}
+                    onChange={(event) => setWardCode(event.target.value)}
+                  />
+                ) : (
+                  <strong>{renderValue(profile?.wardCode)}</strong>
+                )}
+              </div>
+              <div className="profile__item">
+                <span>District ID</span>
+                {isEditing ? (
+                  <input
+                    type="number"
+                    value={districtId}
+                    onChange={(event) => setDistrictId(event.target.value)}
+                  />
+                ) : (
+                  <strong>{renderValue(profile?.districtId?.toString())}</strong>
+                )}
+              </div>
+              <div className="profile__item">
+                <span>Province ID</span>
+                {isEditing ? (
+                  <input
+                    type="number"
+                    value={provinceId}
+                    onChange={(event) => setProvinceId(event.target.value)}
+                  />
+                ) : (
+                  <strong>{renderValue(profile?.provinceId?.toString())}</strong>
+                )}
+              </div>
+              <div className="profile__item">
                 <span>Giới tính</span>
                 {isEditing ? (
                   <select value={gender} onChange={(event) => setGender(event.target.value)}>
@@ -284,7 +329,15 @@ export default function ProfilePage() {
                 className="profile__button profile__button--secondary"
                 onClick={() => navigate(PATHS.orders)}
               >
-                Lịch sử đơn hàng
+                Lịch sử đơn hàng mua
+              </button>
+              <button
+                type="button"
+                className="profile__button"
+                style={{ backgroundColor: '#2563eb', color: 'white', border: 'none', marginLeft: '12px' }}
+                onClick={() => navigate(PATHS.sellerDashboard)}
+              >
+                Kênh Người Bán (Ký gửi)
               </button>
             </div>
           </div>

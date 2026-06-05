@@ -21,3 +21,25 @@
   font-size: 16px;
   color: #666666;
 }
+
+.search__ai-btn {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.search__ai-btn:hover {
+  background: #dcfce7;
+  transform: translateY(-50%) scale(1.05);
+}

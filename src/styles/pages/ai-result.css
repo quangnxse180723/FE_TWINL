@@ -1,0 +1,160 @@
+.ai-result-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.ai-result-header {
+  margin-bottom: 32px;
+}
+
+.ai-result-header h1 {
+  font-size: 32px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 8px;
+}
+
+.ai-result-subtitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #16a34a;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* TOP BLOCK: AI INFO */
+.ai-info-container {
+  display: flex;
+  gap: 40px;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  margin-bottom: 60px;
+}
+
+.ai-image-preview {
+  flex: 0 0 400px;
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f8fafc;
+}
+
+.ai-image-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  max-height: 500px;
+}
+
+.ai-focus-markers {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+}
+
+.ai-focus-markers::before,
+.ai-focus-markers::after {
+  content: '';
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  border-color: #22c55e;
+  border-style: solid;
+}
+.ai-focus-markers::before {
+  top: 0; left: 0;
+  border-width: 2px 0 0 2px;
+}
+.ai-focus-markers::after {
+  bottom: 0; right: 0;
+  border-width: 0 2px 2px 0;
+}
+
+.ai-details {
+  flex: 1;
+}
+
+.ai-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #f1f5f9;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 32px;
+}
+
+.ai-detail-row {
+  margin-bottom: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.ai-detail-row:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.ai-detail-label {
+  font-size: 12px;
+  color: #64748b;
+  margin-bottom: 8px;
+}
+
+.ai-detail-value {
+  font-size: 20px;
+  font-weight: 600;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ai-detail-value.price {
+  font-size: 28px;
+}
+
+/* BOTTOM BLOCK: RELATED PRODUCTS */
+.ai-related-section {
+  border-top: 1px solid #e2e8f0;
+  padding-top: 40px;
+}
+
+.ai-related-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.ai-related-header h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.ai-related-link {
+  font-size: 13px;
+  color: #64748b;
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .ai-info-container {
+    flex-direction: column;
+  }
+  .ai-image-preview {
+    flex: auto;
+    width: 100%;
+  }
+}

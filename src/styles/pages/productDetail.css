@@ -180,11 +180,56 @@
 .product-detail__benefits div {
   background: #f7f7f4;
   border-radius: 12px;
-  padding: 12px;
-  font-size: 12px;
+  padding: 40px;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.product-detail__ai-actions {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
-  flex-direction: column;
+  gap: 8px;
+  z-index: 10;
+  white-space: nowrap;
+}
+
+.ai-scan-direct-btn,
+.ai-legit-btn {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(6px);
+  padding: 8px 14px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
   gap: 6px;
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+}
+
+.ai-scan-direct-btn {
+  border: 1.5px solid #22c55e;
+  color: #16a34a;
+}
+.ai-scan-direct-btn:hover {
+  background: #22c55e;
+  color: white;
+  transform: translateY(-2px);
+}
+
+.ai-legit-btn {
+  border: 1.5px solid #3b82f6;
+  color: #1d4ed8;
+}
+.ai-legit-btn:hover {
+  background: #3b82f6;
+  color: white;
+  transform: translateY(-2px);
 }
 
 .product-detail__similar {

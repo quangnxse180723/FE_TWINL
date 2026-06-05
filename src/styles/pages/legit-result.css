@@ -1,0 +1,188 @@
+/* ── Legit Result Page ─────────────────────────────────────────── */
+.legit-result {
+  min-height: 100vh;
+  background: #0a0a0f;
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Hero */
+.legit-result__hero {
+  padding: 48px 20px 40px;
+}
+.legit-result__hero-inner {
+  max-width: 640px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+.legit-result__icon-wrap {
+  width: 80px;
+  height: 80px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.legit-result--low .legit-result__icon-wrap,
+.legit-result--low { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
+.legit-result--high .legit-result__icon-wrap,
+.legit-result--high { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+.legit-result--uncertain .legit-result__icon-wrap,
+.legit-result--uncertain { background: rgba(234, 179, 8, 0.15); color: #eab308; }
+
+.legit-result__brand { font-size: 14px; color: rgba(255,255,255,0.6); margin: 0 0 6px; text-transform: uppercase; letter-spacing: 1px; }
+.legit-result__verdict { font-size: 32px; font-weight: 800; margin: 0 0 6px; }
+.legit-result__sublabel { font-size: 14px; color: rgba(255,255,255,0.65); margin: 0; }
+
+/* Body */
+.legit-result__body {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 32px 20px 60px;
+}
+
+/* Image Previews */
+.legit-result__previews {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+.legit-result__preview-img {
+  flex: 1;
+  aspect-ratio: 3/4;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.legit-result__preview-img img { width: 100%; height: 100%; object-fit: cover; }
+
+/* Sections */
+.legit-result__section {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+.legit-result__section-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.8);
+  margin: 0 0 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Red flags */
+.legit-result__red-flags { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+.legit-result__red-flag {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 14px;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 10px;
+  font-size: 14px;
+  color: #fca5a5;
+}
+.legit-result__red-flag svg { flex-shrink: 0; color: #ef4444; margin-top: 2px; }
+
+/* Clean result */
+.legit-result__clean {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  color: #22c55e;
+  text-align: center;
+  font-size: 14px;
+}
+
+/* Advice */
+.legit-result__advice {
+  font-size: 14px;
+  line-height: 1.7;
+  color: #d1d5db;
+}
+
+/* Disclaimer */
+.legit-result__disclaimer {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 12px 16px;
+  background: rgba(255, 193, 7, 0.06);
+  border: 1px solid rgba(255, 193, 7, 0.2);
+  border-radius: 12px;
+  font-size: 12px;
+  color: #fbbf24;
+  line-height: 1.5;
+  margin-bottom: 24px;
+}
+.legit-result__disclaimer svg { flex-shrink: 0; margin-top: 2px; }
+
+/* Actions */
+.legit-result__actions {
+  display: flex;
+  gap: 12px;
+}
+.legit-result__back {
+  flex: 1;
+  padding: 13px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 12px;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background 0.2s;
+}
+.legit-result__back:hover { background: rgba(255,255,255,0.13); }
+.legit-result__shop {
+  flex: 2;
+  padding: 13px;
+  background: linear-gradient(135deg, #1a5c3a, #22c55e);
+  border-radius: 12px;
+  color: white;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: opacity 0.2s;
+}
+.legit-result__shop:hover { opacity: 0.9; }
+
+/* Empty state */
+.legit-result-empty {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  color: #6b7280;
+  background: #0a0a0f;
+}
+.legit-result-empty button {
+  padding: 12px 28px;
+  background: #22c55e;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+}

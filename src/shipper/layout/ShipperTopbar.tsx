@@ -1,0 +1,46 @@
+import { useDispatch, useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
+import { authApi } from '../../api/auth/authApi'
+import { PATHS } from '../../routes/paths'
+import { logout } from '../../store/slices/authSlice'
+import { clearAuth } from '../../utils/authStorage'
+import type { RootState } from '../../store'
+
+export default function ShipperTopbar() {
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
+  const user = useSelector((state: RootState) => state.auth.user)
+
+  const handleLogout = async () => {
+    try {
+      await authApi.logout()
+    } finally {
+      clearAuth()
+      dispatch(logout())
+      navigate(PATHS.login)
+    }
+  }
+
+  return (
+    <div className="admin__topbar">
+      <div className="admin__search">
+        <span className="admin__search-icon">🔍</span>
+        <input type="text" placeholder="Tìm kiếm đơn hàng..." />
+      </div>
+      <div className="admin__topbar-actions">
+        <button type="button" className="admin__logout" onClick={handleLogout}>
+          Đăng xuất
+        </button>
+        <div className="admin__profile">
+          <div className="admin__profile-avatar">
+            {user?.displayName?.charAt(0).toUpperCase() || 'S'}
+          </div>
+          <div>
+            <div className="admin__profile-name">{user?.displayName || 'Shipper'}</div>
+            <div className="admin__profile-role">SHIPPER</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}

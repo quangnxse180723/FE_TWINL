@@ -19,7 +19,8 @@ export default function LoginPage() {
     if (user) {
       const isAdmin = user.roles?.some((role) => role === 'ADMIN')
       const isStaff = user.roles?.some((role) => role === 'STAFF')
-      navigate(isAdmin ? PATHS.admin : isStaff ? PATHS.staff : PATHS.home)
+      const isShipper = user.roles?.some((role) => role === 'SHIPPER')
+      navigate(isAdmin ? PATHS.admin : isStaff ? PATHS.staff : isShipper ? PATHS.shipper : PATHS.home)
     }
   }, [navigate, user])
 
@@ -27,7 +28,8 @@ export default function LoginPage() {
     if (loginMutation.isSuccess && user) {
       const isAdmin = user.roles?.some((role) => role === 'ADMIN')
       const isStaff = user.roles?.some((role) => role === 'STAFF')
-      navigate(isAdmin ? PATHS.admin : isStaff ? PATHS.staff : PATHS.home)
+      const isShipper = user.roles?.some((role) => role === 'SHIPPER')
+      navigate(isAdmin ? PATHS.admin : isStaff ? PATHS.staff : isShipper ? PATHS.shipper : PATHS.home)
     }
   }, [loginMutation.isSuccess, navigate, user])
 
@@ -39,14 +41,16 @@ export default function LoginPage() {
   return (
     <section className="auth">
       <div className="auth__card">
-        <h1 className="auth__logo">Twinl</h1>
+        <h1 className="auth__logo">
+          <Link to={PATHS.home} style={{ textDecoration: 'none', color: 'inherit' }}>Twinl</Link>
+        </h1>
         <h2>Đăng nhập</h2>
         <p className="auth__subtitle">Nhập thông tin tài khoản để tiếp tục</p>
 
-        <form className="auth__form" onSubmit={handleSubmit}>
+        <form className="auth__form" onSubmit={handleSubmit} noValidate>
           <TextField
             label="Email"
-            type="email"
+            type="text"
             fullWidth
             value={email}
             onChange={(event) => setEmail(event.target.value)}

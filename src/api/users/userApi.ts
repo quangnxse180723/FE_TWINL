@@ -5,6 +5,9 @@ export interface UpdateProfilePayload {
   displayName?: string | null
   phone?: string | null
   address?: string | null
+  wardCode?: string | null
+  districtId?: number | null
+  provinceId?: number | null
   gender?: string | null
   dateOfBirth?: string | null
 }

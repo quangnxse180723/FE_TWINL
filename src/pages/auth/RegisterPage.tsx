@@ -41,7 +41,9 @@ export default function RegisterPage() {
   return (
     <section className="auth">
       <div className="auth__card">
-        <h1 className="auth__logo">Twinl</h1>
+        <h1 className="auth__logo">
+          <Link to={PATHS.home} style={{ textDecoration: 'none', color: 'inherit' }}>Twinl</Link>
+        </h1>
         <h2>Đăng ký</h2>
         <p className="auth__subtitle">Tạo tài khoản mới để trở thành thành viên của Twinl</p>
 
@@ -94,10 +96,6 @@ export default function RegisterPage() {
           </Button>
         </form>
 
-        <div className="auth__divider">hoặc</div>
-        <Button variant="outlined" size="large" fullWidth>
-          Đăng nhập
-        </Button>
 
         <div className="auth__footer">
           Đã có tài khoản? <Link to={PATHS.login}>Đăng nhập</Link>

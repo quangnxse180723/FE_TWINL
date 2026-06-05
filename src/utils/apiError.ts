@@ -18,7 +18,7 @@ export const getApiErrorMessage = (error: unknown) => {
     }
 
     if (error.response?.status === 401) {
-      return error.message || 'Invalid credentials'
+      return 'Sai email hoặc mật khẩu'
     }
 
     if (error.response?.status === 403) {

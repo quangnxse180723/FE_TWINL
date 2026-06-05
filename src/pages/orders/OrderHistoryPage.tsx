@@ -14,6 +14,15 @@ const formatDateTime = (value: string) => {
   return parsed.toLocaleString('vi-VN')
 }
 
+const STATUS_LABELS: Record<string, string> = {
+  PENDING: 'Chờ xử lý',
+  ASSIGNED: 'Đã giao Shipper',
+  PICKED_UP: 'Đang giao hàng',
+  DELIVERED: 'Đã giao thành công',
+  COMPLETED: 'Hoàn thành',
+  CANCELED: 'Đã huỷ',
+}
+
 export default function OrderHistoryPage() {
   const [page, setPage] = useState(0)
   const [sizePage] = useState(10)
@@ -73,7 +82,7 @@ export default function OrderHistoryPage() {
                     <td>{formatPrice(order.totalAmount)}</td>
                     <td>
                       <span className={`orders__status orders__status--${order.status.toLowerCase()}`}>
-                        {order.status}
+                        {STATUS_LABELS[order.status] || order.status}
                       </span>
                     </td>
                     <td>

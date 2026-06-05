@@ -5,6 +5,9 @@ import productsApi, { type Product } from '../../api/products/productsApi'
 import cartApi from '../../api/cart/cartApi'
 import { PATHS } from '../../routes/paths'
 import type { RootState } from '../../store'
+import { Sparkles, Shield } from 'lucide-react'
+import AiScannerModal from '../../components/shared/AiScannerModal'
+import LegitCheckModal from '../../components/shared/LegitCheckModal'
 import '../../styles/pages/productDetail.css'
 
 const formatPrice = (value: number) =>
@@ -18,6 +21,9 @@ export default function ProductDetailPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [adding, setAdding] = useState(false)
+  const [isAiModalOpen, setIsAiModalOpen] = useState(false)
+  const [directScanUrl, setDirectScanUrl] = useState('')
+  const [isLegitModalOpen, setIsLegitModalOpen] = useState(false)
   const navigate = useNavigate()
   const user = useSelector((state: RootState) => state.auth.user)
 
@@ -68,7 +74,77 @@ export default function ProductDetailPage() {
     return <section className="product-detail">{error || 'Không tìm thấy sản phẩm'}</section>
   }
 
-  const handleAddToCart = async () => {
+  const flyToCart = (e: React.MouseEvent) => {
+    if (!mainImage) return
+
+    const img = document.createElement('img')
+    img.src = mainImage
+    img.style.position = 'fixed'
+    img.style.zIndex = '9999'
+    img.style.width = '120px'
+    img.style.height = '120px'
+    img.style.objectFit = 'cover'
+    img.style.borderRadius = '8px'
+    img.style.transition = 'all 0.8s cubic-bezier(0.25, 1, 0.5, 1)'
+    img.style.opacity = '1'
+
+    const target = e.currentTarget as HTMLElement
+    const rect = target.getBoundingClientRect()
+    img.style.top = `${rect.top - 60}px`
+    img.style.left = `${rect.left + rect.width / 2 - 60}px`
+
+    document.body.appendChild(img)
+
+    const cartIcon = document.getElementById('header-cart-icon')
+    const targetRect = cartIcon?.getBoundingClientRect() || { top: 20, left: window.innerWidth - 100 }
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        img.style.top = `${targetRect.top}px`
+        img.style.left = `${targetRect.left + 5}px`
+        img.style.width = '24px'
+        img.style.height = '24px'
+        img.style.opacity = '0.3'
+        img.style.borderRadius = '50%'
+        img.style.transform = 'scale(0.5) rotate(360deg)'
+      })
+    })
+
+    setTimeout(() => {
+      if (document.body.contains(img)) {
+        document.body.removeChild(img)
+      }
+    }, 800)
+  }
+
+  const handleAddToCart = async (e: React.MouseEvent) => {
+    if (!user) {
+      navigate(PATHS.login)
+      return
+    }
+    if (!product) return
+
+    flyToCart(e)
+    setAdding(true)
+    try {
+      const response = await cartApi.addItem({ productId: product.id, quantity: 1 })
+      // Dùng optional chaining để catch mọi khả năng cấu trúc response, ưu tiên items.length
+      // @ts-ignore
+      const newTotal = response?.data?.data?.items?.length ?? response?.data?.items?.length ?? null;
+      
+      if (newTotal !== null) {
+        window.dispatchEvent(new CustomEvent('cart-updated', { detail: newTotal }))
+      } else {
+        // Fallback
+        window.dispatchEvent(new Event('cart-updated'))
+      }
+    } catch {
+    } finally {
+      setAdding(false)
+    }
+  }
+
+  const handleBuyNow = async () => {
     if (!user) {
       navigate(PATHS.login)
       return
@@ -77,6 +153,8 @@ export default function ProductDetailPage() {
     setAdding(true)
     try {
       await cartApi.addItem({ productId: product.id, quantity: 1 })
+      window.dispatchEvent(new Event('cart-updated'))
+      navigate(PATHS.cart)
     } catch {
     } finally {
       setAdding(false)
@@ -107,8 +185,30 @@ export default function ProductDetailPage() {
               </button>
             ))}
           </div>
-          <div className="product-detail__main">
+          <div className="product-detail__main" style={{ position: 'relative' }}>
             {mainImage ? <img src={mainImage} alt={product.name} /> : null}
+            {mainImage && (
+              <div className="product-detail__ai-actions">
+                <button 
+                  type="button" 
+                  className="ai-scan-direct-btn"
+                  onClick={() => { setDirectScanUrl(mainImage); setIsAiModalOpen(true); }}
+                  title="Phân tích ảnh này bằng AI"
+                >
+                  <Sparkles size={14} />
+                  <span>Quét AI</span>
+                </button>
+                <button 
+                  type="button" 
+                  className="ai-legit-btn"
+                  onClick={() => setIsLegitModalOpen(true)}
+                  title="Kiểm định chính hãng bằng AI"
+                >
+                  <Shield size={14} />
+                  <span>Legit Check</span>
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -119,7 +219,14 @@ export default function ProductDetailPage() {
             <span className="product-detail__status">Tình trạng: Khá tốt</span>
           </div>
           <div className="product-detail__actions">
-            <button type="button" className="product-detail__buy">Mua ngay</button>
+            <button
+              type="button"
+              className="product-detail__buy"
+              onClick={handleBuyNow}
+              disabled={adding}
+            >
+              {adding ? 'Đang xử lý...' : 'Mua ngay'}
+            </button>
             <button
               type="button"
               className="product-detail__cart"
@@ -177,6 +284,17 @@ export default function ProductDetailPage() {
           )}
         </div>
       </div>
+
+      <AiScannerModal 
+        isOpen={isAiModalOpen} 
+        onClose={() => { setIsAiModalOpen(false); setDirectScanUrl(''); }} 
+        directScanImageUrl={directScanUrl} 
+      />
+      <LegitCheckModal
+        isOpen={isLegitModalOpen}
+        onClose={() => setIsLegitModalOpen(false)}
+        productImageUrls={product.imageUrls ?? []}
+      />
     </section>
   )
 }

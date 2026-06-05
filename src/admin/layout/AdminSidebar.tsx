@@ -2,7 +2,8 @@ import { NavLink } from 'react-router-dom'
 import { PATHS } from '../../routes/paths'
 
 const links = [
-  { to: PATHS.admin, label: 'Dashboard', icon: '⧉' },
+  { to: PATHS.admin, label: 'Tổng quan', icon: '⧉' },
+  { to: PATHS.adminTraffic, label: 'Thống kê Truy cập', icon: '📊' },
   { to: PATHS.adminProducts, label: 'Sản phẩm', icon: '▢' },
   { to: PATHS.adminUsers, label: 'Tài khoản', icon: '◉' },
   { to: PATHS.adminOrders, label: 'Đơn hàng', icon: '▤' },
@@ -30,7 +31,6 @@ export default function AdminSidebar() {
           </NavLink>
         ))}
       </nav>
-      <button type="button" className="admin__cta">+ Add Product</button>
     </aside>
   )
 }

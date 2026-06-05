@@ -1,5 +1,7 @@
 export interface AdminProduct {
   id: number
+  sellerId?: number | null
+  sellerName?: string | null
   name: string
   description?: string | null
   price: number
@@ -16,6 +18,42 @@ export interface AdminProduct {
   colors?: string[]
   createdAt?: string
   updatedAt?: string
+}
+
+export interface AdminOrderItem {
+  productId: number | null
+  productName: string | null
+  quantity: number
+  unitPrice: number
+  lineTotal: number
+}
+
+export interface AdminOrder {
+  id: number
+  code: string
+  customerName: string
+  customerEmail: string
+  customerPhone?: string | null
+  shippingAddress?: string | null
+  status: 'PENDING' | 'ASSIGNED' | 'PICKED_UP' | 'DELIVERED' | 'COMPLETED' | 'CANCELED'
+  totalAmount: number
+  paymentMethod?: string | null
+  paymentStatus?: string | null
+  shipperId?: number | null
+  shipperName?: string | null
+  deliveredAt?: string | null
+  note?: string | null
+  items: AdminOrderItem[]
+  createdAt: string
+  updatedAt: string
+}
+
+export interface AdminOrderPage {
+  content: AdminOrder[]
+  totalElements: number
+  totalPages: number
+  size: number
+  number: number
 }
 
 export interface AdminProductPage {
@@ -58,7 +96,7 @@ export interface AdminUserCreatePayload {
   displayName: string
   email: string
   password: string
-  role: 'USER' | 'STAFF'
+  role: 'USER' | 'STAFF' | 'SHIPPER'
   phone?: string | null
   address?: string | null
   gender?: string | null
@@ -67,7 +105,7 @@ export interface AdminUserCreatePayload {
 
 export interface AdminUserUpdatePayload {
   displayName?: string | null
-  role?: 'USER' | 'STAFF'
+  role?: 'USER' | 'STAFF' | 'SHIPPER'
   phone?: string | null
   address?: string | null
   gender?: string | null
