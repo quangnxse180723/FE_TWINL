@@ -7,6 +7,7 @@ export const PATHS = {
   sport: '/category/sport',
   cart: '/cart',
   vnpayReturn: '/payment/vnpay-return',
+  sepayCheckout: '/payment/sepay',
   orders: '/orders',
   orderTracking: '/orders/:code',
   contact: '/contact',

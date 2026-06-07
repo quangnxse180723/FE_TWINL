@@ -246,3 +246,131 @@
   transition: width 0.4s ease;
 }
 .lc-progress-pct { font-size: 13px; color: #6b7280; }
+
+/* ── Slot States ──────────────────────────────────────────────── */
+
+/* Hidden file input */
+.lc-slot__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Camera icon inside empty slot */
+.lc-slot__camera {
+  color: #4b5563;
+  margin-top: 2px;
+}
+
+/* Invalid slot – border red */
+.lc-slot--invalid .lc-slot__preview {
+  border-color: #ef4444;
+  border-style: solid;
+}
+
+/* Validating overlay */
+.lc-slot__validating {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 11px;
+  color: #fff;
+  border-radius: 10px;
+}
+
+/* Spinning animation for Loader2 */
+.lc-spin {
+  animation: lc-rotate 0.9s linear infinite;
+}
+@keyframes lc-rotate {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* Valid (green tick) badge */
+.lc-slot__valid-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: #22c55e;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  box-shadow: 0 2px 6px rgba(34,197,94,0.5);
+}
+
+/* Invalid (red warning) badge */
+.lc-slot__invalid-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: #ef4444;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  box-shadow: 0 2px 6px rgba(239,68,68,0.5);
+}
+
+/* Label error state */
+.lc-slot__label--error {
+  color: #ef4444 !important;
+}
+
+/* Error hint below slot */
+.lc-slot__error-hint {
+  font-size: 10px;
+  color: #f87171;
+  margin: 4px 0 0;
+  line-height: 1.4;
+  text-align: center;
+}
+
+/* Slot hint text */
+.lc-slot__hint {
+  font-size: 10px;
+  color: #6b7280;
+  margin: 4px 0 0;
+  line-height: 1.4;
+  text-align: center;
+}
+
+/* ── Upload progress bar ─────────────────────────────────────── */
+.lc-upload-progress {
+  margin: 14px 0 12px;
+}
+
+.lc-upload-progress__bar {
+  height: 5px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+.lc-upload-progress__fill {
+  height: 100%;
+  background: linear-gradient(90deg, #1a5c3a, #22c55e);
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+
+.lc-upload-progress__text {
+  font-size: 12px;
+  color: #9ca3af;
+}
+

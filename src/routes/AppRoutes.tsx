@@ -14,6 +14,7 @@ import ProductDetailPage from '../pages/products/ProductDetailPage'
 import CartPage from '../pages/cart/CartPage'
 import ContactPage from '../pages/contact/ContactPage'
 import VnpayReturnPage from '../pages/payment/VnpayReturnPage'
+import SepayCheckoutPage from '../pages/payment/SepayCheckoutPage'
 import OrderHistoryPage from '../pages/orders/OrderHistoryPage'
 import OrderTrackingPage from '../pages/orders/OrderTrackingPage'
 import LoginPage from '../pages/auth/LoginPage'
@@ -49,6 +50,7 @@ export default function AppRoutes() {
         <Route path={PATHS.sport} element={<SportCategoryPage />} />
         <Route path={PATHS.cart} element={<CartPage />} />
         <Route path={PATHS.vnpayReturn} element={<VnpayReturnPage />} />
+        <Route path={PATHS.sepayCheckout} element={<SepayCheckoutPage />} />
         <Route path={PATHS.orders} element={<OrderHistoryPage />} />
         <Route path={PATHS.orderTracking} element={<OrderTrackingPage />} />
         <Route path={PATHS.contact} element={<ContactPage />} />
