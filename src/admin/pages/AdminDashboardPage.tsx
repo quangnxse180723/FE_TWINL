@@ -173,7 +173,7 @@ export default function AdminDashboardPage() {
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
                   <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 11 }} dy={10} />
                   <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 11 }} tickFormatter={(val) => val >= 1000000 ? (val/1000000) + 'M' : val} />
-                  <Tooltip formatter={(value: number) => formatCurrency(value)} />
+                  <Tooltip formatter={(value) => typeof value === 'number' ? formatCurrency(value) : value} />
                   <Area type="monotone" dataKey="uv" stroke="#22c55e" strokeWidth={4} fillOpacity={1} fill="url(#colorUv)" activeDot={{ r: 6, fill: '#fff', stroke: '#22c55e', strokeWidth: 2 }} />
                 </AreaChart>
               </ResponsiveContainer>
@@ -245,48 +245,50 @@ export default function AdminDashboardPage() {
           <h3 style={{ fontSize: '16px', fontWeight: 600 }}>Danh sách Đơn hàng Cần Chú Ý</h3>
           <span style={{ color: '#16a34a', cursor: 'pointer', fontWeight: 500, fontSize: '13px' }}>Xem tất cả ❯</span>
         </div>
-        <table className="admin-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr style={{ borderTop: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0', backgroundColor: '#f8fafc' }}>
-              <th style={{ textAlign: 'left', padding: '16px 24px', fontSize: '11px', color: '#64748b', fontWeight: 600, letterSpacing: '0.05em' }}>MÃ ĐƠN</th>
-              <th style={{ textAlign: 'left', padding: '16px 24px', fontSize: '11px', color: '#64748b', fontWeight: 600, letterSpacing: '0.05em' }}>KHÁCH HÀNG</th>
-              <th style={{ textAlign: 'left', padding: '16px 24px', fontSize: '11px', color: '#64748b', fontWeight: 600, letterSpacing: '0.05em' }}>TÌNH TRẠNG</th>
-              <th style={{ textAlign: 'left', padding: '16px 24px', fontSize: '11px', color: '#64748b', fontWeight: 600, letterSpacing: '0.05em' }}>SHIPPER PHỤ TRÁCH</th>
-              <th style={{ textAlign: 'left', padding: '16px 24px', fontSize: '11px', color: '#64748b', fontWeight: 600, letterSpacing: '0.05em' }}>TRẠNG THÁI</th>
-            </tr>
-          </thead>
-          <tbody>
-            {(d?.attentionOrders || []).length > 0 ? (
-              d?.attentionOrders.map((ord) => (
-                <tr key={ord.code} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                  <td style={{ padding: '16px 24px', fontSize: '13px', color: '#334155' }}>{ord.code}</td>
-                  <td style={{ padding: '16px 24px', fontSize: '13px', color: '#334155' }}>{ord.customer}</td>
-                  <td style={{ padding: '16px 24px', fontSize: '13px', color: '#dc2626', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    {ord.status === 'DELAY' || ord.status === 'DISPUTE' ? <AlertTriangle size={14} /> : null}
-                    {ord.issue}
-                  </td>
-                  <td style={{ padding: '16px 24px', fontSize: '13px', color: '#334155' }}>{ord.shipper}</td>
-                  <td style={{ padding: '16px 24px' }}>
-                    <span style={{ 
-                      padding: '4px 8px', 
-                      borderRadius: '4px', 
-                      fontSize: '10px', 
-                      fontWeight: 600, 
-                      backgroundColor: ord.status === 'DELAY' || ord.status === 'DISPUTE' ? '#fee2e2' : '#e2e8f0',
-                      color: ord.status === 'DELAY' || ord.status === 'DISPUTE' ? '#dc2626' : '#475569'
-                    }}>
-                      {ord.status}
-                    </span>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={5} style={{ padding: '24px', textAlign: 'center' }}>Không có đơn hàng nào cần chú ý.</td>
+        <div style={{ overflowX: 'auto', maxWidth: '100%' }}>
+          <table className="admin-table" style={{ width: '100%', borderCollapse: 'collapse', minWidth: '700px' }}>
+            <thead>
+              <tr style={{ borderTop: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0', backgroundColor: '#f8fafc' }}>
+                <th style={{ textAlign: 'left', padding: '16px 24px', fontSize: '11px', color: '#64748b', fontWeight: 600, letterSpacing: '0.05em' }}>MÃ ĐƠN</th>
+                <th style={{ textAlign: 'left', padding: '16px 24px', fontSize: '11px', color: '#64748b', fontWeight: 600, letterSpacing: '0.05em' }}>KHÁCH HÀNG</th>
+                <th style={{ textAlign: 'left', padding: '16px 24px', fontSize: '11px', color: '#64748b', fontWeight: 600, letterSpacing: '0.05em' }}>TÌNH TRẠNG</th>
+                <th style={{ textAlign: 'left', padding: '16px 24px', fontSize: '11px', color: '#64748b', fontWeight: 600, letterSpacing: '0.05em' }}>SHIPPER PHỤ TRÁCH</th>
+                <th style={{ textAlign: 'left', padding: '16px 24px', fontSize: '11px', color: '#64748b', fontWeight: 600, letterSpacing: '0.05em' }}>TRẠNG THÁI</th>
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {(d?.attentionOrders || []).length > 0 ? (
+                d?.attentionOrders.map((ord) => (
+                  <tr key={ord.code} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                    <td style={{ padding: '16px 24px', fontSize: '13px', color: '#334155' }}>{ord.code}</td>
+                    <td style={{ padding: '16px 24px', fontSize: '13px', color: '#334155' }}>{ord.customer}</td>
+                    <td style={{ padding: '16px 24px', fontSize: '13px', color: '#dc2626', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      {ord.status === 'DELAY' || ord.status === 'DISPUTE' ? <AlertTriangle size={14} /> : null}
+                      {ord.issue}
+                    </td>
+                    <td style={{ padding: '16px 24px', fontSize: '13px', color: '#334155' }}>{ord.shipper}</td>
+                    <td style={{ padding: '16px 24px' }}>
+                      <span style={{ 
+                        padding: '4px 8px', 
+                        borderRadius: '4px', 
+                        fontSize: '10px', 
+                        fontWeight: 600, 
+                        backgroundColor: ord.status === 'DELAY' || ord.status === 'DISPUTE' ? '#fee2e2' : '#e2e8f0',
+                        color: ord.status === 'DELAY' || ord.status === 'DISPUTE' ? '#dc2626' : '#475569'
+                      }}>
+                        {ord.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={5} style={{ padding: '24px', textAlign: 'center' }}>Không có đơn hàng nào cần chú ý.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </section>
   )

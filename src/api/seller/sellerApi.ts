@@ -1,6 +1,6 @@
 import { axiosClient } from '../axiosClient';
 import type { ProductResponse } from '../../types/product';
-import type { OrderResponse } from '../../types/order';
+import type { Order } from '../../types/order';
 
 interface PaginatedResponse<T> {
   content: T[];
@@ -22,7 +22,7 @@ export const sellerApi = {
   },
 
   getMyOrders: (page = 0, size = 10) => {
-    return axiosClient.get<PaginatedResponse<OrderResponse>>('/api/v1/seller/orders', {
+    return axiosClient.get<PaginatedResponse<Order>>('/api/v1/seller/orders', {
       params: { page, sizePage: size },
     });
   },

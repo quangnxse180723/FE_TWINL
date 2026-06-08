@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { Package, PlusCircle, ShoppingBag, Loader2, Upload, Sparkles, CheckCircle2, AlertTriangle, XCircle, Clock, Wallet as WalletIcon, ArrowRightLeft, CreditCard, Save, TrendingUp, LayoutDashboard, Shield, Camera, RotateCcw } from 'lucide-react';
+import React, { useEffect, useState, useRef } from 'react';
+import { Package, PlusCircle, ShoppingBag, Loader2, Sparkles, CheckCircle2, AlertTriangle, Clock, Wallet as WalletIcon, CreditCard, Save, TrendingUp, LayoutDashboard, Shield, Camera, RotateCcw } from 'lucide-react';
 import { sellerApi } from '../../api/seller/sellerApi';
 import { categoriesApi } from '../../api/categories/categoriesApi';
 import { colorsApi } from '../../api/colors/colorsApi';
@@ -14,13 +14,6 @@ import { compressImage } from '../../utils/imageCompressor';
 
 type Tab = 'overview' | 'products' | 'new-product' | 'orders' | 'my-orders' | 'wallet';
 
-interface ImageSlot {
-  file: File;
-  previewUrl: string;
-  uploadedUrl?: string;
-  qualityStatus?: 'checking' | 'PASS' | 'WARN' | 'FAIL';
-  qualityLabel?: string;
-}
 
 interface AiAutoFillResult {
   name?: string; brand?: string; style?: string; gender?: string;
@@ -82,29 +75,28 @@ export default function SellerDashboardPage() {
   const [aiSuggested, setAiSuggested] = useState<Record<string, boolean>>({});
   const [aiResult, setAiResult] = useState<AiAutoFillResult>({});
 
-  // ── Legit Check 4-slot state (Primary Images) ─────────────────
-  type LegitSlotKey = 'front' | 'logo' | 'neckTag' | 'washTag'
+  // ── Legit Check 6-slot state (Primary Images) ─────────────────
+  type LegitSlotKey = 'front' | 'back' | 'tag' | 'opt1' | 'opt2' | 'opt3'
   type LegitSlotState = {
     file: File | null; preview: string | null
     validating: boolean; valid: boolean | null; errorMsg: string
   }
-  const LEGIT_SLOTS: { key: LegitSlotKey; icon: string; title: string; hint: string }[] = [
-    { key: 'front',   icon: '👕', title: 'Toàn thân', hint: 'Mặt trước sản phẩm' },
-    { key: 'logo',    icon: '🔍', title: 'Cận cảnh Logo', hint: 'Logo rõ nét' },
-    { key: 'neckTag', icon: '🏷️', title: 'Mác cổ áo', hint: 'Chữ trên mác rõ ràng' },
-    { key: 'washTag', icon: '📋', title: 'Mác giặt', hint: 'Mác thông tin bên trong' },
+  const LEGIT_SLOTS: { key: LegitSlotKey; icon: string; title: string; hint: string; required: boolean }[] = [
+    { key: 'front', icon: '👕', title: 'Mặt trước', hint: 'Bắt buộc', required: true },
+    { key: 'back',  icon: '👕', title: 'Mặt sau', hint: 'Bắt buộc', required: true },
+    { key: 'tag',   icon: '🏷️', title: 'Mác/Logo/Size', hint: 'Bắt buộc', required: true },
+    { key: 'opt1',  icon: '📷', title: 'Ảnh phụ 1', hint: 'Không bắt buộc', required: false },
+    { key: 'opt2',  icon: '📷', title: 'Ảnh phụ 2', hint: 'Không bắt buộc', required: false },
+    { key: 'opt3',  icon: '📷', title: 'Ảnh phụ 3', hint: 'Không bắt buộc', required: false },
   ]
   const emptyLegitSlot = (): LegitSlotState => ({ file: null, preview: null, validating: false, valid: null, errorMsg: '' })
   const [legitSlots, setLegitSlots] = useState<Record<LegitSlotKey, LegitSlotState>>({
-    front: emptyLegitSlot(), logo: emptyLegitSlot(), neckTag: emptyLegitSlot(), washTag: emptyLegitSlot(),
+    front: emptyLegitSlot(), back: emptyLegitSlot(), tag: emptyLegitSlot(),
+    opt1: emptyLegitSlot(), opt2: emptyLegitSlot(), opt3: emptyLegitSlot(),
   })
-  const [legitResult, setLegitResult] = useState<{ riskLevel: string; brand: string; advice: string } | null>(null)
-  const [isLegitScanning, setIsLegitScanning] = useState(false)
-  const [legitScanProgress, setLegitScanProgress] = useState(0)
   const legitFileRefs = useRef<Partial<Record<LegitSlotKey, HTMLInputElement | null>>>({})
 
-  const validLegitSlots = Object.values(legitSlots).filter(s => s.file && s.valid !== false).length
-
+  const validLegitSlots = [legitSlots.front, legitSlots.back, legitSlots.tag].filter(s => s.file && s.valid !== false).length
   const [twName, setTwName] = useState('');
   const [twDesc, setTwDesc] = useState('');
   const twNameEffect = useTypewriter(twName, 20);
@@ -170,31 +162,6 @@ export default function SellerDashboardPage() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  // ── Legit Check: scan toàn bộ ảnh đã chọn ───────────────────
-  const handleStartLegitScan = async () => {
-    const files = LEGIT_SLOTS.map(s => legitSlots[s.key].file).filter(Boolean) as File[]
-    if (files.length < 2) { toast.warn('Cần ít nhất 2 ảnh để kiểm định.'); return }
-    setIsLegitScanning(true)
-    setLegitScanProgress(0)
-    const prog = setInterval(() => setLegitScanProgress(p => p >= 88 ? 88 : p + 5), 400)
-    try {
-      const fd = new FormData()
-      files.forEach(f => fd.append('files', f))
-      const res = await fetch(`${API_BASE_URL}/api/v1/ai/legit-check`, { method: 'POST', body: fd })
-      if (!res.ok) throw new Error('Legit check thất bại')
-      const data = await res.json()
-      clearInterval(prog)
-      setLegitScanProgress(100)
-      setLegitResult(data)
-      const label = data.riskLevel === 'LOW' ? '✅ Khả năng cao là chính hãng!' : data.riskLevel === 'HIGH' ? '⚠️ Phát hiện nhiều dấu hiệu đáng ngờ' : '🔍 Không đủ dữ liệu để kết luận'
-      toast.info(`Kết quả kiểm định: ${label}`, { autoClose: 6000 })
-    } catch (e: any) {
-      clearInterval(prog)
-      toast.error(e.message || 'Kiểm định thất bại')
-    } finally {
-      setIsLegitScanning(false)
-    }
-  }
 
   const handleAutoFill = async () => {
     const files = Object.values(legitSlots).map(s => s.file).filter(Boolean) as File[];
@@ -269,8 +236,9 @@ export default function SellerDashboardPage() {
   const handleCreateProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     const filesToUpload = Object.values(legitSlots).map(s => s.file).filter(Boolean) as File[];
-    if (filesToUpload.length < 4) {
-      toast.error('Vui lòng chụp đủ 4 ảnh kiểm định.');
+    const requiredFiles = [legitSlots.front.file, legitSlots.back.file, legitSlots.tag.file].filter(Boolean);
+    if (requiredFiles.length < 3) {
+      toast.error('Vui lòng chụp đủ 3 ảnh bắt buộc (mặt trước, sau, mác).');
       return;
     }
     setIsLoading(true);
@@ -289,8 +257,7 @@ export default function SellerDashboardPage() {
       await sellerApi.createProduct(payload);
       toast.success('Đăng sản phẩm thành công!');
       setFormData({ name: '', description: '', price: '', categoryId: '', brand: '', gender: 'Unisex', style: '', stock: '' });
-      setLegitSlots({ front: emptyLegitSlot(), logo: emptyLegitSlot(), neckTag: emptyLegitSlot(), washTag: emptyLegitSlot() });
-      setLegitResult(null);
+      setLegitSlots({ front: emptyLegitSlot(), back: emptyLegitSlot(), tag: emptyLegitSlot(), opt1: emptyLegitSlot(), opt2: emptyLegitSlot(), opt3: emptyLegitSlot() });
       setSizes('');
       setColorIds([]);
       setAiSuggested({});
@@ -346,10 +313,6 @@ export default function SellerDashboardPage() {
                 <ShoppingBag size={20} /><span>Đơn hàng chờ xử lý</span>
               </button>
               
-              <div className="pt-2 pb-1 px-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Kênh Người Mua</div>
-              <button onClick={() => setActiveTab('my-orders')} className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${activeTab === 'my-orders' ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-50'}`}>
-                <ShoppingBag size={20} /><span>Đơn hàng đã mua</span>
-              </button>
               
               <div className="pt-2 pb-1 px-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Tài chính</div>
               <button onClick={() => setActiveTab('wallet')} className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${activeTab === 'wallet' ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-50'}`}>
@@ -535,9 +498,9 @@ export default function SellerDashboardPage() {
                               <td className="p-4">
                                 <span className={`text-xs px-3 py-1 rounded-full font-medium ${
                                   order.status === 'PENDING' ? 'bg-amber-100 text-amber-700' :
-                                  order.status === 'SHIPPING' ? 'bg-blue-100 text-blue-700' :
+                                  order.status === 'PICKED_UP' ? 'bg-blue-100 text-blue-700' :
                                   order.status === 'DELIVERED' ? 'bg-green-100 text-green-700' :
-                                  order.status === 'CANCELLED' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700'
+                                  order.status === 'CANCELED' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700'
                                 }`}>
                                   {order.status}
                                 </span>
@@ -686,10 +649,10 @@ export default function SellerDashboardPage() {
                           <h4 className="font-semibold text-gray-800">1. Ảnh sản phẩm & Kiểm định *</h4>
                         </div>
                         <p className="text-xs text-gray-500 mb-5">
-                          Tải lên đủ 4 góc ảnh để AI kiểm định chính hãng, qua đó làm ảnh hiển thị chính cho sản phẩm.
+                          Tải lên đủ 3 ảnh bắt buộc để AI tự động điền thông tin và kiểm định chính hãng.
                         </p>
 
-                        <div className="grid grid-cols-2 gap-3 mb-5">
+                        <div className="grid grid-cols-3 gap-3 mb-5">
                           {LEGIT_SLOTS.map((slot, idx) => {
                             const st = legitSlots[slot.key]
                             const isFilled = !!st.file
@@ -746,10 +709,11 @@ export default function SellerDashboardPage() {
                                     </>
                                   )}
                                 </div>
-                                <p className={`text-xs text-center font-medium leading-tight ${
-                                  isInvalid ? 'text-red-500' : isFilled && st.valid ? 'text-emerald-600' : 'text-gray-500'
+                                <p className={`text-[11px] text-center font-medium leading-tight mt-1 ${
+                                  isInvalid ? 'text-red-500' : isFilled && st.valid ? 'text-emerald-600' : slot.required ? 'text-gray-700' : 'text-gray-400'
                                 }`}>
                                   <span className="text-gray-400 mr-1">{idx+1}.</span>{slot.title}
+                                  {slot.required && <span className="text-red-500 ml-0.5">*</span>}
                                 </p>
                                 {!isFilled && <p className="text-[10px] text-center text-gray-400 leading-tight">{slot.hint}</p>}
                                 {isInvalid && <p className="text-[10px] text-center text-red-500 leading-tight">{st.errorMsg}</p>}
@@ -758,44 +722,26 @@ export default function SellerDashboardPage() {
                           })}
                         </div>
 
-                        {/* Progress + scan button */}
+                        {/* Progress indicator */}
                         <div className="flex flex-col gap-3 mb-5">
                           <div className="flex-1">
                             <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
                               <div
                                 className="h-full bg-gradient-to-r from-emerald-700 to-emerald-400 rounded-full transition-all duration-300"
-                                style={{ width: isLegitScanning ? `${legitScanProgress}%` : `${(validLegitSlots / 4) * 100}%` }}
+                                style={{ width: `${(validLegitSlots / 3) * 100}%` }}
                               />
                             </div>
                             <div className="flex justify-between items-center mt-1">
                               <p className="text-[10px] text-gray-400">
-                                {isLegitScanning ? `Đang kiểm định... ${legitScanProgress}%` : `${validLegitSlots}/4 ảnh hợp lệ`}
+                                {`${validLegitSlots}/3 ảnh bắt buộc`}
                               </p>
-                              {legitResult && (
-                                <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold flex items-center gap-1 ${
-                                  legitResult.riskLevel === 'LOW' ? 'bg-emerald-100 text-emerald-700' :
-                                  legitResult.riskLevel === 'HIGH' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'
-                                }`}>
-                                  {legitResult.riskLevel === 'LOW' ? <CheckCircle2 size={10}/> : <AlertTriangle size={10}/>}
-                                  {legitResult.riskLevel === 'LOW' ? 'Đã xác thực' : legitResult.riskLevel === 'HIGH' ? 'Rủi ro cao' : 'Chưa rõ'}
-                                </span>
-                              )}
                             </div>
                           </div>
-                          <button
-                            type="button"
-                            onClick={handleStartLegitScan}
-                            disabled={validLegitSlots < 4 || isLegitScanning}
-                            className="w-full flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm"
-                          >
-                            {isLegitScanning ? <Loader2 size={16} className="animate-spin" /> : <Shield size={16} />}
-                            {isLegitScanning ? 'AI đang quét...' : legitResult ? 'Quét lại kiểm định' : 'Bắt đầu kiểm định'}
-                          </button>
                         </div>
 
                         {/* AI Auto Fill Button */}
                         <div className="pt-5 border-t border-gray-100">
-                          <button type="button" onClick={handleAutoFill} disabled={isAutoFilling || validLegitSlots === 0} className="w-full bg-gradient-to-r from-teal-800 to-green-500 hover:from-teal-700 hover:to-green-400 text-white rounded-xl py-3 px-4 font-bold text-sm flex items-center justify-center gap-2 shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                          <button type="button" onClick={handleAutoFill} disabled={isAutoFilling || validLegitSlots < 3} className="w-full bg-gradient-to-r from-teal-800 to-green-500 hover:from-teal-700 hover:to-green-400 text-white rounded-xl py-3 px-4 font-bold text-sm flex items-center justify-center gap-2 shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed">
                               <Sparkles size={16} className={isAutoFilling ? "animate-spin" : ""} />
                               {isAutoFilling ? 'AI đang phân tích...' : '2. Nhờ AI điền thông tin'}
                           </button>
@@ -936,18 +882,8 @@ export default function SellerDashboardPage() {
                             </div>
                           )}
 
-                          <div className="pt-6 border-t border-gray-100 flex items-center justify-between gap-4">
-                            {/* Badge chính hãng nếu đã Legit Check */}
-                            {legitResult?.riskLevel === 'LOW' && (
-                              <div className="flex items-center gap-1.5 text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-lg text-xs font-semibold">
-                                <Shield size={13} />
-                                AI xác nhận chính hãng
-                              </div>
-                            )}
-                            {!legitResult && (
-                              <p className="text-xs text-gray-400 italic">Nhấn "Bắt đầu kiểm định" bên trái trước khi đăng</p>
-                            )}
-                            <button type="submit" disabled={isLoading || validLegitSlots < 4} className="ml-auto bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium py-3 px-8 rounded-xl shadow-sm transition-all focus:ring-4 focus:ring-blue-100 flex items-center">
+                          <div className="pt-6 border-t border-gray-100 flex items-center justify-end gap-4">
+                            <button type="submit" disabled={isLoading || validLegitSlots < 3} className="ml-auto bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium py-3 px-8 rounded-xl shadow-sm transition-all focus:ring-4 focus:ring-blue-100 flex items-center">
                               {isLoading ? (
                                 <><Loader2 className="animate-spin mr-2" size={18} /> Đang xử lý...</>
                               ) : '4. Xác nhận Đăng bán'}

@@ -12,7 +12,7 @@ import { adminAnalyticsApi } from './admin/api/adminAnalyticsApi'
 function App() {
   const dispatch = useDispatch()
   const user = useSelector((state: RootState) => state.auth.user)
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     // Track visit once per session load

@@ -1,4 +1,5 @@
-import { Button, TextField } from '@mui/material'
+import { Button, TextField, InputAdornment, IconButton } from '@mui/material'
+import { Eye, EyeOff } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
@@ -16,6 +17,8 @@ export default function RegisterPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   useEffect(() => {
     if (user) {
@@ -63,17 +66,43 @@ export default function RegisterPage() {
           />
           <TextField
             label="Mật khẩu"
-            type="password"
+            type={showPassword ? 'text' : 'password'}
             fullWidth
             value={password}
             onChange={(event) => setPassword(event.target.value)}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="toggle password visibility"
+                    onClick={() => setShowPassword(!showPassword)}
+                    edge="end"
+                  >
+                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
           />
           <TextField
             label="Xác nhận lại mật khẩu"
-            type="password"
+            type={showConfirmPassword ? 'text' : 'password'}
             fullWidth
             value={confirmPassword}
             onChange={(event) => setConfirmPassword(event.target.value)}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="toggle confirm password visibility"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    edge="end"
+                  >
+                    {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
           />
           {confirmPassword.length > 0 && confirmPassword !== password ? (
             <div className="auth__error">Mật khẩu xác nhận không khớp.</div>

@@ -22,7 +22,6 @@ export default function ProductDetailPage() {
   const [error, setError] = useState('')
   const [adding, setAdding] = useState(false)
   const [isAiModalOpen, setIsAiModalOpen] = useState(false)
-  const [directScanUrl, setDirectScanUrl] = useState('')
   const [isLegitModalOpen, setIsLegitModalOpen] = useState(false)
   const navigate = useNavigate()
   const user = useSelector((state: RootState) => state.auth.user)
@@ -192,7 +191,7 @@ export default function ProductDetailPage() {
                 <button 
                   type="button" 
                   className="ai-scan-direct-btn"
-                  onClick={() => { setDirectScanUrl(mainImage); setIsAiModalOpen(true); }}
+                  onClick={() => setIsAiModalOpen(true)}
                   title="Phân tích ảnh này bằng AI"
                 >
                   <Sparkles size={14} />
@@ -287,8 +286,8 @@ export default function ProductDetailPage() {
 
       <AiScannerModal 
         isOpen={isAiModalOpen} 
-        onClose={() => { setIsAiModalOpen(false); setDirectScanUrl(''); }} 
-        directScanImageUrl={directScanUrl} 
+        onClose={() => setIsAiModalOpen(false)} 
+        directScanImageUrls={product.imageUrls ?? []}
       />
       <LegitCheckModal
         isOpen={isLegitModalOpen}

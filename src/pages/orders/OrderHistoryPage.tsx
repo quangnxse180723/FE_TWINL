@@ -63,37 +63,55 @@ export default function OrderHistoryPage() {
         ) : error ? (
           <div className="orders__state orders__state--error">{error}</div>
         ) : data?.content?.length ? (
-          <>
-            <table className="orders__table">
-              <thead>
-                <tr>
-                  <th>Mã đơn</th>
-                  <th>Ngày đặt</th>
-                  <th>Tổng tiền</th>
-                  <th>Trạng thái</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.content.map((order) => (
-                  <tr key={order.id}>
-                    <td>{order.code}</td>
-                    <td>{formatDateTime(order.createdAt)}</td>
-                    <td>{formatPrice(order.totalAmount)}</td>
-                    <td>
-                      <span className={`orders__status orders__status--${order.status.toLowerCase()}`}>
-                        {STATUS_LABELS[order.status] || order.status}
-                      </span>
-                    </td>
-                    <td>
-                      <Link className="orders__link" to={PATHS.orderTracking.replace(':code', order.code)}>
-                        Xem chi tiết
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="orders__history-list">
+            {data.content.map((order) => (
+              <div key={order.id} className="orders__history-card">
+                <div className="orders__history-card-header">
+                  <div>
+                    <span className="orders__history-code">#{order.code}</span>
+                    <span className="orders__history-date">{formatDateTime(order.createdAt)}</span>
+                  </div>
+                  <div className="orders__history-statuses">
+                    <span className={`orders__status orders__status--${order.paymentStatus?.toLowerCase() || 'pending'}`}>
+                      {order.paymentStatus === 'SUCCESS' ? 'Đã thanh toán' : 'Chưa thanh toán'}
+                    </span>
+                    <span className={`orders__status orders__status--${order.status.toLowerCase()}`}>
+                      {STATUS_LABELS[order.status] || order.status}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="orders__history-items">
+                  {order.items.map((item, index) => (
+                    <div key={index} className="orders__history-item">
+                      <div className="orders__history-item-image">
+                        {item.imageUrl ? (
+                          <img src={item.imageUrl} alt={item.productName || 'Sản phẩm'} />
+                        ) : (
+                          <div className="orders__history-item-placeholder">No Image</div>
+                        )}
+                      </div>
+                      <div className="orders__history-item-info">
+                        <h4>{item.productName}</h4>
+                        <p>Số lượng: {item.quantity}</p>
+                      </div>
+                      <div className="orders__history-item-price">
+                        {formatPrice(item.unitPrice)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="orders__history-card-footer">
+                  <div className="orders__history-total">
+                    Tổng tiền: <strong>{formatPrice(order.totalAmount)}</strong>
+                  </div>
+                  <Link className="orders__history-btn" to={PATHS.orderTracking.replace(':code', order.code)}>
+                    Xem chi tiết
+                  </Link>
+                </div>
+              </div>
+            ))}
 
             <div className="orders__pagination">
               <button type="button" onClick={() => setPage((prev) => Math.max(prev - 1, 0))} disabled={page === 0}>
@@ -108,7 +126,7 @@ export default function OrderHistoryPage() {
                 Sau
               </button>
             </div>
-          </>
+          </div>
         ) : (
           <div className="orders__state">Chưa có đơn hàng.</div>
         )}

@@ -1,6 +1,6 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { X, UploadCloud, Bot, CheckCircle2, Search, Settings } from 'lucide-react'
+import { X, Bot, CheckCircle2, Search, Settings } from 'lucide-react'
 import { PATHS } from '../../routes/paths'
 import { API_BASE_URL } from '../../config/constants'
 import { toast } from 'react-toastify'
@@ -9,15 +9,14 @@ import '../../styles/components/ai-scanner.css'
 interface AiScannerModalProps {
   isOpen: boolean
   onClose: () => void
-  directScanImageUrl?: string
+  directScanImageUrls?: string[]
 }
 
-export default function AiScannerModal({ isOpen, onClose, directScanImageUrl }: AiScannerModalProps) {
+export default function AiScannerModal({ isOpen, onClose, directScanImageUrls }: AiScannerModalProps) {
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
   const [isScanning, setIsScanning] = useState(false)
   const [scanProgress, setScanProgress] = useState(0)
   const [loadingText, setLoadingText] = useState('AI của TWINL đang phân tích chất liệu và thương hiệu...')
-  const fileInputRef = useRef<HTMLInputElement>(null)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -25,16 +24,20 @@ export default function AiScannerModal({ isOpen, onClose, directScanImageUrl }: 
       setSelectedImage(null)
       setIsScanning(false)
       setScanProgress(0)
-    } else if (directScanImageUrl) {
+    } else if (directScanImageUrls && directScanImageUrls.length > 0) {
       // Bắt đầu scan trực tiếp
       const initiateDirectScan = async () => {
-        setSelectedImage(directScanImageUrl)
+        setSelectedImage(directScanImageUrls[0])
         setIsScanning(true)
         try {
-          const res = await fetch(directScanImageUrl)
-          const blob = await res.blob()
-          const file = new File([blob], 'direct-image.jpg', { type: blob.type })
-          await scanFile(file, directScanImageUrl)
+          const filesToScan: File[] = []
+          for (let i = 0; i < Math.min(directScanImageUrls.length, 6); i++) {
+            const url = directScanImageUrls[i]
+            const res = await fetch(url)
+            const blob = await res.blob()
+            filesToScan.push(new File([blob], `direct-image-${i}.jpg`, { type: blob.type }))
+          }
+          await scanFiles(filesToScan, directScanImageUrls[0])
         } catch (error) {
           toast.error('Không thể tải ảnh trực tiếp để quét.')
           setIsScanning(false)
@@ -42,15 +45,26 @@ export default function AiScannerModal({ isOpen, onClose, directScanImageUrl }: 
       }
       initiateDirectScan()
     }
-  }, [isOpen, directScanImageUrl])
+  }, [isOpen, directScanImageUrls])
+
+  useEffect(() => {
+    if (isScanning && directScanImageUrls && directScanImageUrls.length > 1) {
+      let imgIdx = 0
+      const imgInterval = setInterval(() => {
+        imgIdx = (imgIdx + 1) % directScanImageUrls.length
+        setSelectedImage(directScanImageUrls[imgIdx])
+      }, 1000)
+      return () => clearInterval(imgInterval)
+    }
+  }, [isScanning, directScanImageUrls])
 
   useEffect(() => {
     if (isScanning) {
       const texts = [
-        'AI của TWINL đang phân tích chất liệu và thương hiệu...',
+        'AI của TWINL đang phân tích toàn bộ góc độ sản phẩm...',
         'Đang quét cấu trúc bề mặt vải...',
-        'Đang trích xuất dữ liệu kiểu dáng thập niên...',
-        'Đang xác thực tình trạng sản phẩm...',
+        'Đang đối chiếu hình ảnh mặt trước và sau...',
+        'Đang xác thực chi tiết mác và logo...',
       ]
       let idx = 0
       const interval = setInterval(() => {
@@ -61,7 +75,7 @@ export default function AiScannerModal({ isOpen, onClose, directScanImageUrl }: 
     }
   }, [isScanning])
 
-  const scanFile = async (file: File, imageUrlPreview: string) => {
+  const scanFiles = async (files: File[], imageUrlPreview: string) => {
     // Simulate progress bar
     const progressInterval = setInterval(() => {
       setScanProgress(prev => {
@@ -72,7 +86,7 @@ export default function AiScannerModal({ isOpen, onClose, directScanImageUrl }: 
 
     try {
       const formData = new FormData()
-      formData.append('file', file)
+      files.forEach(f => formData.append('files', f))
       
       const response = await fetch(`${API_BASE_URL}/api/v1/ai/scan`, {
         method: 'POST',
@@ -102,15 +116,6 @@ export default function AiScannerModal({ isOpen, onClose, directScanImageUrl }: 
     }
   }
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0]
-      const imageUrl = URL.createObjectURL(file)
-      setSelectedImage(imageUrl)
-      setIsScanning(true)
-      await scanFile(file, imageUrl)
-    }
-  }
 
   if (!isOpen) return null
 
@@ -130,9 +135,14 @@ export default function AiScannerModal({ isOpen, onClose, directScanImageUrl }: 
         {isScanning && selectedImage && (
           <div className="ai-scanning-state">
             <div className="ai-scanning-image">
-              <img src={selectedImage} alt="Scanning" />
+              <img src={selectedImage} alt="Scanning" style={{ transition: 'opacity 0.3s ease-in-out' }} />
               <div className="scanning-line"></div>
               <div className="scanning-markers"></div>
+              {directScanImageUrls && directScanImageUrls.length > 1 && (
+                <div style={{ position: 'absolute', bottom: 12, right: 12, background: 'rgba(0,0,0,0.6)', color: 'white', padding: '4px 8px', borderRadius: 12, fontSize: 11, fontWeight: 600, zIndex: 10 }}>
+                  Đang quét {directScanImageUrls.length} ảnh
+                </div>
+              )}
             </div>
             <div className="ai-scanning-info">
               <div className="ai-scanning-logo">

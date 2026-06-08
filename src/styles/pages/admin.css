@@ -3,6 +3,13 @@
   grid-template-columns: 240px 1fr;
   min-height: 100vh;
   background: #f5f7f2;
+  max-width: 100vw;
+  overflow-x: hidden;
+  transition: grid-template-columns 0.3s ease;
+}
+
+.admin--sidebar-closed {
+  grid-template-columns: 72px 1fr;
 }
 
 .admin__sidebar {
@@ -12,6 +19,23 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
+  overflow: hidden;
+  transition: padding 0.3s ease;
+}
+
+.admin__sidebar--closed .admin__brand-title,
+.admin__sidebar--closed .admin__brand-sub,
+.admin__sidebar--closed .admin__nav-label {
+  display: none;
+}
+
+.admin__sidebar--closed {
+  padding: 24px 8px;
+}
+
+.admin__sidebar--closed .admin__nav-link {
+  justify-content: center;
+  padding: 10px 0;
 }
 
 .admin__brand-title {
@@ -66,6 +90,8 @@
 .admin__main {
   display: flex;
   flex-direction: column;
+  min-width: 0;
+  overflow-x: hidden;
 }
 
 .admin__topbar {
@@ -610,12 +636,10 @@
     grid-template-columns: 200px 1fr;
   }
 
-  .admin-cards {
-    grid-template-columns: 1fr;
-  }
-
+  .admin-cards, 
+  .admin-analytics-cards,
   .admin-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
   }
 
   .admin-form {
@@ -633,12 +657,55 @@
   }
 
   .admin__sidebar {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 16px;
+    border-right: none;
+    border-bottom: 1px solid #e6e3df;
+    gap: 16px;
+  }
+
+  .admin__nav {
     flex-direction: row;
-    align-items: center;
-    overflow-x: auto;
+    flex-wrap: wrap;
+    justify-content: center;
+    overflow-x: visible;
+    padding-bottom: 8px;
+    gap: 8px;
+  }
+
+  .admin__nav-link {
+    white-space: nowrap;
+    padding: 8px 12px;
+    font-size: 12px;
   }
 
   .admin__cta {
-    margin-top: 0;
+    display: none;
+  }
+
+  .admin__topbar {
+    padding: 12px 16px;
+  }
+
+  .admin__search {
+    width: 100%;
+  }
+
+  .admin-page__filters {
+    flex-direction: column;
+    align-items: stretch !important;
+  }
+
+  .admin-page__header {
+    flex-direction: column;
+    align-items: flex-start !important;
+  }
+
+  .admin-table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+    width: 100%;
   }
 }

@@ -5,8 +5,9 @@ import { PATHS } from '../../routes/paths'
 import { logout } from '../../store/slices/authSlice'
 import { clearAuth } from '../../utils/authStorage'
 import type { RootState } from '../../store'
+import { Menu } from 'lucide-react'
 
-export default function StaffTopbar() {
+export default function StaffTopbar({ toggleSidebar }: { toggleSidebar?: () => void }) {
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const user = useSelector((state: RootState) => state.auth.user)
@@ -23,9 +24,14 @@ export default function StaffTopbar() {
 
   return (
     <div className="admin__topbar">
-      <div className="admin__search">
-        <span className="admin__search-icon">🔍</span>
-        <input type="text" placeholder="Tìm kiếm nhanh..." />
+      <div className="admin__topbar-left" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        <button type="button" className="admin__icon-button" onClick={toggleSidebar} style={{ padding: '8px' }}>
+          <Menu size={20} />
+        </button>
+        <div className="admin__search">
+          <span className="admin__search-icon">🔍</span>
+          <input type="text" placeholder="Tìm kiếm nhanh..." />
+        </div>
       </div>
       <div className="admin__topbar-actions">
         <button type="button" className="admin__icon-button">🔔</button>

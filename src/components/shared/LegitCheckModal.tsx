@@ -13,34 +13,16 @@ interface LegitCheckModalProps {
   productImageUrls?: string[]
 }
 
-// ── Định nghĩa 4 slot upload ──────────────────────────────────────
-type SlotKey = 'front' | 'logo' | 'neckTag' | 'washTag'
+// ── Định nghĩa 6 slot upload ──────────────────────────────────────
+type SlotKey = 'front' | 'back' | 'tag' | 'opt1' | 'opt2' | 'opt3'
 
-const SLOTS: { key: SlotKey; icon: string; title: string; hint: string }[] = [
-  {
-    key: 'front',
-    icon: '👕',
-    title: 'Toàn thân mặt trước',
-    hint: 'Chụp đủ sáng, thấy toàn bộ sản phẩm',
-  },
-  {
-    key: 'logo',
-    icon: '🔍',
-    title: 'Cận cảnh Logo',
-    hint: 'Logo/họa tiết thương hiệu rõ nét',
-  },
-  {
-    key: 'neckTag',
-    icon: '🏷️',
-    title: 'Mác cổ áo',
-    hint: 'Neck tag – chữ phải đọc được',
-  },
-  {
-    key: 'washTag',
-    icon: '📋',
-    title: 'Mác giặt',
-    hint: 'Wash tag / mác thông tin bên trong',
-  },
+const SLOTS: { key: SlotKey; icon: string; title: string; hint: string; required: boolean }[] = [
+  { key: 'front', icon: '👕', title: 'Mặt trước', hint: 'Bắt buộc', required: true },
+  { key: 'back',  icon: '👕', title: 'Mặt sau', hint: 'Bắt buộc', required: true },
+  { key: 'tag',   icon: '🏷️', title: 'Mác/Logo/Size', hint: 'Bắt buộc', required: true },
+  { key: 'opt1',  icon: '📷', title: 'Ảnh phụ 1', hint: 'Tùy chọn', required: false },
+  { key: 'opt2',  icon: '📷', title: 'Ảnh phụ 2', hint: 'Tùy chọn', required: false },
+  { key: 'opt3',  icon: '📷', title: 'Ảnh phụ 3', hint: 'Tùy chọn', required: false },
 ]
 
 const LOADING_TEXTS = [
@@ -73,10 +55,8 @@ export default function LegitCheckModal({ isOpen, onClose, productImageUrls }: L
   // Step: 'upload' | 'scanning'
   const [step, setStep] = useState<'upload' | 'scanning'>('upload')
   const [slots, setSlots] = useState<Record<SlotKey, SlotState>>({
-    front: emptySlot(),
-    logo: emptySlot(),
-    neckTag: emptySlot(),
-    washTag: emptySlot(),
+    front: emptySlot(), back: emptySlot(), tag: emptySlot(),
+    opt1: emptySlot(), opt2: emptySlot(), opt3: emptySlot(),
   })
   const [scanProgress, setScanProgress] = useState(0)
   const [loadingText, setLoadingText] = useState(LOADING_TEXTS[0])
@@ -88,7 +68,7 @@ export default function LegitCheckModal({ isOpen, onClose, productImageUrls }: L
   useEffect(() => {
     if (!isOpen) {
       setStep('upload')
-      setSlots({ front: emptySlot(), logo: emptySlot(), neckTag: emptySlot(), washTag: emptySlot() })
+      setSlots({ front: emptySlot(), back: emptySlot(), tag: emptySlot(), opt1: emptySlot(), opt2: emptySlot(), opt3: emptySlot() })
       setScanProgress(0)
     }
   }, [isOpen])
@@ -146,7 +126,8 @@ export default function LegitCheckModal({ isOpen, onClose, productImageUrls }: L
   }
 
   // ── Số slot đã upload hợp lệ ──────────────────────────────────
-  const validSlotCount = Object.values(slots).filter(s => s.file && s.valid !== false).length
+  const validRequiredSlotCount = [slots.front, slots.back, slots.tag].filter(s => s.file && s.valid !== false).length
+  const totalValidSlotCount = Object.values(slots).filter(s => s.file && s.valid !== false).length
 
   // ── Bắt đầu kiểm định thật từ các file đã chọn ──────────────
   const handleStartScan = async () => {
@@ -406,24 +387,24 @@ export default function LegitCheckModal({ isOpen, onClose, productImageUrls }: L
               <div className="lc-upload-progress__bar">
                 <div
                   className="lc-upload-progress__fill"
-                  style={{ width: `${(validSlotCount / 4) * 100}%` }}
+                  style={{ width: `${(validRequiredSlotCount / 3) * 100}%` }}
                 />
               </div>
               <span className="lc-upload-progress__text">
-                {validSlotCount}/4 ảnh đã hợp lệ
-                {validSlotCount >= 2 ? ' – Sẵn sàng kiểm định!' : ' – Cần tối thiểu 2 ảnh'}
+                {validRequiredSlotCount}/3 ảnh bắt buộc
+                {validRequiredSlotCount >= 3 ? ' – Sẵn sàng kiểm định!' : ' – Cần tối thiểu 3 ảnh'}
               </span>
             </div>
 
             <button
               className="lc-btn"
               onClick={handleStartScan}
-              disabled={validSlotCount < 2}
+              disabled={validRequiredSlotCount < 3}
             >
               <Shield size={18} />
-              {validSlotCount < 2
-                ? `Cần thêm ${2 - validSlotCount} ảnh nữa`
-                : `Bắt đầu Legit Check (${validSlotCount} ảnh)`}
+              {validRequiredSlotCount < 3
+                ? `Cần thêm ${3 - validRequiredSlotCount} ảnh nữa`
+                : `Bắt đầu Legit Check (${totalValidSlotCount} ảnh)`}
             </button>
           </>
         )}

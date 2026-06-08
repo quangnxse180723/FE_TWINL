@@ -1,5 +1,5 @@
 import { axiosClient } from '../../api/axiosClient'
-import type { AdminOrder, AdminOrderPage } from '../types'
+import type { AdminOrder, AdminOrderPage } from '../../admin/types'
 
 export type ShipperOrderStatus = 'PICKED_UP' | 'DELIVERED'
 

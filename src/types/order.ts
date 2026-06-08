@@ -11,6 +11,7 @@ export type PaymentStatus = 'PENDING' | 'SUCCESS' | 'FAILED'
 export interface OrderItem {
   productId: number | null
   productName: string | null
+  imageUrl?: string | null
   quantity: number
   unitPrice: number
   lineTotal: number

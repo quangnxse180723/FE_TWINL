@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import cartApi from '../../api/cart/cartApi'
-import vnpayApi from '../../api/payment/vnpayApi'
 import sepayApi from '../../api/payment/sepayApi'
 import { PATHS } from '../../routes/paths'
 import type { CartResponse } from '../../types/cart'
@@ -19,9 +18,6 @@ export default function CartPage() {
   const [error, setError] = useState('')
   const [actionError, setActionError] = useState('')
   const [checkoutLoading, setCheckoutLoading] = useState(false)
-  // 'vnpay' = Sandbox test | 'sepay' = VietQR tiền thật
-  const [paymentMethod, setPaymentMethod] = useState<'vnpay' | 'sepay'>('sepay')
-  const [sepayQrUrl, setSepayQrUrl] = useState<string>('')
 
   const hasShippingInfo = Boolean(
     user?.displayName &&
@@ -88,20 +84,14 @@ export default function CartPage() {
     setCheckoutLoading(true)
     setActionError('')
     try {
-      if (paymentMethod === 'sepay') {
-        // SePay – VietQR tiền thật
-        const response = await sepayApi.createPayment()
-        setSepayQrUrl(response.data.paymentUrl)
-      } else {
-        // VNPay – Sandbox test
-        const response = await vnpayApi.createPayment()
-        window.location.href = response.data.paymentUrl
-      }
+      // SePay – VietQR tiền thật
+      const response = await sepayApi.createPayment()
+      navigate(PATHS.sepayCheckout, { state: { qrUrl: response.data.paymentUrl, orderCode: response.data.orderCode } })
     } catch (err) {
       setActionError(
         err instanceof Error
           ? err.message
-          : `Không thể tạo thanh toán ${paymentMethod === 'sepay' ? 'SePay' : 'VNPay'}`
+          : 'Không thể tạo thanh toán SePay'
       )
     } finally {
       setCheckoutLoading(false)
@@ -286,66 +276,25 @@ export default function CartPage() {
               {/* ── Chọn phương thức thanh toán ── */}
               <div className="cart__payment-method">
                 <h4>Phương thức thanh toán</h4>
-                <label className={`cart__payment-option ${paymentMethod === 'sepay' ? 'cart__payment-option--active' : ''}`}>
-                  <input
-                    type="radio"
-                    name="paymentMethod"
-                    value="sepay"
-                    checked={paymentMethod === 'sepay'}
-                    onChange={() => setPaymentMethod('sepay')}
-                  />
+                <div className="cart__payment-option cart__payment-option--active" style={{ cursor: 'default' }}>
                   <span className="cart__payment-option-icon">🏦</span>
                   <span>
-                    <strong>VietQR (Tiền thật)</strong>
-                    <small>Chuyển khoản ngân hàng siêu tốc</small>
+                    <strong>Bank QR</strong>
+                    <small>Chuyển khoản ngân hàng siêu tốc qua hệ thống SePay</small>
                   </span>
-                </label>
-                <label className={`cart__payment-option ${paymentMethod === 'vnpay' ? 'cart__payment-option--active' : ''}`}>
-                  <input
-                    type="radio"
-                    name="paymentMethod"
-                    value="vnpay"
-                    checked={paymentMethod === 'vnpay'}
-                    onChange={() => setPaymentMethod('vnpay')}
-                  />
-                  <span className="cart__payment-option-icon">🧪</span>
-                  <span>
-                    <strong>VNPay</strong>
-                    <small>Sandbox – Chỉ dùng để test</small>
-                  </span>
-                </label>
+                </div>
               </div>
 
-              {sepayQrUrl ? (
-                <div className="cart__qr-container" style={{ textAlign: 'center', marginTop: '16px', background: '#f8f9fa', padding: '16px', borderRadius: '8px', border: '1px solid #e0e0e0' }}>
-                  <h4 style={{ color: '#0052cc', marginBottom: '12px', fontSize: '16px' }}>Quét mã QR để thanh toán</h4>
-                  <img src={sepayQrUrl} alt="VietQR" style={{ width: '100%', maxWidth: '250px', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
-                  <p style={{ fontSize: '13px', color: '#666', marginTop: '12px' }}>
-                    Đơn hàng sẽ tự động duyệt sau khi nhận được thanh toán. Vui lòng giữ nguyên trang này hoặc theo dõi trong Đơn hàng của tôi.
-                  </p>
-                  <button
-                    type="button"
-                    className="cart__checkout"
-                    style={{ marginTop: '16px', background: '#e0e0e0', color: '#333' }}
-                    onClick={() => navigate(PATHS.orders)}
-                  >
-                    Xem đơn hàng
-                  </button>
-                </div>
-              ) : (
-                <button
+              <button
                   type="button"
                   className="cart__checkout"
                   onClick={handleCheckout}
                   disabled={checkoutLoading}
                 >
                   {checkoutLoading
-                    ? `Đang chuyển đến ${paymentMethod === 'sepay' ? 'trang thanh toán' : 'VNPay'}...`
-                    : paymentMethod === 'sepay'
-                    ? '💳 Thanh toán VietQR'
-                    : '🧪 Thanh toán VNPay (Test)'}
+                    ? `Đang chuyển đến trang thanh toán...`
+                    : '💳 Thanh toán bằng VietQR'}
                 </button>
-              )}
               <div className="cart__coupon">
                 <input type="text" placeholder="Mã giảm giá" />
                 <button type="button">Áp dụng</button>

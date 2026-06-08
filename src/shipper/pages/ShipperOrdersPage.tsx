@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { shipperApi, type ShipperOrderStatus } from '../api/shipperApi'
-import type { AdminOrder } from '../types'
+import type { AdminOrder } from '../../admin/types'
 
 const formatPrice = (value: number) =>
   new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value)

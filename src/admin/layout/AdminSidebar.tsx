@@ -9,9 +9,9 @@ const links = [
   { to: PATHS.adminOrders, label: 'Đơn hàng', icon: '▤' },
 ]
 
-export default function AdminSidebar() {
+export default function AdminSidebar({ isSidebarOpen = true }: { isSidebarOpen?: boolean }) {
   return (
-    <aside className="admin__sidebar">
+    <aside className={`admin__sidebar ${isSidebarOpen ? '' : 'admin__sidebar--closed'}`}>
       <div className="admin__brand">
         <span className="admin__brand-title">Twinl Admin</span>
         <span className="admin__brand-sub">Ecommerce Control</span>
@@ -27,7 +27,7 @@ export default function AdminSidebar() {
             }
           >
             <span className="admin__nav-icon">{link.icon}</span>
-            {link.label}
+            <span className="admin__nav-label">{link.label}</span>
           </NavLink>
         ))}
       </nav>

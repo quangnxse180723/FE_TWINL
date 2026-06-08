@@ -207,64 +207,66 @@ export default function AdminTrafficAnalyticsPage() {
             </select>
           </div>
         </div>
-        <table className="admin-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr style={{ borderTop: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0', backgroundColor: '#f8fafc' }}>
-              <th style={{ textAlign: 'left', padding: '16px 24px', fontSize: '12px', color: '#64748b', fontWeight: 600, letterSpacing: '0.05em' }}>THỜI GIAN</th>
-              <th style={{ textAlign: 'left', padding: '16px 24px', fontSize: '12px', color: '#64748b', fontWeight: 600, letterSpacing: '0.05em' }}>ID</th>
-              <th style={{ textAlign: 'left', padding: '16px 24px', fontSize: '12px', color: '#64748b', fontWeight: 600, letterSpacing: '0.05em' }}>TÊN NGƯỜI DÙNG</th>
-              <th style={{ textAlign: 'left', padding: '16px 24px', fontSize: '12px', color: '#64748b', fontWeight: 600, letterSpacing: '0.05em' }}>VAI TRÒ</th>
-              <th style={{ textAlign: 'left', padding: '16px 24px', fontSize: '12px', color: '#64748b', fontWeight: 600, letterSpacing: '0.05em' }}>VỊ TRÍ</th>
-              <th style={{ textAlign: 'left', padding: '16px 24px', fontSize: '12px', color: '#64748b', fontWeight: 600, letterSpacing: '0.05em' }}>THIẾT BỊ</th>
-              <th style={{ textAlign: 'left', padding: '16px 24px', fontSize: '12px', color: '#64748b', fontWeight: 600, letterSpacing: '0.05em' }}>TRẠNG THÁI</th>
-            </tr>
-          </thead>
-          <tbody>
-            {isLogsLoading ? (
-              <tr>
-                <td colSpan={7} style={{ padding: '24px', textAlign: 'center' }}>Đang tải dữ liệu...</td>
+        <div style={{ overflowX: 'auto', maxWidth: '100%' }}>
+          <table className="admin-table" style={{ width: '100%', borderCollapse: 'collapse', minWidth: '700px' }}>
+            <thead>
+              <tr style={{ borderTop: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0', backgroundColor: '#f8fafc' }}>
+                <th style={{ textAlign: 'left', padding: '16px 24px', fontSize: '12px', color: '#64748b', fontWeight: 600, letterSpacing: '0.05em' }}>THỜI GIAN</th>
+                <th style={{ textAlign: 'left', padding: '16px 24px', fontSize: '12px', color: '#64748b', fontWeight: 600, letterSpacing: '0.05em' }}>ID</th>
+                <th style={{ textAlign: 'left', padding: '16px 24px', fontSize: '12px', color: '#64748b', fontWeight: 600, letterSpacing: '0.05em' }}>TÊN NGƯỜI DÙNG</th>
+                <th style={{ textAlign: 'left', padding: '16px 24px', fontSize: '12px', color: '#64748b', fontWeight: 600, letterSpacing: '0.05em' }}>VAI TRÒ</th>
+                <th style={{ textAlign: 'left', padding: '16px 24px', fontSize: '12px', color: '#64748b', fontWeight: 600, letterSpacing: '0.05em' }}>VỊ TRÍ</th>
+                <th style={{ textAlign: 'left', padding: '16px 24px', fontSize: '12px', color: '#64748b', fontWeight: 600, letterSpacing: '0.05em' }}>THIẾT BỊ</th>
+                <th style={{ textAlign: 'left', padding: '16px 24px', fontSize: '12px', color: '#64748b', fontWeight: 600, letterSpacing: '0.05em' }}>TRẠNG THÁI</th>
               </tr>
-            ) : paginatedLogs.length ? (
-              paginatedLogs.map((log) => (
-                <tr key={log.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                  <td style={{ padding: '16px 24px', fontSize: '14px', color: '#334155' }}>{formatDateTime(log.createdAt)}</td>
-                  <td style={{ padding: '16px 24px', fontSize: '14px', color: '#334155' }}>{log.userId ? `USR-${log.userId}` : <span style={{ fontStyle: 'italic', color: '#94a3b8' }}>-</span>}</td>
-                  <td style={{ padding: '16px 24px', fontSize: '14px', color: '#334155', fontWeight: 500 }}>{log.userName}</td>
-                  <td style={{ padding: '16px 24px' }}>
-                    <span style={{ 
-                      padding: '4px 8px', 
-                      borderRadius: '4px', 
-                      fontSize: '11px', 
-                      fontWeight: 600, 
-                      backgroundColor: log.userRole === 'ADMIN' ? '#fee2e2' : log.userRole === 'STAFF' ? '#fef08a' : log.userRole === 'GUEST' ? '#f1f5f9' : '#dcfce7',
-                      color: log.userRole === 'ADMIN' ? '#dc2626' : log.userRole === 'STAFF' ? '#854d0e' : log.userRole === 'GUEST' ? '#64748b' : '#16a34a'
-                    }}>
-                      {log.userRole === 'GUEST' ? 'Khách' : log.userRole}
-                    </span>
-                  </td>
-                  <td style={{ padding: '16px 24px', fontSize: '14px', color: '#334155' }}>📍 {log.location || 'Chưa rõ'}</td>
-                  <td style={{ padding: '16px 24px', fontSize: '14px', color: '#334155' }}>{log.device}</td>
-                  <td style={{ padding: '16px 24px' }}>
-                    <span style={{ 
-                      padding: '4px 8px', 
-                      borderRadius: '4px', 
-                      fontSize: '11px', 
-                      fontWeight: 600, 
-                      backgroundColor: log.status === 'SUCCESS' ? '#22c55e' : log.status === 'FAILED' ? '#fecaca' : '#f1f5f9',
-                      color: log.status === 'SUCCESS' ? '#fff' : log.status === 'FAILED' ? '#ef4444' : '#475569'
-                    }}>
-                      {log.status}
-                    </span>
-                  </td>
+            </thead>
+            <tbody>
+              {isLogsLoading ? (
+                <tr>
+                  <td colSpan={7} style={{ padding: '24px', textAlign: 'center' }}>Đang tải dữ liệu...</td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={7} style={{ padding: '24px', textAlign: 'center' }}>Chưa có log truy cập.</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+              ) : paginatedLogs.length ? (
+                paginatedLogs.map((log) => (
+                  <tr key={log.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                    <td style={{ padding: '16px 24px', fontSize: '14px', color: '#334155' }}>{formatDateTime(log.createdAt)}</td>
+                    <td style={{ padding: '16px 24px', fontSize: '14px', color: '#334155' }}>{log.userId ? `USR-${log.userId}` : <span style={{ fontStyle: 'italic', color: '#94a3b8' }}>-</span>}</td>
+                    <td style={{ padding: '16px 24px', fontSize: '14px', color: '#334155', fontWeight: 500 }}>{log.userName}</td>
+                    <td style={{ padding: '16px 24px' }}>
+                      <span style={{ 
+                        padding: '4px 8px', 
+                        borderRadius: '4px', 
+                        fontSize: '11px', 
+                        fontWeight: 600, 
+                        backgroundColor: log.userRole === 'ADMIN' ? '#fee2e2' : log.userRole === 'STAFF' ? '#fef08a' : log.userRole === 'GUEST' ? '#f1f5f9' : '#dcfce7',
+                        color: log.userRole === 'ADMIN' ? '#dc2626' : log.userRole === 'STAFF' ? '#854d0e' : log.userRole === 'GUEST' ? '#64748b' : '#16a34a'
+                      }}>
+                        {log.userRole === 'GUEST' ? 'Khách' : log.userRole}
+                      </span>
+                    </td>
+                    <td style={{ padding: '16px 24px', fontSize: '14px', color: '#334155' }}>📍 {log.location || 'Chưa rõ'}</td>
+                    <td style={{ padding: '16px 24px', fontSize: '14px', color: '#334155' }}>{log.device}</td>
+                    <td style={{ padding: '16px 24px' }}>
+                      <span style={{ 
+                        padding: '4px 8px', 
+                        borderRadius: '4px', 
+                        fontSize: '11px', 
+                        fontWeight: 600, 
+                        backgroundColor: log.status === 'SUCCESS' ? '#22c55e' : log.status === 'FAILED' ? '#fecaca' : '#f1f5f9',
+                        color: log.status === 'SUCCESS' ? '#fff' : log.status === 'FAILED' ? '#ef4444' : '#475569'
+                      }}>
+                        {log.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={7} style={{ padding: '24px', textAlign: 'center' }}>Chưa có log truy cập.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
         
         {/* Pagination */}
         {totalPages > 1 && (

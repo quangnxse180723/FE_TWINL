@@ -15,7 +15,6 @@ const RISK_CONFIG = {
   LOW: {
     label: 'Rủi ro thấp',
     sublabel: 'Khả năng cao là chính hãng',
-    icon: <Shield size={40} />,
     className: 'legit-result--low',
     badgeClass: 'legit-badge--low',
     bgGradient: 'linear-gradient(135deg, #0f4c2a 0%, #1a7a40 100%)',
@@ -24,7 +23,6 @@ const RISK_CONFIG = {
   HIGH: {
     label: 'Rủi ro cao',
     sublabel: 'Nhiều dấu hiệu làm giả được phát hiện',
-    icon: <ShieldAlert size={40} />,
     className: 'legit-result--high',
     badgeClass: 'legit-badge--high',
     bgGradient: 'linear-gradient(135deg, #4a0d0d 0%, #8b2020 100%)',
@@ -33,7 +31,6 @@ const RISK_CONFIG = {
   UNCERTAIN: {
     label: 'Không đủ dữ liệu',
     sublabel: 'Cần thêm ảnh hoặc góc rõ hơn để phán đoán',
-    icon: <ShieldQuestion size={40} />,
     className: 'legit-result--uncertain',
     badgeClass: 'legit-badge--uncertain',
     bgGradient: 'linear-gradient(135deg, #2d2d00 0%, #5a5200 100%)',
