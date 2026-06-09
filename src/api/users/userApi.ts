@@ -31,4 +31,8 @@ export const userApi = {
     })
     return data
   },
+  changePassword: async (payload: { oldPassword: string; newPassword: string }) => {
+    const { data } = await axiosClient.put('/api/users/me/password', payload)
+    return data
+  },
 }

@@ -22,6 +22,12 @@ export default function ProfilePage() {
   const [saveError, setSaveError] = useState('')
   const [isUploading, setIsUploading] = useState(false)
   const [uploadError, setUploadError] = useState('')
+
+  const [isChangingPassword, setIsChangingPassword] = useState(false)
+  const [passwordData, setPasswordData] = useState({ oldPassword: '', newPassword: '', confirmPassword: '' })
+  const [passwordError, setPasswordError] = useState('')
+  const [isSubmittingPassword, setIsSubmittingPassword] = useState(false)
+
   const [isEditing, setIsEditing] = useState(false)
 
   const [displayName, setDisplayName] = useState('')
@@ -149,6 +155,30 @@ export default function ProfilePage() {
     }
   }
 
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      setPasswordError('Mật khẩu xác nhận không khớp.')
+      return
+    }
+    if (passwordData.newPassword.length < 6) {
+      setPasswordError('Mật khẩu mới phải có ít nhất 6 ký tự.')
+      return
+    }
+    setIsSubmittingPassword(true)
+    setPasswordError('')
+    try {
+      await userApi.changePassword({ oldPassword: passwordData.oldPassword, newPassword: passwordData.newPassword })
+      toast.success('Đổi mật khẩu thành công')
+      setIsChangingPassword(false)
+      setPasswordData({ oldPassword: '', newPassword: '', confirmPassword: '' })
+    } catch (err: any) {
+      setPasswordError(err.response?.data?.message || 'Có lỗi xảy ra. Vui lòng thử lại.')
+    } finally {
+      setIsSubmittingPassword(false)
+    }
+  }
+
   return (
     <section className="profile">
       <div className="profile__card">
@@ -166,7 +196,7 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        <div className="profile__upload">
+        <div className="profile__upload" style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
           <label className="profile__upload-label">
             {isUploading ? 'Đang tải ảnh...' : 'Tải ảnh đại diện'}
             <input
@@ -176,8 +206,45 @@ export default function ProfilePage() {
               disabled={isUploading}
             />
           </label>
-          {uploadError ? <div className="profile__error">{uploadError}</div> : null}
+          <button 
+             type="button" 
+             className="profile__upload-label" 
+             style={{ cursor: 'pointer', background: '#3b82f6', color: 'white', border: 'none', marginLeft: '10px' }}
+             onClick={() => setIsChangingPassword(!isChangingPassword)}
+          >
+             Đổi mật khẩu
+          </button>
+          {uploadError && <div className="profile__error">{uploadError}</div>}
         </div>
+
+        {isChangingPassword && (
+          <form className="profile__form" style={{ marginTop: '24px', padding: '24px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }} onSubmit={handleChangePassword}>
+            <h3 style={{ marginBottom: '16px', fontSize: '18px', fontWeight: 'bold' }}>Đổi mật khẩu</h3>
+            {passwordError && <div className="profile__error" style={{ marginBottom: '16px' }}>{passwordError}</div>}
+            
+            <div className="profile__form-group">
+              <label>Mật khẩu hiện tại</label>
+              <input type="password" required value={passwordData.oldPassword} onChange={(e) => setPasswordData(prev => ({ ...prev, oldPassword: e.target.value }))} placeholder="Nhập mật khẩu hiện tại" />
+            </div>
+            
+            <div className="profile__form-group">
+              <label>Mật khẩu mới</label>
+              <input type="password" required value={passwordData.newPassword} onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))} placeholder="Nhập mật khẩu mới" />
+            </div>
+            
+            <div className="profile__form-group">
+              <label>Xác nhận mật khẩu mới</label>
+              <input type="password" required value={passwordData.confirmPassword} onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))} placeholder="Nhập lại mật khẩu mới" />
+            </div>
+            
+            <div className="profile__actions">
+              <button type="button" className="profile__btn-cancel" onClick={() => setIsChangingPassword(false)}>Hủy</button>
+              <button type="submit" className="profile__btn-save" disabled={isSubmittingPassword}>
+                {isSubmittingPassword ? 'Đang lưu...' : 'Lưu mật khẩu mới'}
+              </button>
+            </div>
+          </form>
+        )}
 
         {isLoading ? (
           <div className="profile__loading">Đang tải thông tin...</div>
@@ -231,7 +298,7 @@ export default function ProfilePage() {
                 )}
               </div>
               <div className="profile__item">
-                <span>Mã Tỉnh/Thành (Province ID)</span>
+                <span>Tỉnh/Thành</span>
                 {isEditing ? (
                   <select
                     value={provinceId}
@@ -256,7 +323,7 @@ export default function ProfilePage() {
                 )}
               </div>
               <div className="profile__item">
-                <span>Mã Quận/Huyện (District ID)</span>
+                <span>Quận/Huyện</span>
                 {isEditing ? (
                   <select
                     value={districtId}
@@ -281,7 +348,7 @@ export default function ProfilePage() {
                 )}
               </div>
               <div className="profile__item">
-                <span>Mã Phường/Xã (Ward Code)</span>
+                <span>Phường/Xã</span>
                 {isEditing ? (
                   <select
                     value={wardCode}
