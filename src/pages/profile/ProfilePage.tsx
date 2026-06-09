@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { Eye, EyeOff } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { PATHS } from '../../routes/paths'
@@ -27,6 +28,9 @@ export default function ProfilePage() {
   const [passwordData, setPasswordData] = useState({ oldPassword: '', newPassword: '', confirmPassword: '' })
   const [passwordError, setPasswordError] = useState('')
   const [isSubmittingPassword, setIsSubmittingPassword] = useState(false)
+  const [showOldPassword, setShowOldPassword] = useState(false)
+  const [showNewPassword, setShowNewPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   const [isEditing, setIsEditing] = useState(false)
 
@@ -224,38 +228,53 @@ export default function ProfilePage() {
             
             <div style={{ marginBottom: '16px' }}>
               <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500', color: '#475569' }}>Mật khẩu hiện tại</label>
-              <input 
-                type="password" 
-                required 
-                value={passwordData.oldPassword} 
-                onChange={(e) => setPasswordData(prev => ({ ...prev, oldPassword: e.target.value }))} 
-                placeholder="Nhập mật khẩu hiện tại" 
-                style={{ width: '100%', padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '15px', outline: 'none' }}
-              />
+              <div style={{ position: 'relative' }}>
+                <input 
+                  type={showOldPassword ? 'text' : 'password'} 
+                  required 
+                  value={passwordData.oldPassword} 
+                  onChange={(e) => setPasswordData(prev => ({ ...prev, oldPassword: e.target.value }))} 
+                  placeholder="Nhập mật khẩu hiện tại" 
+                  style={{ width: '100%', padding: '10px 40px 10px 12px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '15px', outline: 'none' }}
+                />
+                <button type="button" onClick={() => setShowOldPassword(!showOldPassword)} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', padding: 0, display: 'flex' }}>
+                  {showOldPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
             </div>
             
             <div style={{ marginBottom: '16px' }}>
               <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500', color: '#475569' }}>Mật khẩu mới</label>
-              <input 
-                type="password" 
-                required 
-                value={passwordData.newPassword} 
-                onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))} 
-                placeholder="Nhập mật khẩu mới" 
-                style={{ width: '100%', padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '15px', outline: 'none' }}
-              />
+              <div style={{ position: 'relative' }}>
+                <input 
+                  type={showNewPassword ? 'text' : 'password'} 
+                  required 
+                  value={passwordData.newPassword} 
+                  onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))} 
+                  placeholder="Nhập mật khẩu mới" 
+                  style={{ width: '100%', padding: '10px 40px 10px 12px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '15px', outline: 'none' }}
+                />
+                <button type="button" onClick={() => setShowNewPassword(!showNewPassword)} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', padding: 0, display: 'flex' }}>
+                  {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
             </div>
             
             <div style={{ marginBottom: '24px' }}>
               <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500', color: '#475569' }}>Xác nhận mật khẩu mới</label>
-              <input 
-                type="password" 
-                required 
-                value={passwordData.confirmPassword} 
-                onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))} 
-                placeholder="Nhập lại mật khẩu mới" 
-                style={{ width: '100%', padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '15px', outline: 'none' }}
-              />
+              <div style={{ position: 'relative' }}>
+                <input 
+                  type={showConfirmPassword ? 'text' : 'password'} 
+                  required 
+                  value={passwordData.confirmPassword} 
+                  onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))} 
+                  placeholder="Nhập lại mật khẩu mới" 
+                  style={{ width: '100%', padding: '10px 40px 10px 12px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '15px', outline: 'none' }}
+                />
+                <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', padding: 0, display: 'flex' }}>
+                  {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
             </div>
             
             <div className="profile__actions" style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '16px' }}>
