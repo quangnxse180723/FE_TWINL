@@ -12,10 +12,10 @@ export default function Footer() {
         </div>
         <div className="footer__column">
           <h4>Sản phẩm</h4>
-          <a href="#">Nữ</a>
-          <a href="#">Nam</a>
-          <a href="#">Trẻ em</a>
-          <a href="#">Thể thao</a>
+          <Link to={PATHS.women}>Nữ</Link>
+          <Link to={PATHS.men}>Nam</Link>
+          <Link to={PATHS.kids}>Trẻ em</Link>
+          <Link to={PATHS.sport}>Thể thao</Link>
         </div>
         <div className="footer__column">
           <h4>Giới thiệu</h4>
