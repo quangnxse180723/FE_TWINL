@@ -9,7 +9,11 @@ import { store } from './store'
 import { appTheme } from './config/theme'
 import './index.css'
 
+import { GoogleOAuthProvider } from '@react-oauth/google'
+
 const queryClient = new QueryClient()
+
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || 'YOUR_GOOGLE_CLIENT_ID'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -18,7 +22,9 @@ createRoot(document.getElementById('root')!).render(
         <ThemeProvider theme={appTheme}>
           <CssBaseline />
           <BrowserRouter>
-            <App />
+            <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+              <App />
+            </GoogleOAuthProvider>
           </BrowserRouter>
         </ThemeProvider>
       </QueryClientProvider>

@@ -4,13 +4,15 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { PATHS } from '../../routes/paths'
-import { useRegisterMutation } from '../../hooks/useAuth'
+import { useRegisterMutation, useGoogleLoginMutation } from '../../hooks/useAuth'
+import { useGoogleLogin } from '@react-oauth/google'
 import { getApiErrorMessage } from '../../utils/apiError'
 import type { RootState } from '../../store'
 import '../../styles/pages/auth.css'
 
 export default function RegisterPage() {
   const registerMutation = useRegisterMutation()
+  const googleLoginMutation = useGoogleLoginMutation()
   const navigate = useNavigate()
   const user = useSelector((state: RootState) => state.auth.user)
   const [displayName, setDisplayName] = useState('')
@@ -27,10 +29,22 @@ export default function RegisterPage() {
   }, [navigate, user])
 
   useEffect(() => {
-    if (registerMutation.isSuccess) {
-      navigate(PATHS.login)
+    if (googleLoginMutation.isSuccess && user) {
+      const isAdmin = user.roles?.some((role) => role === 'ADMIN')
+      const isStaff = user.roles?.some((role) => role === 'STAFF')
+      const isShipper = user.roles?.some((role) => role === 'SHIPPER')
+      navigate(isAdmin ? PATHS.admin : isStaff ? PATHS.staff : isShipper ? PATHS.shipper : PATHS.home)
     }
-  }, [registerMutation.isSuccess, navigate])
+  }, [googleLoginMutation.isSuccess, navigate, user])
+
+  const handleGoogleLogin = useGoogleLogin({
+    onSuccess: (tokenResponse) => {
+      googleLoginMutation.mutate(tokenResponse.access_token)
+    },
+    onError: () => {
+      console.error('Google Login Failed')
+    }
+  })
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -125,7 +139,19 @@ export default function RegisterPage() {
           </Button>
         </form>
 
-
+        <div className="auth__divider">hoặc</div>
+        {googleLoginMutation.isError ? (
+            <div className="auth__error">{getApiErrorMessage(googleLoginMutation.error)}</div>
+        ) : null}
+        <Button 
+          variant="outlined" 
+          size="large" 
+          fullWidth 
+          onClick={() => handleGoogleLogin()}
+          disabled={googleLoginMutation.isPending}
+        >
+          {googleLoginMutation.isPending ? 'Đang kết nối...' : 'Đăng ký với Google'}
+        </Button>
         <div className="auth__footer">
           Đã có tài khoản? <Link to={PATHS.login}>Đăng nhập</Link>
         </div>

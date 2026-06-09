@@ -21,3 +21,14 @@ export const useRegisterMutation = () => {
     mutationFn: (payload: RegisterRequest) => authApi.register(payload),
   })
 }
+
+export const useGoogleLoginMutation = () => {
+  const dispatch = useDispatch()
+  return useMutation({
+    mutationFn: (idToken: string) => authApi.googleLogin(idToken),
+    onSuccess: (data) => {
+      saveAuth(data)
+      dispatch(setCredentials(data))
+    },
+  })
+}

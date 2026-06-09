@@ -13,4 +13,8 @@ export const authApi = {
   logout: async () => {
     await axiosClient.post('/api/auth/logout')
   },
+  googleLogin: async (idToken: string) => {
+    const { data } = await axiosClient.post<AuthResponse>('/api/auth/google', { idToken })
+    return data
+  },
 }
