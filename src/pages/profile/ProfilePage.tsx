@@ -222,19 +222,40 @@ export default function ProfilePage() {
             <h3 style={{ marginBottom: '16px', fontSize: '18px', fontWeight: 'bold' }}>Đổi mật khẩu</h3>
             {passwordError && <div className="profile__error" style={{ marginBottom: '16px' }}>{passwordError}</div>}
             
-            <div className="profile__form-group">
-              <label>Mật khẩu hiện tại</label>
-              <input type="password" required value={passwordData.oldPassword} onChange={(e) => setPasswordData(prev => ({ ...prev, oldPassword: e.target.value }))} placeholder="Nhập mật khẩu hiện tại" />
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500', color: '#475569' }}>Mật khẩu hiện tại</label>
+              <input 
+                type="password" 
+                required 
+                value={passwordData.oldPassword} 
+                onChange={(e) => setPasswordData(prev => ({ ...prev, oldPassword: e.target.value }))} 
+                placeholder="Nhập mật khẩu hiện tại" 
+                style={{ width: '100%', padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '15px', outline: 'none' }}
+              />
             </div>
             
-            <div className="profile__form-group">
-              <label>Mật khẩu mới</label>
-              <input type="password" required value={passwordData.newPassword} onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))} placeholder="Nhập mật khẩu mới" />
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500', color: '#475569' }}>Mật khẩu mới</label>
+              <input 
+                type="password" 
+                required 
+                value={passwordData.newPassword} 
+                onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))} 
+                placeholder="Nhập mật khẩu mới" 
+                style={{ width: '100%', padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '15px', outline: 'none' }}
+              />
             </div>
             
-            <div className="profile__form-group">
-              <label>Xác nhận mật khẩu mới</label>
-              <input type="password" required value={passwordData.confirmPassword} onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))} placeholder="Nhập lại mật khẩu mới" />
+            <div style={{ marginBottom: '24px' }}>
+              <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500', color: '#475569' }}>Xác nhận mật khẩu mới</label>
+              <input 
+                type="password" 
+                required 
+                value={passwordData.confirmPassword} 
+                onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))} 
+                placeholder="Nhập lại mật khẩu mới" 
+                style={{ width: '100%', padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '15px', outline: 'none' }}
+              />
             </div>
             
             <div className="profile__actions">
