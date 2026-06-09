@@ -183,7 +183,7 @@ export default function SportCategoryPage() {
           ) : products.length === 0 ? (
             <div className="category__empty">
               <p>Không có sản phẩm nào phù hợp</p>
-              <button type="button" onClick={() => { setSelectedGender(''); setSelectedCategory(''); setSelectedSize('') }}>
+              <button type="button" onClick={() => { setSearchKeyword(''); setMinPrice(''); setMaxPrice(''); setSelectedColor(''); setSelectedSize('') }}>
                 Xem tất cả sản phẩm
               </button>
             </div>
