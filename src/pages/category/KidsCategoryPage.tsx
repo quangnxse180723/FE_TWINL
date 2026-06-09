@@ -9,8 +9,10 @@ export default function KidsCategoryPage() {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState('')
-  const [selectedStyle, setSelectedStyle] = useState('')
+  const [searchKeyword, setSearchKeyword] = useState('')
+  const [minPrice, setMinPrice] = useState('')
+  const [maxPrice, setMaxPrice] = useState('')
+  const [selectedColor, setSelectedColor] = useState('')
   const [selectedSize, setSelectedSize] = useState('')
   const [sortBy, setSortBy] = useState('')
   const [page, setPage] = useState(0)
@@ -18,7 +20,7 @@ export default function KidsCategoryPage() {
 
   useEffect(() => {
     fetchProducts()
-  }, [selectedCategory, selectedStyle, selectedSize, sortBy, page])
+  }, [searchKeyword, minPrice, maxPrice, selectedColor, selectedSize, sortBy, page])
 
   const fetchProducts = async () => {
     setLoading(true)
@@ -29,13 +31,13 @@ export default function KidsCategoryPage() {
         page,
         sizePage: 12,
       }
-      if (selectedCategory) params.search = selectedCategory
-      if (selectedStyle) {
-        params.style = selectedStyle
-      }
+      if (searchKeyword) params.search = searchKeyword
+      if (minPrice) params.minPrice = minPrice
+      if (maxPrice) params.maxPrice = maxPrice
+      if (selectedColor) params.color = selectedColor
       if (selectedSize) params.size = selectedSize
-      if (sortBy === 'price_asc') params.minPrice = 0
-      if (sortBy === 'price_desc') params.maxPrice = 999999999
+      if (sortBy === 'price_asc') params.minPrice = params.minPrice || 0
+      if (sortBy === 'price_desc') params.maxPrice = params.maxPrice || 999999999
 
       const response = await productsApi.getProducts(params)
       setProducts(response.data.content)
@@ -76,25 +78,51 @@ export default function KidsCategoryPage() {
           <h3>Bộ lọc</h3>
 
           <div className="category__filter-group">
-            <label>Danh mục</label>
-            <select value={selectedCategory} onChange={(e) => { setSelectedCategory(e.target.value); setPage(0) }}>
-              <option value="">Tất cả</option>
-              <option value="Áo">Áo</option>
-              <option value="Quần">Quần</option>
-              <option value="Áo khoác">Áo khoác</option>
-              <option value="Giày">Giày</option>
-              <option value="Phụ kiện">Phụ kiện</option>
-            </select>
+            <label>Từ khóa</label>
+            <input 
+              type="text" 
+              placeholder="Tìm kiếm sản phẩm..." 
+              value={searchKeyword}
+              onChange={(e) => { setSearchKeyword(e.target.value); setPage(0) }}
+              style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
+            />
           </div>
 
           <div className="category__filter-group">
-            <label>Phong cách</label>
-            <select value={selectedStyle} onChange={(e) => { setSelectedStyle(e.target.value); setPage(0) }}>
+            <label>Khoảng giá</label>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <input 
+                type="number" 
+                placeholder="Từ (đ)" 
+                value={minPrice}
+                onChange={(e) => { setMinPrice(e.target.value); setPage(0) }}
+                style={{ width: '50%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
+              />
+              <input 
+                type="number" 
+                placeholder="Đến (đ)" 
+                value={maxPrice}
+                onChange={(e) => { setMaxPrice(e.target.value); setPage(0) }}
+                style={{ width: '50%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
+              />
+            </div>
+          </div>
+
+          <div className="category__filter-group">
+            <label>Màu sắc</label>
+            <select value={selectedColor} onChange={(e) => { setSelectedColor(e.target.value); setPage(0) }}>
               <option value="">Tất cả</option>
-              <option value="Cơ bản">Cơ bản</option>
-              <option value="Thể thao">Thể thao</option>
-              <option value="Dạo phố">Dạo phố</option>
-              <option value="Tiệc">Tiệc</option>
+              <option value="Trắng">Trắng</option>
+              <option value="Đen">Đen</option>
+              <option value="Đỏ">Đỏ</option>
+              <option value="Xanh dương">Xanh dương</option>
+              <option value="Xanh lá">Xanh lá</option>
+              <option value="Vàng">Vàng</option>
+              <option value="Hồng">Hồng</option>
+              <option value="Xám">Xám</option>
+              <option value="Nâu">Nâu</option>
+              <option value="Tím">Tím</option>
+              <option value="Cam">Cam</option>
             </select>
           </div>
 
@@ -114,8 +142,10 @@ export default function KidsCategoryPage() {
             type="button"
             className="category__reset-btn"
             onClick={() => {
-              setSelectedCategory('')
-              setSelectedStyle('')
+              setSearchKeyword('')
+              setMinPrice('')
+              setMaxPrice('')
+              setSelectedColor('')
               setSelectedSize('')
               setSortBy('')
               setPage(0)
