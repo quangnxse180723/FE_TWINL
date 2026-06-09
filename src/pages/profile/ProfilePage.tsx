@@ -258,9 +258,19 @@ export default function ProfilePage() {
               />
             </div>
             
-            <div className="profile__actions">
-              <button type="button" className="profile__btn-cancel" onClick={() => setIsChangingPassword(false)}>Hủy</button>
-              <button type="submit" className="profile__btn-save" disabled={isSubmittingPassword}>
+            <div className="profile__actions" style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '16px' }}>
+              <button 
+                type="button" 
+                onClick={() => setIsChangingPassword(false)}
+                style={{ padding: '10px 20px', borderRadius: '8px', border: '1px solid #cbd5e1', background: 'white', color: '#475569', fontWeight: '500', cursor: 'pointer' }}
+              >
+                Hủy
+              </button>
+              <button 
+                type="submit" 
+                disabled={isSubmittingPassword}
+                style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', background: '#3b82f6', color: 'white', fontWeight: '500', cursor: 'pointer', opacity: isSubmittingPassword ? 0.7 : 1 }}
+              >
                 {isSubmittingPassword ? 'Đang lưu...' : 'Lưu mật khẩu mới'}
               </button>
             </div>
