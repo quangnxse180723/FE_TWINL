@@ -27,13 +27,7 @@ export default function HomePage() {
   })
   const menItems = menData?.data?.content || []
 
-  const brands = [
-    { name: 'ZARA', img: 'https://images.unsplash.com/photo-1542272201-b1ca555f8505?w=500&q=80' },
-    { name: 'HM', img: 'https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=500&q=80' },
-    { name: 'HERMES', img: 'https://images.unsplash.com/photo-1584916201218-f4242ceb4809?w=500&q=80' },
-    { name: 'GUCCI', img: 'https://images.unsplash.com/photo-1549439602-43ebca2327af?w=500&q=80' },
-    { name: 'CHANEL', img: 'https://images.unsplash.com/photo-1605733513597-a8f8341084e6?w=500&q=80' }
-  ]
+
 
   const formatPrice = (price: number) => {
     return price.toLocaleString('vi-VN') + ' đ'
@@ -176,24 +170,6 @@ export default function HomePage() {
         )}
       </section>
 
-      {/* 6. BRANDS */}
-      <section className="home__section home__section--brands">
-        <div className="home__section-header">
-          <h4>Thương hiệu</h4>
-          <button type="button" className="home__section-link">Xem các sản phẩm tương tự</button>
-        </div>
-        <div className="home__brand-grid">
-          {brands.map((brand) => (
-            <div key={brand.name} className="home__brand-card-new">
-              <img src={brand.img} alt={brand.name} loading="lazy" />
-              <span>{brand.name}</span>
-            </div>
-          ))}
-        </div>
-        <div className="home__section-footer">
-          <button type="button" className="home__section-button">Xem bộ sưu tập</button>
-        </div>
-      </section>
     </section>
   )
 }
