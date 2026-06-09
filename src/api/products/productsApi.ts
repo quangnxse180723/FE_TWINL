@@ -38,6 +38,8 @@ export interface ProductsParams {
   inStock?: boolean;
   minPrice?: string;
   maxPrice?: string;
+  style?: string;
+  excludeStyle?: string;
   page?: number;
   sizePage?: number;
 }
