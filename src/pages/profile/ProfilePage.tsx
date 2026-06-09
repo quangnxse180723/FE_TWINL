@@ -6,6 +6,7 @@ import { userApi } from '../../api/users/userApi'
 import { updateUser } from '../../store/slices/authSlice'
 import { updateAuthUser } from '../../utils/authStorage'
 import { API_BASE_URL } from '../../config/constants'
+import { useVNLocations } from '../../hooks/useVNLocations'
 import type { RootState } from '../../store'
 import '../../styles/pages/profile.css'
 import type { UserProfile } from '../../types/user'
@@ -31,6 +32,8 @@ export default function ProfilePage() {
   const [provinceId, setProvinceId] = useState('')
   const [gender, setGender] = useState('')
   const [dateOfBirth, setDateOfBirth] = useState('')
+
+  const { provinces, districts, wards } = useVNLocations(provinceId, districtId)
 
   useEffect(() => {
     if (!user) {
@@ -228,39 +231,75 @@ export default function ProfilePage() {
                 )}
               </div>
               <div className="profile__item">
-                <span>Mã Phường/Xã (Ward Code)</span>
+                <span>Mã Tỉnh/Thành (Province ID)</span>
                 {isEditing ? (
-                  <input
-                    type="text"
-                    value={wardCode}
-                    onChange={(event) => setWardCode(event.target.value)}
-                  />
+                  <select
+                    value={provinceId}
+                    onChange={(event) => {
+                      setProvinceId(event.target.value)
+                      setDistrictId('') // reset district when province changes
+                      setWardCode('') // reset ward
+                    }}
+                  >
+                    <option value="">Chọn Tỉnh/Thành</option>
+                    {provinces.map((p) => (
+                      <option key={p.code} value={p.code}>
+                        {p.name}
+                      </option>
+                    ))}
+                  </select>
                 ) : (
-                  <strong>{renderValue(profile?.wardCode)}</strong>
+                  <strong>
+                    {provinces.find((p) => p.code.toString() === profile?.provinceId?.toString())?.name ||
+                      renderValue(profile?.provinceId?.toString())}
+                  </strong>
                 )}
               </div>
               <div className="profile__item">
                 <span>Mã Quận/Huyện (District ID)</span>
                 {isEditing ? (
-                  <input
-                    type="number"
+                  <select
                     value={districtId}
-                    onChange={(event) => setDistrictId(event.target.value)}
-                  />
+                    onChange={(event) => {
+                      setDistrictId(event.target.value)
+                      setWardCode('') // reset ward
+                    }}
+                    disabled={!provinceId}
+                  >
+                    <option value="">Chọn Quận/Huyện</option>
+                    {districts.map((d) => (
+                      <option key={d.code} value={d.code}>
+                        {d.name}
+                      </option>
+                    ))}
+                  </select>
                 ) : (
-                  <strong>{renderValue(profile?.districtId?.toString())}</strong>
+                  <strong>
+                    {districts.find((d) => d.code.toString() === profile?.districtId?.toString())?.name ||
+                      renderValue(profile?.districtId?.toString())}
+                  </strong>
                 )}
               </div>
               <div className="profile__item">
-                <span>Mã Tỉnh/Thành (Province ID)</span>
+                <span>Mã Phường/Xã (Ward Code)</span>
                 {isEditing ? (
-                  <input
-                    type="number"
-                    value={provinceId}
-                    onChange={(event) => setProvinceId(event.target.value)}
-                  />
+                  <select
+                    value={wardCode}
+                    onChange={(event) => setWardCode(event.target.value)}
+                    disabled={!districtId}
+                  >
+                    <option value="">Chọn Phường/Xã</option>
+                    {wards.map((w) => (
+                      <option key={w.code} value={w.code}>
+                        {w.name}
+                      </option>
+                    ))}
+                  </select>
                 ) : (
-                  <strong>{renderValue(profile?.provinceId?.toString())}</strong>
+                  <strong>
+                    {wards.find((w) => w.code.toString() === profile?.wardCode?.toString())?.name ||
+                      renderValue(profile?.wardCode)}
+                  </strong>
                 )}
               </div>
               <div className="profile__item">
