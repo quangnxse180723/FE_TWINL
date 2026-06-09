@@ -1,4 +1,5 @@
-import { Route, Routes } from 'react-router-dom'
+import { Route, Routes, useLocation } from 'react-router-dom'
+import { useEffect } from 'react'
 import { PATHS } from './paths'
 import MainLayout from '../components/layout/MainLayout'
 import AuthLayout from '../components/layout/AuthLayout'
@@ -37,6 +38,12 @@ import ShipperLayout from '../shipper/layout/ShipperLayout'
 import ShipperOrdersPage from '../shipper/pages/ShipperOrdersPage'
 
 export default function AppRoutes() {
+  const location = useLocation()
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
+  }, [location.pathname])
+
   return (
     <Routes>
       <Route element={<MainLayout />}>
