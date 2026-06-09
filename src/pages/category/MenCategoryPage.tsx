@@ -24,12 +24,14 @@ export default function MenCategoryPage() {
     setError('')
     try {
       const params: Record<string, unknown> = {
-        gender: 'Nam',
+        category: 'Nam',
         page,
-        size: 12,
+        sizePage: 12,
       }
-      if (selectedCategory) params.category = selectedCategory
-      if (selectedStyle) params.style = selectedStyle
+      if (selectedCategory) params.search = selectedCategory
+      if (selectedStyle) {
+        params.style = selectedStyle
+      }
       if (selectedSize) params.size = selectedSize
       if (sortBy === 'price_asc') params.minPrice = 0
       if (sortBy === 'price_desc') params.maxPrice = 999999999

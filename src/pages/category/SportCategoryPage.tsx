@@ -25,12 +25,12 @@ export default function SportCategoryPage() {
     setError('')
     try {
       const params: Record<string, unknown> = {
-        style: 'Thể thao',
+        category: 'Thể thao',
         page,
         sizePage: 12,
       }
       if (selectedGender) params.gender = selectedGender
-      if (selectedCategory) params.category = selectedCategory
+      if (selectedCategory) params.search = selectedCategory
       if (selectedSize) params.size = selectedSize
       if (sortBy === 'price_asc') params.minPrice = 0
       if (sortBy === 'price_desc') params.maxPrice = 999999999
