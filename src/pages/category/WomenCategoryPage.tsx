@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import productsApi, { type Product } from '../../api/products/productsApi'
 import { PATHS } from '../../routes/paths'
+import bannerNu from '../../assets/images/banner-nu.png'
 import '../../styles/pages/category.css'
 
 export default function WomenCategoryPage() {
@@ -61,7 +62,7 @@ export default function WomenCategoryPage() {
   return (
     <section className="category">
       <div className="category__hero">
-        <img src="https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=1200" alt="Women's Fashion" />
+        <img src={bannerNu} alt="Women's Fashion" />
         <div className="category__hero-content">
           <h1>Thời Trang Nữ</h1>
           <p>Khám phá bộ sưu tập thời trang nữ đa dạng</p>
