@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import productsApi, { type Product } from '../../api/products/productsApi'
 import { PATHS } from '../../routes/paths'
+import bannerThethao from '../../assets/images/banner-thethao.png'
 import '../../styles/pages/category.css'
 
 export default function SportCategoryPage() {
@@ -61,7 +62,7 @@ export default function SportCategoryPage() {
   return (
     <section className="category">
       <div className="category__hero">
-        <img src="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=1200" alt="Sport" />
+        <img src={bannerThethao} alt="Sport" />
         <div className="category__hero-content">
           <h1>Thể Thao</h1>
           <p>Trang phục năng động cho mọi hoạt động</p>

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import productsApi, { type Product } from '../../api/products/productsApi';
 import { PATHS } from '../../routes/paths'
+import bannerNam from '../../assets/images/banner-nam.png'
 
 export default function MenCategoryPage() {
   const [products, setProducts] = useState<Product[]>([])
@@ -60,7 +61,7 @@ export default function MenCategoryPage() {
   return (
     <section className="category">
       <div className="category__hero">
-        <img src="https://images.unsplash.com/photo-1490578474895-699cd4e2cf59?w=1200" alt="Men's Fashion" />
+        <img src={bannerNam} alt="Men's Fashion" />
         <div className="category__hero-content">
           <h1>Thời Trang Nam</h1>
           <p>Khám phá bộ sưu tập thời trang nam đa dạng</p>

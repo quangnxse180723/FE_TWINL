@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import productsApi, { type Product } from '../../api/products/productsApi'
 import { PATHS } from '../../routes/paths'
+import bannerTreem from '../../assets/images/banner-treem.png'
 import '../../styles/pages/category.css'
 
 export default function KidsCategoryPage() {
@@ -61,7 +62,7 @@ export default function KidsCategoryPage() {
   return (
     <section className="category">
       <div className="category__hero">
-        <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1200" alt="Kids Fashion" />
+        <img src={bannerTreem} alt="Kids Fashion" />
         <div className="category__hero-content">
           <h1>Thời Trang Trẻ Em</h1>
           <p>Bộ sưu tập đáng yêu dành cho các bé</p>
