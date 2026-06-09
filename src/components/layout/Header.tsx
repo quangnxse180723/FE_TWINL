@@ -119,7 +119,6 @@ export default function Header() {
         <Link to={PATHS.women}>Nữ</Link>
         <Link to={PATHS.men}>Nam</Link>
         <Link to={PATHS.kids}>Trẻ em</Link>
-        <Link to={PATHS.brands}>Thương hiệu</Link>
         <Link to={PATHS.sport}>Thể thao</Link>
         <Link to={PATHS.contact}>Liên hệ</Link>
       </div>

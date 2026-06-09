@@ -15,7 +15,6 @@ export default function Footer() {
           <a href="#">Nữ</a>
           <a href="#">Nam</a>
           <a href="#">Trẻ em</a>
-          <a href="#">Thương hiệu</a>
           <a href="#">Thể thao</a>
         </div>
         <div className="footer__column">
