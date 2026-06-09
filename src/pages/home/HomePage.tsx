@@ -13,17 +13,17 @@ export default function HomePage() {
   const user = useSelector((state: RootState) => state.auth.user)
   const navigate = useNavigate()
 
-  // Fetch women products
+  // Fetch women products (Áo khoác)
   const { data: womenData } = useQuery({
     queryKey: ['products', 'home-women'],
-    queryFn: () => productsApi.getProducts({ gender: 'Nữ', sizePage: 5 }),
+    queryFn: () => productsApi.getProducts({ gender: 'Nữ', category: 'Áo khoác', sizePage: 5 }),
   })
   const womenItems = womenData?.data?.content || []
 
-  // Fetch men products
+  // Fetch men products (Áo khoác)
   const { data: menData } = useQuery({
     queryKey: ['products', 'home-men'],
-    queryFn: () => productsApi.getProducts({ gender: 'Nam', sizePage: 5 }),
+    queryFn: () => productsApi.getProducts({ gender: 'Nam', category: 'Áo khoác', sizePage: 5 }),
   })
   const menItems = menData?.data?.content || []
 
