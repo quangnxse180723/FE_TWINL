@@ -228,7 +228,7 @@ export default function ProfilePage() {
                 )}
               </div>
               <div className="profile__item">
-                <span>Ward Code</span>
+                <span>Mã Phường/Xã (Ward Code)</span>
                 {isEditing ? (
                   <input
                     type="text"
@@ -240,7 +240,7 @@ export default function ProfilePage() {
                 )}
               </div>
               <div className="profile__item">
-                <span>District ID</span>
+                <span>Mã Quận/Huyện (District ID)</span>
                 {isEditing ? (
                   <input
                     type="number"
@@ -252,7 +252,7 @@ export default function ProfilePage() {
                 )}
               </div>
               <div className="profile__item">
-                <span>Province ID</span>
+                <span>Mã Tỉnh/Thành (Province ID)</span>
                 {isEditing ? (
                   <input
                     type="number"
