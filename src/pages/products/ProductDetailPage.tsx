@@ -21,6 +21,7 @@ export default function ProductDetailPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [adding, setAdding] = useState(false)
+  const [quantity, setQuantity] = useState(1)
   const [isAiModalOpen, setIsAiModalOpen] = useState(false)
   const [isLegitModalOpen, setIsLegitModalOpen] = useState(false)
   const navigate = useNavigate()
@@ -126,7 +127,7 @@ export default function ProductDetailPage() {
     flyToCart(e)
     setAdding(true)
     try {
-      const response = await cartApi.addItem({ productId: product.id, quantity: 1 })
+      const response = await cartApi.addItem({ productId: product.id, quantity: quantity })
       // Dùng optional chaining để catch mọi khả năng cấu trúc response, ưu tiên items.length
       // @ts-ignore
       const newTotal = response?.data?.data?.items?.length ?? response?.data?.items?.length ?? null;
@@ -151,7 +152,7 @@ export default function ProductDetailPage() {
     if (!product) return
     setAdding(true)
     try {
-      await cartApi.addItem({ productId: product.id, quantity: 1 })
+      await cartApi.addItem({ productId: product.id, quantity: quantity })
       window.dispatchEvent(new Event('cart-updated'))
       navigate(PATHS.cart)
     } catch {
@@ -222,6 +223,36 @@ export default function ProductDetailPage() {
               Tình trạng: {product.stock === 0 ? 'Hết hàng' : 'Còn hàng'}
             </span>
           </div>
+
+          <div className="product-detail__meta" style={{ marginTop: '12px', display: 'flex', gap: '20px', alignItems: 'center' }}>
+            <div><strong style={{color: '#6b7280', fontWeight: 500}}>Màu sắc:</strong> {product.colors?.length ? product.colors.join(', ') : 'Đang cập nhật'}</div>
+            <div><strong style={{color: '#6b7280', fontWeight: 500}}>Thương hiệu:</strong> {product.brand || 'Đang cập nhật'}</div>
+          </div>
+
+          <div className="product-detail__meta" style={{ marginTop: '16px', alignItems: 'center', display: 'flex', gap: '16px' }}>
+             <strong style={{color: '#6b7280', fontWeight: 500}}>Số lượng:</strong>
+             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: '#f3f4f6', padding: '4px', borderRadius: '8px' }}>
+               <button
+                 type="button"
+                 disabled={quantity <= 1 || product.stock === 0}
+                 onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                 style={{ width: '28px', height: '28px', borderRadius: '6px', border: 'none', background: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', color: '#374151', fontWeight: 'bold' }}
+               >
+                 -
+               </button>
+               <span style={{ minWidth: '24px', textAlign: 'center', fontWeight: 600, fontSize: '14px', color: '#111' }}>{quantity}</span>
+               <button
+                 type="button"
+                 disabled={quantity >= (product.stock || 1) || product.stock === 0}
+                 onClick={() => setQuantity(q => Math.min(product.stock || 1, q + 1))}
+                 style={{ width: '28px', height: '28px', borderRadius: '6px', border: 'none', background: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', color: '#374151', fontWeight: 'bold' }}
+               >
+                 +
+               </button>
+             </div>
+             <span style={{ fontSize: '13px', color: '#9ca3af' }}>{product.stock} sản phẩm có sẵn</span>
+          </div>
+
           <div className="product-detail__actions">
             <button
               type="button"
