@@ -216,23 +216,31 @@ export default function ProductDetailPage() {
           <div className="product-detail__meta">
             <span className="product-detail__badge">Size {product.sizes?.[0] || 'Free'}</span>
             <span className="product-detail__status">Tình trạng: Khá tốt</span>
+            <span style={{ 
+              marginLeft: '12px', 
+              fontSize: '13px', 
+              fontWeight: 600, 
+              color: product.stock === 0 ? '#ef4444' : '#22c55e' 
+            }}>
+              {product.stock === 0 ? 'Hết hàng' : 'Còn hàng'}
+            </span>
           </div>
           <div className="product-detail__actions">
             <button
               type="button"
               className="product-detail__buy"
               onClick={handleBuyNow}
-              disabled={adding}
+              disabled={adding || product.stock === 0}
             >
-              {adding ? 'Đang xử lý...' : 'Mua ngay'}
+              {product.stock === 0 ? 'Hết hàng' : (adding ? 'Đang xử lý...' : 'Mua ngay')}
             </button>
             <button
               type="button"
               className="product-detail__cart"
               onClick={handleAddToCart}
-              disabled={adding}
+              disabled={adding || product.stock === 0}
             >
-              {adding ? 'Đang thêm...' : 'Thêm vào giỏ hàng'}
+              {product.stock === 0 ? 'Hết hàng' : (adding ? 'Đang thêm...' : 'Thêm vào giỏ hàng')}
             </button>
           </div>
 
