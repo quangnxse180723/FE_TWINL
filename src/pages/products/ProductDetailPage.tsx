@@ -215,14 +215,11 @@ export default function ProductDetailPage() {
           <div className="product-detail__price">{formatPrice(product.price)}</div>
           <div className="product-detail__meta">
             <span className="product-detail__badge">Size {product.sizes?.[0] || 'Free'}</span>
-            <span className="product-detail__status">Tình trạng: Khá tốt</span>
-            <span style={{ 
-              marginLeft: '12px', 
-              fontSize: '13px', 
+            <span className="product-detail__status" style={{ 
               fontWeight: 600, 
               color: product.stock === 0 ? '#ef4444' : '#22c55e' 
             }}>
-              {product.stock === 0 ? 'Hết hàng' : 'Còn hàng'}
+              Tình trạng: {product.stock === 0 ? 'Hết hàng' : 'Còn hàng'}
             </span>
           </div>
           <div className="product-detail__actions">
