@@ -22,7 +22,7 @@ export function useVNLocations(provinceId?: string, districtId?: string) {
 
   // Fetch Provinces
   useEffect(() => {
-    fetch('https://provinces.open-api.vn/api/p/')
+    fetch('https://provinces.open-api.vn/api/v1/p/')
       .then((res) => res.json())
       .then((data) => setProvinces(data))
       .catch((err) => console.error('Error fetching provinces:', err))
@@ -31,7 +31,7 @@ export function useVNLocations(provinceId?: string, districtId?: string) {
   // Fetch Districts when provinceId changes
   useEffect(() => {
     if (provinceId) {
-      fetch(`https://provinces.open-api.vn/api/p/${provinceId}?depth=2`)
+      fetch(`https://provinces.open-api.vn/api/v1/p/${provinceId}?depth=2`)
         .then((res) => res.json())
         .then((data) => {
           setDistricts(data.districts || [])
@@ -45,7 +45,7 @@ export function useVNLocations(provinceId?: string, districtId?: string) {
   // Fetch Wards when districtId changes
   useEffect(() => {
     if (districtId) {
-      fetch(`https://provinces.open-api.vn/api/d/${districtId}?depth=2`)
+      fetch(`https://provinces.open-api.vn/api/v1/d/${districtId}?depth=2`)
         .then((res) => res.json())
         .then((data) => {
           // Open API ward code can be integer or string, our DB uses string
