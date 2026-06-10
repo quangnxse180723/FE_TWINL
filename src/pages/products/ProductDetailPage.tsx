@@ -213,6 +213,7 @@ export default function ProductDetailPage() {
         </div>
 
         <aside className="product-detail__info">
+          <h1 style={{ fontSize: '24px', fontWeight: 700, color: '#111', marginBottom: '16px', lineHeight: 1.3 }}>{product.name}</h1>
           <div className="product-detail__price">{formatPrice(product.price)}</div>
           <div className="product-detail__meta">
             <span className="product-detail__badge">Size {product.sizes?.[0] || 'Free'}</span>
