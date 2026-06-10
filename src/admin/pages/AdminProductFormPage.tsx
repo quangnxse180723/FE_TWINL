@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate, useParams } from 'react-router-dom'
 import { adminProductsApi } from '../api/adminProductsApi'
@@ -8,7 +8,8 @@ import { PATHS } from '../../routes/paths'
 import type { AdminProductPayload } from '../types'
 import { API_BASE_URL } from '../../config/constants'
 import { toast } from 'react-toastify'
-import { Sparkles, CheckCircle2, AlertTriangle, XCircle, Clock, Upload, ArrowRight } from 'lucide-react'
+import { Sparkles, CheckCircle2, AlertTriangle, Loader2, ArrowRight, Shield, Camera, RotateCcw } from 'lucide-react'
+import { compressImage } from '../../utils/imageCompressor'
 import '../../styles/pages/adminProductForm.css'
 
 const emptyForm: AdminProductPayload = {
@@ -17,19 +18,27 @@ const emptyForm: AdminProductPayload = {
   style: '', stock: 0, sizes: [], colorIds: [],
 }
 
-interface ImageSlot {
-  file: File
-  previewUrl: string
-  uploadedUrl?: string
-  qualityStatus?: 'checking' | 'PASS' | 'WARN' | 'FAIL'
-  qualityLabel?: string
-}
-
 interface AiAutoFillResult {
   name?: string; brand?: string; style?: string; gender?: string
   description?: string; estimatedPrice?: string; material?: string; condition?: string
   color?: string;
 }
+
+// ── Legit Check 6-slot state ─────────────────
+type LegitSlotKey = 'front' | 'back' | 'tag' | 'opt1' | 'opt2' | 'opt3'
+type LegitSlotState = {
+  file: File | null; preview: string | null
+  validating: boolean; valid: boolean | null; errorMsg: string
+}
+const LEGIT_SLOTS: { key: LegitSlotKey; icon: string; title: string; hint: string; required: boolean }[] = [
+  { key: 'front', icon: '👕', title: 'Mặt trước', hint: 'Bắt buộc', required: true },
+  { key: 'back',  icon: '👕', title: 'Mặt sau', hint: 'Bắt buộc', required: true },
+  { key: 'tag',   icon: '🏷️', title: 'Mác/Logo/Size', hint: 'Bắt buộc', required: true },
+  { key: 'opt1',  icon: '📷', title: 'Ảnh phụ 1', hint: 'Không bắt buộc', required: false },
+  { key: 'opt2',  icon: '📷', title: 'Ảnh phụ 2', hint: 'Không bắt buộc', required: false },
+  { key: 'opt3',  icon: '📷', title: 'Ảnh phụ 3', hint: 'Không bắt buộc', required: false },
+]
+const emptyLegitSlot = (): LegitSlotState => ({ file: null, preview: null, validating: false, valid: null, errorMsg: '' })
 
 // Typewriter effect hook
 function useTypewriter(target: string, speed = 18) {
@@ -58,12 +67,18 @@ export default function AdminProductFormPage() {
   const [sizes, setSizes] = useState('')
   const [colorIds, setColorIds] = useState<number[]>([])
   const [formError, setFormError] = useState('')
-  const [imageSlots, setImageSlots] = useState<ImageSlot[]>([])
   const [isUploading, setIsUploading] = useState(false)
   const [isAutoFilling, setIsAutoFilling] = useState(false)
   const [aiSuggested, setAiSuggested] = useState<Record<string, boolean>>({})
   const [aiResult, setAiResult] = useState<AiAutoFillResult>({})
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  
+  const [legitSlots, setLegitSlots] = useState<Record<LegitSlotKey, LegitSlotState>>({
+    front: emptyLegitSlot(), back: emptyLegitSlot(), tag: emptyLegitSlot(),
+    opt1: emptyLegitSlot(), opt2: emptyLegitSlot(), opt3: emptyLegitSlot(),
+  })
+  const legitFileRefs = useRef<Partial<Record<LegitSlotKey, HTMLInputElement | null>>>({})
+  const validLegitSlots = [legitSlots.front, legitSlots.back, legitSlots.tag].filter(s => (s.file || s.preview) && s.valid !== false).length
+
   const isEdit = Boolean(id)
 
   // Typewriter targets
@@ -97,7 +112,31 @@ export default function AdminProductFormPage() {
       })
       setSizes((data.sizes ?? []).join(', '))
       setColorIds(data.colorIds ?? [])
+
+      // Load existing images into legitSlots
+      if (data.imageUrls && data.imageUrls.length > 0) {
+        const slotKeys: LegitSlotKey[] = ['front', 'back', 'tag', 'opt1', 'opt2', 'opt3']
+        const updatedSlots = { ...legitSlots }
+        data.imageUrls.forEach((url, index) => {
+          if (index < 6) {
+            const fullUrl = url.startsWith('http') ? url : `${API_BASE_URL}${url}`
+            updatedSlots[slotKeys[index]] = {
+              file: null, // we don't have the File object yet, but we have preview
+              preview: fullUrl,
+              validating: false,
+              valid: true,
+              errorMsg: ''
+            }
+          }
+        })
+        setLegitSlots(updatedSlots)
+        
+        // Optionally fetch as File object in background so it can be re-validated or re-uploaded
+        // But for Edit, we only need to re-upload if they changed it. If they didn't, we keep the original URL.
+        // To handle this, we need to track which slots are new files vs existing URLs.
+      }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data])
 
   const mutation = useMutation({
@@ -110,82 +149,46 @@ export default function AdminProductFormPage() {
     onError: () => toast.error('Lưu sản phẩm thất bại, vui lòng thử lại.'),
   })
 
-  const checkImageQuality = useCallback(async (slot: ImageSlot): Promise<Partial<ImageSlot>> => {
-    const fd = new FormData()
-    fd.append('file', slot.file)
+  const handleLegitSlotChange = async (slotKey: LegitSlotKey, file: File | null) => {
+    if (!file) return
+    
+    const compressedFile = await compressImage(file, 800, 0.7);
+    const previewUrl = URL.createObjectURL(compressedFile)
+    
+    setLegitSlots(prev => ({ ...prev, [slotKey]: { file: compressedFile, preview: previewUrl, validating: true, valid: null, errorMsg: '' } }))
     try {
-      const res = await fetch(`${API_BASE_URL}/api/v1/ai/image-quality`, { method: 'POST', body: fd })
-      if (!res.ok) return { qualityStatus: 'WARN', qualityLabel: 'Không thể kiểm tra' }
-      const data = await res.json()
-      const statusMap: Record<string, ImageSlot['qualityStatus']> = { PASS: 'PASS', WARN: 'WARN', FAIL: 'FAIL' }
-      return {
-        qualityStatus: statusMap[data.status] ?? 'WARN',
-        qualityLabel: data.status === 'PASS' ? 'Đạt chuẩn' : data.status === 'WARN' ? 'Chấp nhận được' : 'Chất lượng kém',
-      }
+      const fd = new FormData()
+      fd.append('file', compressedFile)
+      fd.append('slotType', slotKey)
+      const res = await fetch(`${API_BASE_URL}/api/v1/ai/validate-slot`, { method: 'POST', body: fd })
+      const data = res.ok ? await res.json() : { valid: true }
+      const isValid: boolean = data.valid !== false
+      setLegitSlots(prev => ({ ...prev, [slotKey]: { file: compressedFile, preview: previewUrl, validating: false, valid: isValid, errorMsg: isValid ? '' : data.message || '' } }))
+      if (!isValid) toast.warning(data.message, { autoClose: 5000 })
     } catch {
-      return { qualityStatus: 'WARN', qualityLabel: 'Không thể kiểm tra' }
-    }
-  }, [])
-
-  const handleFilesSelected = async (files: File[]) => {
-    if (!files.length) return
-    const totalAfter = imageSlots.length + files.length
-    if (totalAfter > 6) {
-      toast.warn('Tối đa 6 ảnh. Vui lòng xóa bớt ảnh trước.')
-      return
-    }
-
-    const newSlots: ImageSlot[] = files.map(f => ({
-      file: f,
-      previewUrl: URL.createObjectURL(f),
-      qualityStatus: 'checking',
-    }))
-    setImageSlots(prev => [...prev, ...newSlots])
-    setIsUploading(true)
-
-    try {
-      // Upload images to server
-      const uploadedUrls = await adminProductsApi.uploadImages(files)
-      // Check quality for each image concurrently
-      const qualityResults = await Promise.all(newSlots.map(s => checkImageQuality(s)))
-
-      setImageSlots(prev => {
-        const updated = [...prev]
-        const startIdx = updated.length - newSlots.length
-        uploadedUrls.forEach((url, i) => {
-          updated[startIdx + i] = { ...updated[startIdx + i], uploadedUrl: url, ...qualityResults[i] }
-        })
-        return updated
-      })
-      setForm(prev => ({ ...prev, imageUrls: [...(prev.imageUrls ?? []), ...uploadedUrls] }))
-    } catch {
-      toast.error('Không thể tải ảnh lên. Vui lòng thử lại.')
-      setImageSlots(prev => prev.slice(0, prev.length - newSlots.length))
-    } finally {
-      setIsUploading(false)
+      setLegitSlots(prev => ({ ...prev, [slotKey]: { file: compressedFile, preview: previewUrl, validating: false, valid: true, errorMsg: '' } }))
     }
   }
 
   const handleAutoFill = async () => {
-    if (imageSlots.length === 0) {
-      toast.warn('Vui lòng tải ít nhất 1 ảnh sản phẩm trước.')
+    const files = Object.values(legitSlots).map(s => s.file).filter(Boolean) as File[]
+    if (files.length === 0) {
+      toast.warn('Vui lòng tải ảnh mới từ thiết bị để AI phân tích.')
       return
     }
     setIsAutoFilling(true)
     setAiSuggested({})
     try {
       const fd = new FormData()
-      imageSlots.slice(0, 3).forEach(s => fd.append('files', s.file))
+      files.slice(0, 3).forEach(f => fd.append('files', f))
       const res = await fetch(`${API_BASE_URL}/api/v1/ai/autofill`, { method: 'POST', body: fd })
       if (!res.ok) throw new Error('AI trả về lỗi')
       const data: AiAutoFillResult = await res.json()
       setAiResult(data)
 
-      // Typewriter for name and description
       if (data.name) setTwName(data.name)
       if (data.description) setTwDesc(data.description)
 
-      // Instant fill for other fields
       setForm(prev => ({
         ...prev,
         brand: data.brand ?? prev.brand,
@@ -214,32 +217,55 @@ export default function AdminProductFormPage() {
     }
   }
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (!form.categoryId) { setFormError('Vui lòng chọn danh mục trước khi lưu.'); return }
-    const uploadedUrls = imageSlots.filter(s => s.uploadedUrl).map(s => s.uploadedUrl!)
-    if (uploadedUrls.length < 3) { toast.error('Vui lòng tải từ 3 đến 6 ảnh sản phẩm.'); return }
-    mutation.mutate({
-      ...form,
-      imageUrls: uploadedUrls,
-      colorIds,
-      sizes: sizes.split(',').map(s => s.trim()).filter(Boolean),
-    })
-  }
-
-  const removeSlot = (idx: number) => {
-    const removed = imageSlots[idx]
-    setImageSlots(prev => prev.filter((_, i) => i !== idx))
-    if (removed.uploadedUrl) {
-      setForm(prev => ({ ...prev, imageUrls: prev.imageUrls?.filter(u => u !== removed.uploadedUrl) }))
+    
+    const requiredSlots = [legitSlots.front, legitSlots.back, legitSlots.tag]
+    if (requiredSlots.some(s => !s.preview)) {
+      toast.error('Vui lòng chụp đủ 3 ảnh bắt buộc (mặt trước, sau, mác).')
+      return
     }
-  }
 
-  const badgeIcon = (status?: ImageSlot['qualityStatus']) => {
-    if (status === 'checking') return <Clock size={11} />
-    if (status === 'PASS') return <CheckCircle2 size={11} />
-    if (status === 'WARN') return <AlertTriangle size={11} />
-    return <XCircle size={11} />
+    setIsUploading(true)
+    try {
+      // For Edit mode, we mix existing URLs with new File uploads
+      const finalImageUrls: string[] = []
+      const slotKeys: LegitSlotKey[] = ['front', 'back', 'tag', 'opt1', 'opt2', 'opt3']
+      
+      // Upload new files
+      const filesToUpload = slotKeys.map(k => legitSlots[k].file).filter(Boolean) as File[]
+      let newUploadedUrls: string[] = []
+      if (filesToUpload.length > 0) {
+        newUploadedUrls = await adminProductsApi.uploadImages(filesToUpload)
+      }
+
+      // Reconstruct imageUrls array
+      let newUrlIdx = 0
+      for (const k of slotKeys) {
+        const slot = legitSlots[k]
+        if (slot.file) {
+          finalImageUrls.push(newUploadedUrls[newUrlIdx])
+          newUrlIdx++
+        } else if (slot.preview) {
+          // It's an existing image, we need to extract the original path (relative)
+          // The preview is a full URL, e.g., http://localhost:8080/uploads/...
+          const urlObj = new URL(slot.preview, window.location.origin)
+          finalImageUrls.push(urlObj.pathname)
+        }
+      }
+
+      mutation.mutate({
+        ...form,
+        imageUrls: finalImageUrls,
+        colorIds,
+        sizes: sizes.split(',').map(s => s.trim()).filter(Boolean),
+      })
+    } catch (err) {
+      toast.error('Có lỗi xảy ra khi tải ảnh lên.')
+    } finally {
+      setIsUploading(false)
+    }
   }
 
   return (
@@ -251,95 +277,123 @@ export default function AdminProductFormPage() {
         </div>
         <div className="admin-form__actions">
           <button type="button" className="admin-secondary" onClick={() => navigate(PATHS.adminProducts)}>Hủy bỏ</button>
-          <button type="submit" form="admin-product-form" className="admin-primary" disabled={mutation.isPending}>
-            {mutation.isPending ? 'Đang lưu...' : 'Lưu thay đổi'}
+          <button type="submit" form="admin-product-form" className="admin-primary" disabled={mutation.isPending || isUploading}>
+            {mutation.isPending || isUploading ? 'Đang lưu...' : 'Lưu thay đổi'}
           </button>
         </div>
       </div>
 
       <form id="admin-product-form" onSubmit={handleSubmit}>
-        <div className="apf-layout">
-          {/* ─── LEFT: Image Upload Panel ─── */}
-          <div className="apf-upload-panel">
-            <p className="apf-upload-panel__title">📸 Ảnh sản phẩm (3–6 ảnh)</p>
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
+          {/* ─── LEFT: Image Upload Panel (Tailwind styled) ─── */}
+          <div className="xl:col-span-5 bg-white border border-gray-200 rounded-xl p-6 sticky top-8">
+            <div className="flex items-center gap-2 mb-4">
+              <Shield size={20} className="text-emerald-600" />
+              <h4 className="font-semibold text-gray-800">1. Ảnh sản phẩm & Kiểm định *</h4>
+            </div>
+            <p className="text-xs text-gray-500 mb-5">
+              Tải lên đủ 3 ảnh bắt buộc để AI tự động điền thông tin và kiểm định chính hãng.
+            </p>
 
-            {/* Dropzone */}
-            {imageSlots.length < 6 && (
-              <div className={`apf-dropzone ${isUploading ? 'apf-dropzone--active' : ''}`}>
-                <input
-                  ref={fileInputRef}
-                  type="file" accept="image/*" multiple
-                  onChange={e => { const files = Array.from(e.target.files ?? []); if (files.length) handleFilesSelected(files); e.target.value = '' }}
-                  disabled={isUploading}
-                />
-                <span className="apf-dropzone__icon">☁️</span>
-                <p className="apf-dropzone__label">{isUploading ? 'Đang tải lên...' : 'Kéo & thả ảnh vào đây'}</p>
-                <p className="apf-dropzone__hint">JPG, PNG, WEBP – tối đa 10MB mỗi ảnh</p>
-                <span className="apf-dropzone__btn">
-                  <Upload size={14} style={{ display: 'inline', marginRight: 6 }} />
-                  Chọn ảnh
-                </span>
-              </div>
-            )}
-
-            {/* Image grid with quality badges */}
-            {imageSlots.length > 0 && (
-              <div className="apf-upload-grid">
-                {imageSlots.map((slot, idx) => (
-                  <div key={idx} className="apf-upload-thumb">
-                    <img src={slot.previewUrl} alt={`Ảnh ${idx + 1}`} />
-                    {slot.qualityStatus && (
-                      <span className={`apf-upload-thumb__badge apf-badge--${slot.qualityStatus === 'checking' ? 'checking' : slot.qualityStatus.toLowerCase()}`}>
-                        {badgeIcon(slot.qualityStatus)}
-                        {slot.qualityStatus === 'checking' ? 'Đang kiểm tra...' : slot.qualityLabel}
-                      </span>
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => removeSlot(idx)}
-                      style={{ position: 'absolute', top: 4, right: 4, background: 'rgba(0,0,0,0.5)', border: 'none', borderRadius: '50%', width: 20, height: 20, color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 }}
+            <div className="grid grid-cols-3 gap-3 mb-5">
+              {LEGIT_SLOTS.map((slot, idx) => {
+                const st = legitSlots[slot.key]
+                const isFilled = !!st.preview
+                const isInvalid = st.valid === false
+                return (
+                  <div key={slot.key} className="flex flex-col gap-1.5">
+                    <input
+                      ref={el => { legitFileRefs.current[slot.key] = el }}
+                      type="file" accept="image/*" capture="environment"
+                      className="hidden"
+                      onChange={e => { handleLegitSlotChange(slot.key, e.target.files?.[0] ?? null); e.target.value = '' }}
+                    />
+                    <div
+                      role="button" tabIndex={0}
+                      onClick={() => legitFileRefs.current[slot.key]?.click()}
+                      onKeyDown={e => e.key === 'Enter' && legitFileRefs.current[slot.key]?.click()}
+                      className={`relative aspect-[3/4] rounded-xl border-2 cursor-pointer overflow-hidden flex flex-col items-center justify-center gap-1 transition-all ${
+                        isInvalid ? 'border-red-400 bg-red-50' :
+                        isFilled && st.valid ? 'border-emerald-400 bg-emerald-50/30' :
+                        'border-dashed border-gray-300 bg-gray-50 hover:border-emerald-400 hover:bg-emerald-50/20'
+                      }`}
                     >
-                      <XCircle size={12} />
-                    </button>
+                      {st.preview ? (
+                        <>
+                          <img src={st.preview} className="w-full h-full object-cover absolute inset-0" alt={slot.title} />
+                          {/* validating spinner */}
+                          {st.validating && (
+                            <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center gap-1 text-white">
+                              <Loader2 size={18} className="animate-spin" />
+                              <span className="text-[10px]">AI kiểm tra...</span>
+                            </div>
+                          )}
+                          {/* valid badge */}
+                          {st.valid && !st.validating && (
+                            <div className="absolute top-1 right-1 w-5 h-5 bg-emerald-500 rounded-full flex items-center justify-center shadow">
+                              <CheckCircle2 size={12} className="text-white" />
+                            </div>
+                          )}
+                          {/* invalid badge */}
+                          {isInvalid && !st.validating && (
+                            <div className="absolute top-1 right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center shadow">
+                              <AlertTriangle size={11} className="text-white" />
+                            </div>
+                          )}
+                          {/* hover re-upload */}
+                          <div className="absolute inset-0 bg-black/0 hover:bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-all">
+                            <RotateCcw size={16} className="text-white" />
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <span className="text-2xl">{slot.icon}</span>
+                          <Camera size={13} className="text-gray-400" />
+                        </>
+                      )}
+                    </div>
+                    <p className={`text-[11px] text-center font-medium leading-tight mt-1 ${
+                      isInvalid ? 'text-red-500' : isFilled && st.valid ? 'text-emerald-600' : slot.required ? 'text-gray-700' : 'text-gray-400'
+                    }`}>
+                      <span className="text-gray-400 mr-1">{idx+1}.</span>{slot.title}
+                      {slot.required && <span className="text-red-500 ml-0.5">*</span>}
+                    </p>
+                    {!isFilled && <p className="text-[10px] text-center text-gray-400 leading-tight">{slot.hint}</p>}
+                    {isInvalid && <p className="text-[10px] text-center text-red-500 leading-tight">{st.errorMsg}</p>}
                   </div>
-                ))}
-              </div>
-            )}
-
-            {/* Checklist guide */}
-            <div className="apf-checklist">
-              <p className="apf-checklist__title">
-                <span>🛡️</span> Yêu cầu ảnh chất lượng cao
-              </p>
-              {[
-                { text: 'Ánh sáng đủ, tự nhiên', ok: true },
-                { text: 'Ảnh nét, không bị mờ rung', ok: true },
-                { text: 'Sản phẩm chiếm phần lớn khung hình', ok: true },
-                { text: 'Không ảnh mờ hoặc độ phân giải thấp', ok: false },
-              ].map((item, i) => (
-                <div key={i} className="apf-checklist__item">
-                  <span className={item.ok ? 'apf-checklist__icon--ok' : 'apf-checklist__icon--fail'}>
-                    {item.ok ? <CheckCircle2 size={13} /> : <XCircle size={13} />}
-                  </span>
-                  <span>{item.text}</span>
-                </div>
-              ))}
+                )
+              })}
             </div>
 
-            {/* AI Auto-fill button */}
-            <button
-              type="button"
-              className="apf-autofill-btn"
-              onClick={handleAutoFill}
-              disabled={isAutoFilling || imageSlots.length === 0 || isUploading}
-            >
-              <Sparkles size={18} className="apf-sparkle" />
-              {isAutoFilling ? 'AI đang phân tích ảnh...' : 'Nhờ AI điền thông tin tự động'}
-            </button>
+            {/* Progress indicator */}
+            <div className="flex flex-col gap-3 mb-5">
+              <div className="flex-1">
+                <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-emerald-700 to-emerald-400 rounded-full transition-all duration-300"
+                    style={{ width: `${(validLegitSlots / 3) * 100}%` }}
+                  />
+                </div>
+                <div className="flex justify-between items-center mt-1">
+                  <p className="text-[10px] text-gray-400">
+                    {`${validLegitSlots}/3 ảnh bắt buộc`}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* AI Auto Fill Button */}
+            <div className="pt-5 border-t border-gray-100">
+              <button type="button" onClick={handleAutoFill} disabled={isAutoFilling || validLegitSlots < 3} className="w-full bg-gradient-to-r from-teal-800 to-green-500 hover:from-teal-700 hover:to-green-400 text-white rounded-xl py-3 px-4 font-bold text-sm flex items-center justify-center gap-2 shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                  <Sparkles size={16} className={isAutoFilling ? "animate-spin" : ""} />
+                  {isAutoFilling ? 'AI đang phân tích...' : '2. Nhờ AI điền thông tin'}
+              </button>
+              <p className="text-[10px] text-gray-400 mt-2 text-center">AI sẽ đọc chi tiết từ các ảnh kiểm định trên để viết mô tả cho bạn.</p>
+            </div>
           </div>
 
           {/* ─── RIGHT: Form Panel ─── */}
-          <div className="apf-form-panel">
+          <div className="xl:col-span-7 apf-form-panel" style={{ height: 'fit-content' }}>
             <div className="apf-form-panel__header">
               <h3 className="apf-form-panel__title">Thông tin sản phẩm</h3>
               {isAutoFilling && (
@@ -460,6 +514,7 @@ export default function AdminProductFormPage() {
                   <option value="Nam">Nam</option>
                   <option value="Nữ">Nữ</option>
                   <option value="Khác">Khác</option>
+                  <option value="Unisex">Unisex</option>
                 </select>
               </div>
             </div>
@@ -536,8 +591,8 @@ export default function AdminProductFormPage() {
               <button type="button" className="apf-btn-secondary" onClick={() => navigate(PATHS.adminProducts)}>
                 Hủy bỏ
               </button>
-              <button type="submit" className="apf-btn-primary" disabled={mutation.isPending}>
-                {mutation.isPending ? 'Đang lưu...' : <><span>Đăng bán ngay</span> <ArrowRight size={16} /></>}
+              <button type="submit" className="apf-btn-primary" disabled={mutation.isPending || isUploading}>
+                {mutation.isPending || isUploading ? 'Đang lưu...' : <><span>Đăng bán ngay</span> <ArrowRight size={16} /></>}
               </button>
             </div>
           </div>
