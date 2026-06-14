@@ -17,8 +17,19 @@ export const useLoginMutation = () => {
 }
 
 export const useRegisterMutation = () => {
+  const dispatch = useDispatch()
   return useMutation({
     mutationFn: (payload: RegisterRequest) => authApi.register(payload),
+    onSuccess: (data) => {
+      saveAuth(data)
+      dispatch(setCredentials(data))
+    },
+  })
+}
+
+export const useSendOtpMutation = () => {
+  return useMutation({
+    mutationFn: (email: string) => authApi.sendOtp(email),
   })
 }
 

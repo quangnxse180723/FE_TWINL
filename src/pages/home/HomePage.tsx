@@ -128,10 +128,10 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* 4. PRODUCTS: NỮ */}
+      {/* 4. PRODUCTS: Thời trang Nữ */}
       <section className="home__section">
         <div className="home__section-header">
-          <h4>Nữ</h4>
+          <h4>Thời trang Nữ</h4>
           <Link to={PATHS.women} className="home__section-link">Xem các sản phẩm tương tự</Link>
         </div>
         <div className="home__card-grid">
@@ -149,10 +149,10 @@ export default function HomePage() {
         )}
       </section>
 
-      {/* 5. PRODUCTS: NAM */}
+      {/* 5. PRODUCTS: Thời trang Nam */}
       <section className="home__section">
         <div className="home__section-header">
-          <h4>Nam</h4>
+          <h4>Thời trang Nam</h4>
           <Link to={PATHS.men} className="home__section-link">Xem các sản phẩm tương tự</Link>
         </div>
         <div className="home__card-grid">

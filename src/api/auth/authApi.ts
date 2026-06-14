@@ -6,6 +6,9 @@ export const authApi = {
     const { data } = await axiosClient.post<AuthResponse>('/api/auth/login', payload)
     return data
   },
+  sendOtp: async (email: string) => {
+    await axiosClient.post('/api/auth/send-otp', { email })
+  },
   register: async (payload: RegisterRequest) => {
     const { data } = await axiosClient.post<AuthResponse>('/api/auth/register', payload)
     return data

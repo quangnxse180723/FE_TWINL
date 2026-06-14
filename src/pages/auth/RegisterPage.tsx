@@ -1,10 +1,10 @@
-import { Button, TextField, InputAdornment, IconButton } from '@mui/material'
+import { Button, TextField, InputAdornment, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Typography } from '@mui/material'
 import { Eye, EyeOff } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { PATHS } from '../../routes/paths'
-import { useRegisterMutation, useGoogleLoginMutation } from '../../hooks/useAuth'
+import { useRegisterMutation, useGoogleLoginMutation, useSendOtpMutation } from '../../hooks/useAuth'
 import { useGoogleLogin } from '@react-oauth/google'
 import { getApiErrorMessage } from '../../utils/apiError'
 import type { RootState } from '../../store'
@@ -21,6 +21,30 @@ export default function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  
+  // OTP States
+  const sendOtpMutation = useSendOtpMutation()
+  const [showOtpModal, setShowOtpModal] = useState(false)
+  const [otp, setOtp] = useState('')
+  const [timeLeft, setTimeLeft] = useState(300) // 5 minutes
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout
+    if (showOtpModal && timeLeft > 0) {
+      timer = setInterval(() => {
+        setTimeLeft((prev) => prev - 1)
+      }, 1000)
+    }
+    return () => {
+      if (timer) clearInterval(timer)
+    }
+  }, [showOtpModal, timeLeft])
+
+  const formatTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60)
+    const s = seconds % 60
+    return `${m}:${s < 10 ? '0' : ''}${s}`
+  }
 
   useEffect(() => {
     if (user) {
@@ -52,7 +76,24 @@ export default function RegisterPage() {
       return
     }
 
-    registerMutation.mutate({ displayName, email, password })
+    sendOtpMutation.mutate(email, {
+      onSuccess: () => {
+        setShowOtpModal(true)
+        setTimeLeft(300)
+      }
+    })
+  }
+
+  const handleVerifyOtp = () => {
+    registerMutation.mutate({ displayName, email, password, otp })
+  }
+
+  const handleResendOtp = () => {
+    sendOtpMutation.mutate(email, {
+      onSuccess: () => {
+        setTimeLeft(300)
+      }
+    })
   }
 
   return (
@@ -124,6 +165,9 @@ export default function RegisterPage() {
           {registerMutation.isError ? (
             <div className="auth__error">{getApiErrorMessage(registerMutation.error)}</div>
           ) : null}
+          {sendOtpMutation.isError && !showOtpModal ? (
+            <div className="auth__error">{getApiErrorMessage(sendOtpMutation.error)}</div>
+          ) : null}
           <Button
             variant="contained"
             size="large"
@@ -131,13 +175,72 @@ export default function RegisterPage() {
             type="submit"
             fullWidth
             disabled={
-              registerMutation.isPending ||
-              (confirmPassword.length > 0 && confirmPassword !== password)
+              sendOtpMutation.isPending ||
+              (confirmPassword.length > 0 && confirmPassword !== password) ||
+              !email || !password || !displayName
             }
           >
-            {registerMutation.isPending ? 'Đang xử lý...' : 'Đăng ký'}
+            {sendOtpMutation.isPending ? 'Đang gửi mã OTP...' : 'Đăng ký'}
           </Button>
         </form>
+
+        <Dialog open={showOtpModal} onClose={() => {}} maxWidth="xs" fullWidth>
+          <DialogTitle sx={{ fontWeight: 'bold', textAlign: 'center' }}>Xác nhận Email</DialogTitle>
+          <DialogContent>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3, textAlign: 'center' }}>
+              Một mã xác thực 6 chữ số đã được gửi đến email <strong>{email}</strong>. Vui lòng kiểm tra hộp thư (hoặc Spam).
+            </Typography>
+            <TextField
+              label="Mã OTP (6 chữ số)"
+              fullWidth
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
+              inputProps={{ maxLength: 6, style: { textAlign: 'center', letterSpacing: '0.5em', fontSize: '1.2rem' } }}
+              autoFocus
+            />
+            {registerMutation.isError ? (
+              <div className="auth__error" style={{ marginTop: '1rem', textAlign: 'center' }}>{getApiErrorMessage(registerMutation.error)}</div>
+            ) : null}
+            {sendOtpMutation.isError ? (
+              <div className="auth__error" style={{ marginTop: '1rem', textAlign: 'center' }}>{getApiErrorMessage(sendOtpMutation.error)}</div>
+            ) : null}
+            <Typography variant="body2" sx={{ mt: 2, textAlign: 'center' }}>
+              {timeLeft > 0 ? (
+                <span style={{ color: '#666' }}>Mã sẽ hết hạn sau {formatTime(timeLeft)}</span>
+              ) : (
+                <span style={{ color: 'red' }}>Mã đã hết hạn</span>
+              )}
+            </Typography>
+          </DialogContent>
+          <DialogActions sx={{ px: 3, pb: 3, display: 'flex', flexDirection: 'column', gap: 1 }}>
+            <Button 
+              variant="contained" 
+              fullWidth 
+              size="large"
+              color="success"
+              onClick={handleVerifyOtp}
+              disabled={otp.length !== 6 || registerMutation.isPending || timeLeft === 0}
+            >
+              {registerMutation.isPending ? 'Đang xử lý...' : 'Xác nhận mã OTP'}
+            </Button>
+            <Button
+              variant="text"
+              fullWidth
+              onClick={handleResendOtp}
+              disabled={timeLeft > 240 || sendOtpMutation.isPending}
+            >
+              Gửi lại mã {timeLeft > 240 ? `(${formatTime(timeLeft - 240)})` : ''}
+            </Button>
+            <Button
+              variant="text"
+              color="inherit"
+              fullWidth
+              onClick={() => setShowOtpModal(false)}
+            >
+              Quay lại
+            </Button>
+          </DialogActions>
+        </Dialog>
 
         <div className="auth__divider">hoặc</div>
         {googleLoginMutation.isError ? (
