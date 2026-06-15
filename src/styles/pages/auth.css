@@ -1,87 +1,492 @@
-.auth {
-  min-height: calc(100vh - 140px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 40px 16px;
+/* ============================================================
+   AUTH.CSS — TWINL
+   Swiss typography-driven, ultra-minimalist
+   Inspired by Bottega Veneta / Celine editorial aesthetic
+   Background: #FAF9F6 cream paper
+   No cards · No shadows · No rounded corners · No photos
+   ============================================================ */
+
+/* Google Fonts — Cormorant Garamond */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600;700;800&display=swap');
+
+
+/* ============================================================
+   1. MAIN WRAPPER
+   ============================================================ */
+
+.auth-swiss {
+  display: grid;
+  grid-template-columns: 60fr 40fr;
+  min-height: calc(100vh - 96px);
+  background: #FAF9F6;
 }
 
-.auth__card {
-  width: min(420px, 92vw);
-  background: #ffffff;
-  border-radius: 18px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08);
-  padding: 32px 32px 36px;
-  text-align: center;
-}
 
-.auth__logo {
-  font-family: 'Playfair Display', serif;
-  color: #1f7a46;
-  margin: 0 0 6px;
-  font-size: 28px;
-}
+/* ============================================================
+   2. LEFT COLUMN
+   ============================================================ */
 
-.auth__subtitle {
-  color: #6f6f6f;
-  margin-bottom: 20px;
-}
-
-.auth__form {
+.auth-left {
+  padding: 60px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  margin: 18px 0;
+  justify-content: space-between;
 }
 
-.auth__forgot {
-  text-align: right;
-  font-size: 12px;
-  color: #1f7a46;
-  cursor: pointer;
+
+/* ============================================================
+   3. TYPOGRAPHIC MANIFESTO
+   ============================================================ */
+
+.auth-manifesto {
+  /* Container for the hero editorial typography */
 }
 
-.auth__divider {
+.auth-manifesto__line {
+  display: block;
+  font-family: 'Cormorant Garamond', 'Playfair Display', serif;
+  font-weight: 700;
+}
+
+.auth-manifesto__headline {
+  font-size: clamp(64px, 8vw, 120px);
+  line-height: 0.92;
+  letter-spacing: -3px;
+  color: #0a0a0a;
+  margin: 0;
+}
+
+.auth-manifesto__rule {
+  border: none;
+  border-top: 1px solid #0a0a0a;
+  margin: 24px 0;
+}
+
+.auth-manifesto__sub {
+  font-size: clamp(40px, 5vw, 72px);
+  line-height: 0.95;
+  letter-spacing: -2px;
+  color: #0a0a0a;
+}
+
+
+/* ============================================================
+   4. FOOTNOTES — BOTTOM OF LEFT COLUMN
+   ============================================================ */
+
+.auth-footnotes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.auth-footnote {
+  font-size: 11px;
+  color: #888;
+  font-style: italic;
+  line-height: 1.5;
+}
+
+
+/* ============================================================
+   5. RIGHT COLUMN
+   ============================================================ */
+
+.auth-right {
+  padding: 60px 64px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.auth-right__logo {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 4px;
   text-transform: uppercase;
-  font-size: 12px;
-  color: #9a9a9a;
-  margin: 18px 0 12px;
+  color: #0a0a0a;
+  text-decoration: none;
+  display: block;
+  margin-bottom: 48px;
+}
+
+.auth-right__heading {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #0a0a0a;
+  margin: 0 0 32px;
+}
+
+
+/* ============================================================
+   6. FORM — Floats freely on cream background, no card wrapper
+   ============================================================ */
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.auth-field__label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #999;
+}
+
+.auth-field__input {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid #0a0a0a;
+  outline: none;
+  font-size: 15px;
+  color: #0a0a0a;
+  padding: 10px 0;
+  font-family: inherit;
+  width: 100%;
+  transition: border-color 0.2s ease;
+}
+
+.auth-field__input:focus {
+  border-bottom-color: #0a0a0a;
+  /* Subtle shimmer via box-shadow — preserves sharp edge */
+  box-shadow: 0 1px 0 0 rgba(10, 10, 10, 0.25);
+}
+
+.auth-field__input::placeholder {
+  color: #ccc;
+}
+
+/* Password field wrapper — for eye icon positioning */
+.auth-field__pw-wrap {
   position: relative;
 }
 
-.auth__divider::before,
-.auth__divider::after {
-  content: '';
-  height: 1px;
-  width: 40%;
-  background: #e6e3df;
+.auth-field__eye {
   position: absolute;
-  top: 50%;
-}
-
-.auth__divider::before {
-  left: 0;
-}
-
-.auth__divider::after {
   right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #999;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  line-height: 1;
 }
 
-.auth__footer {
-  margin-top: 18px;
-  font-size: 13px;
+.auth-field__eye:hover {
+  color: #0a0a0a;
 }
 
-.auth__footer a {
-  color: #0f8a4e;
-  font-weight: 600;
-}
 
-.auth__error {
-  background: #fff2f0;
-  color: #b42318;
-  border: 1px solid #f2b8b5;
-  padding: 8px 10px;
-  border-radius: 8px;
+/* ============================================================
+   7. ERROR MESSAGE
+   ============================================================ */
+
+.auth-error {
   font-size: 12px;
+  color: #c0392b;
+  margin-top: -12px;
+  letter-spacing: 0.3px;
+}
+
+
+/* ============================================================
+   8. FORGOT PASSWORD LINK
+   ============================================================ */
+
+.auth-forgot {
+  text-align: right;
+  margin-top: -12px;
+}
+
+.auth-forgot a {
+  font-size: 11px;
+  color: #888;
+  text-decoration: none;
+  letter-spacing: 0.5px;
+  transition: color 0.2s ease;
+}
+
+.auth-forgot a:hover {
+  color: #0a0a0a;
+}
+
+
+/* ============================================================
+   9. BUTTONS — Sharp rectangle, zero border-radius
+   ============================================================ */
+
+.auth-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 16px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border: none;
+  border-radius: 0;
+  font-family: inherit;
+  transition: opacity 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+/* Primary — black fill */
+.auth-btn--primary {
+  background: #0a0a0a;
+  color: #FAF9F6;
+  margin-top: 8px;
+}
+
+.auth-btn--primary:hover:not(:disabled) {
+  opacity: 0.85;
+}
+
+/* Google — outlined, inverts on hover */
+.auth-btn--google {
+  background: transparent;
+  color: #0a0a0a;
+  border: 1px solid #0a0a0a;
+  margin-top: 0;
+}
+
+.auth-btn--google:hover:not(:disabled) {
+  background: #0a0a0a;
+  color: #FAF9F6;
+}
+
+/* Disabled state — all variants */
+.auth-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+
+/* ============================================================
+   10. DIVIDER — "OR" separator
+   ============================================================ */
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 20px 0;
+  color: #ccc;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #e8e5df;
+}
+
+
+/* ============================================================
+   11. FOOTER — Sign-up / Sign-in toggle link
+   ============================================================ */
+
+.auth-footer {
+  margin-top: 24px;
+  font-size: 12px;
+  color: #888;
+  text-align: center;
+}
+
+.auth-footer a {
+  color: #0a0a0a;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: opacity 0.2s ease;
+}
+
+.auth-footer a:hover {
+  opacity: 0.65;
+}
+
+
+/* ============================================================
+   12. OTP MODAL
+   ============================================================ */
+
+.auth-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 10, 10, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.auth-modal {
+  background: #FAF9F6;
+  width: min(440px, 100%);
+  padding: 48px;
+  position: relative;
+}
+
+.auth-modal__close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #888;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  transition: color 0.2s ease;
+}
+
+.auth-modal__close:hover {
+  color: #0a0a0a;
+}
+
+.auth-modal__title {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 8px;
+  letter-spacing: -0.5px;
+  color: #0a0a0a;
+}
+
+.auth-modal__desc {
+  font-size: 13px;
+  color: #666;
+  margin: 0 0 28px;
+  line-height: 1.6;
+}
+
+/* OTP digit boxes */
+.auth-modal__otp-wrap {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.auth-modal__otp-box {
+  width: 48px;
+  height: 56px;
+  border: none;
+  border-bottom: 2px solid #0a0a0a;
+  background: transparent;
+  font-size: 24px;
+  text-align: center;
+  font-weight: 700;
+  font-family: inherit;
+  outline: none;
+  color: #0a0a0a;
+  border-radius: 0;
+  transition: border-bottom-color 0.2s ease;
+}
+
+.auth-modal__otp-box:focus {
+  border-bottom-color: #c9a84c; /* Gold accent on focus */
+}
+
+.auth-modal__timer {
+  text-align: center;
+  font-size: 12px;
+  color: #888;
+  margin: 12px 0 24px;
+  letter-spacing: 0.5px;
+}
+
+.auth-modal__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+
+/* ============================================================
+   13. STEP INDICATOR — Multi-step form progress
+   ============================================================ */
+
+.auth-steps {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 32px;
+}
+
+.auth-step {
+  width: 24px;
+  height: 2px;
+  background: #ddd;
+  transition: background 0.3s ease;
+}
+
+.auth-step--active {
+  background: #0a0a0a;
+}
+
+
+/* ============================================================
+   14. RESPONSIVE — 900px breakpoint
+   ============================================================ */
+
+@media (max-width: 900px) {
+  .auth-swiss {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-left {
+    display: none; /* Hide editorial column on mobile */
+  }
+
+  .auth-right {
+    width: 100%;
+    padding: 48px 32px;
+    justify-content: flex-start;
+    padding-top: 64px;
+  }
+}
+/* -- Updates for logo and heading -------------------- */
+.auth-logo-img {
+  max-width: 120px;
+  height: auto;
+  margin-bottom: 40px;
+  display: block;
+}
+
+.auth-heading-badge {
+  display: inline-block;
+  background: #f0eee6;
+  border: 1px solid #e2dfd3;
+  padding: 8px 16px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #0a0a0a;
+  margin-bottom: 32px;
+  border-radius: 4px;
 }

@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux'
 import contactApi from '../../api/contact/contactApi'
 import type { ContactRequest } from '../../types/contact'
 import type { RootState } from '../../store'
+import { useTranslation } from 'react-i18next'
 import '../../styles/pages/contact.css'
 
 const emptyForm: ContactRequest = {
@@ -13,6 +14,7 @@ const emptyForm: ContactRequest = {
 }
 
 export default function ContactPage() {
+  const { t } = useTranslation()
   const user = useSelector((state: RootState) => state.auth.user)
   const [form, setForm] = useState<ContactRequest>(emptyForm)
   const [submitting, setSubmitting] = useState(false)
@@ -40,10 +42,10 @@ export default function ContactPage() {
     setSubmitting(true)
     try {
       await contactApi.create(form)
-      setSuccess('Tin nhắn đã được gửi. Chúng tôi sẽ phản hồi sớm nhất.')
+      setSuccess(t('contact.success'))
       setForm((prev) => ({ ...prev, message: '' }))
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Không thể gửi tin nhắn')
+      setError(err instanceof Error ? err.message : t('contact.failed'))
     } finally {
       setSubmitting(false)
     }
@@ -52,16 +54,16 @@ export default function ContactPage() {
   return (
     <section className="contact">
       <div className="contact__hero">
-        <h1>Liên hệ với chúng tôi</h1>
-        <p>Chúng tôi luôn sẵn sàng lắng nghe và giải đáp mọi thắc mắc của bạn.</p>
+        <h1>{t('contact.title')}</h1>
+        <p>{t('contact.desc')}</p>
       </div>
 
       <div className="contact__layout">
         <div className="contact__form">
-          <h2>Gửi tin nhắn</h2>
+          <h2>{t('contact.send_msg')}</h2>
           <form onSubmit={handleSubmit}>
             <label>
-              Họ tên
+              {t('contact.name')}
               <input
                 type="text"
                 value={form.name}
@@ -71,7 +73,7 @@ export default function ContactPage() {
               />
             </label>
             <label>
-              Email
+              {t('contact.email')}
               <input
                 type="email"
                 value={form.email}
@@ -81,7 +83,7 @@ export default function ContactPage() {
               />
             </label>
             <label>
-              Số điện thoại
+              {t('contact.phone')}
               <input
                 type="text"
                 value={form.phone ?? ''}
@@ -90,7 +92,7 @@ export default function ContactPage() {
               />
             </label>
             <label>
-              Tin nhắn
+              {t('contact.message')}
               <textarea
                 rows={6}
                 value={form.message}
@@ -102,45 +104,45 @@ export default function ContactPage() {
             {error ? <div className="contact__error">{error}</div> : null}
             {success ? <div className="contact__success">{success}</div> : null}
             <button type="submit" disabled={submitting}>
-              {submitting ? 'Đang gửi...' : 'Gửi tin nhắn'}
+              {submitting ? '...' : t('contact.send_btn')}
             </button>
           </form>
         </div>
 
         <aside className="contact__info">
           <div className="contact__card">
-            <h3>Thông tin liên hệ</h3>
+            <h3>{t('contact.info')}</h3>
             <div className="contact__line">
-              <span>Email hỗ trợ</span>
-              <strong>support@twinl.com</strong>
+              <span>{t('contact.support_email')}</span>
+              <strong>twinl2hand@gmail.com</strong>
             </div>
             <div className="contact__line">
-              <span>Hotline</span>
-              <strong>1800 123 456</strong>
+              <span>{t('contact.hotline')}</span>
+              <strong>0853443242</strong>
             </div>
             <div className="contact__line">
-              <span>Địa chỉ</span>
-              <strong>123 Đường Thời Trang, Quận 1, TP. Hồ Chí Minh</strong>
+              <span>{t('contact.address')}</span>
+              <strong>Vinhomes Grandpark</strong>
             </div>
           </div>
 
           <div className="contact__card">
-            <h3>Câu hỏi thường gặp</h3>
+            <h3>{t('contact.faq')}</h3>
             <details open>
-              <summary>Sản phẩm tại TWINL có chính hãng không?</summary>
-              <p>Chúng tôi cam kết sản phẩm chính hãng, rõ nguồn gốc.</p>
+              <summary>{t('contact.faq_q1')}</summary>
+              <p>{t('contact.faq_a1')}</p>
             </details>
             <details>
-              <summary>Sản phẩm 2hand tình trạng có mới không?</summary>
-              <p>Mỗi sản phẩm đều được kiểm tra kỹ và mô tả tình trạng rõ ràng.</p>
+              <summary>{t('contact.faq_q2')}</summary>
+              <p>{t('contact.faq_a2')}</p>
             </details>
             <details>
-              <summary>Làm sao để chọn size khi mua online?</summary>
-              <p>Bạn có thể đối chiếu bằng size guide hoặc liên hệ tư vấn.</p>
+              <summary>{t('contact.faq_q3')}</summary>
+              <p>{t('contact.faq_a3')}</p>
             </details>
             <details>
-              <summary>Bao lâu thì đơn hàng được giao?</summary>
-              <p>Thời gian giao hàng 2-5 ngày làm việc tùy khu vực.</p>
+              <summary>{t('contact.faq_q4')}</summary>
+              <p>{t('contact.faq_a4')}</p>
             </details>
           </div>
         </aside>
@@ -148,20 +150,17 @@ export default function ContactPage() {
 
       <div className="contact__about">
         <div>
-          <h3>Cửa hàng TWINL với bộ sưu tập streetwear và hypebeast</h3>
-          <p>
-            Quần áo là yếu tố không thể thiếu để tạo nên phong cách của mỗi người. Chúng mang
-            lại sự tự tin, thoải mái và thể hiện cá tính riêng biệt.
-          </p>
+          <h3>{t('contact.about_title')}</h3>
+          <p>{t('contact.about_desc')}</p>
         </div>
         <div>
-          <h4>Mỗi sản phẩm đều được đảm bảo</h4>
+          <h4>{t('contact.guarantee')}</h4>
           <ul>
-            <li>Chất lượng chuẩn, chính hãng</li>
-            <li>Ngoại hình đẹp, tình trạng rõ ràng</li>
-            <li>Độ bền cao</li>
-            <li>Phong cách đúng chuẩn streetwear / hypebeast</li>
-            <li>Trải nghiệm mua sắm an toàn</li>
+            <li>{t('contact.g1')}</li>
+            <li>{t('contact.g2')}</li>
+            <li>{t('contact.g3')}</li>
+            <li>{t('contact.g4')}</li>
+            <li>{t('contact.g5')}</li>
           </ul>
         </div>
       </div>

@@ -8,12 +8,15 @@ import type { RootState } from '../../store'
 import { Sparkles, Shield } from 'lucide-react'
 import AiScannerModal from '../../components/shared/AiScannerModal'
 import LegitCheckModal from '../../components/shared/LegitCheckModal'
+import { toast } from 'react-toastify'
+import { useTranslation } from 'react-i18next'
 import '../../styles/pages/productDetail.css'
 
 const formatPrice = (value: number) =>
   new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value)
 
 export default function ProductDetailPage() {
+  const { t } = useTranslation()
   const { id } = useParams()
   const [product, setProduct] = useState<Product | null>(null)
   const [mainImage, setMainImage] = useState('')
@@ -135,9 +138,9 @@ export default function ProductDetailPage() {
       if (newTotal !== null) {
         window.dispatchEvent(new CustomEvent('cart-updated', { detail: newTotal }))
       } else {
-        // Fallback
         window.dispatchEvent(new Event('cart-updated'))
       }
+      toast.success(t('product.added_success'))
     } catch {
     } finally {
       setAdding(false)
@@ -205,7 +208,7 @@ export default function ProductDetailPage() {
                   title="Kiểm định chính hãng bằng AI"
                 >
                   <Shield size={14} />
-                  <span>Legit Check</span>
+                  <span>{t('product.legit_check')}</span>
                 </button>
               </div>
             )}
@@ -227,11 +230,11 @@ export default function ProductDetailPage() {
 
           <div className="product-detail__meta" style={{ marginTop: '12px', display: 'flex', gap: '20px', alignItems: 'center' }}>
             <div><strong style={{color: '#6b7280', fontWeight: 500}}>Màu sắc:</strong> {product.colors?.length ? product.colors.join(', ') : 'Đang cập nhật'}</div>
-            <div><strong style={{color: '#6b7280', fontWeight: 500}}>Thương hiệu:</strong> {product.brand || 'Đang cập nhật'}</div>
+            <div><strong style={{color: '#6b7280', fontWeight: 500}}>{t('product.brand')}:</strong> {product.brand || 'Đang cập nhật'}</div>
           </div>
 
           <div className="product-detail__meta" style={{ marginTop: '16px', alignItems: 'center', display: 'flex', gap: '16px' }}>
-             <strong style={{color: '#6b7280', fontWeight: 500}}>Số lượng:</strong>
+             <strong style={{color: '#6b7280', fontWeight: 500}}>{t('cart.quantity')}:</strong>
              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: '#f3f4f6', padding: '4px', borderRadius: '8px' }}>
                <button
                  type="button"
@@ -261,7 +264,7 @@ export default function ProductDetailPage() {
               onClick={handleBuyNow}
               disabled={adding || product.stock === 0}
             >
-              {product.stock === 0 ? 'Hết hàng' : (adding ? 'Đang xử lý...' : 'Mua ngay')}
+              {product.stock === 0 ? t('product.out_of_stock') : (adding ? '...' : t('product.buy_now'))}
             </button>
             <button
               type="button"
@@ -269,17 +272,17 @@ export default function ProductDetailPage() {
               onClick={handleAddToCart}
               disabled={adding || product.stock === 0}
             >
-              {product.stock === 0 ? 'Hết hàng' : (adding ? 'Đang thêm...' : 'Thêm vào giỏ hàng')}
+              {product.stock === 0 ? t('product.out_of_stock') : (adding ? t('product.adding') : t('product.add_to_cart'))}
             </button>
           </div>
 
           <div className="product-detail__divider" />
           <div className="product-detail__section">
-            <h3>Miêu tả sản phẩm</h3>
+            <h3>{t('product.description')}</h3>
             <p>{product.description || 'Sản phẩm thời trang tinh tế, phù hợp nhiều phong cách.'}</p>
             <ul>
               <li>Danh mục: {product.category}</li>
-              <li>Thương hiệu: {product.brand}</li>
+              <li>{t('product.brand')}: {product.brand}</li>
               <li>Phong cách: {product.style || 'Tinh tế'} </li>
             </ul>
           </div>
@@ -297,7 +300,7 @@ export default function ProductDetailPage() {
       </div>
 
       <div className="product-detail__similar">
-        <h2>Sản phẩm tương tự</h2>
+        <h2>{t('product.related')}</h2>
         <div className="product-detail__similar-grid">
           {similar.length > 0 ? (
             similar.map((item) => (

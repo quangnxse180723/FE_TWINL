@@ -12,6 +12,7 @@ export default function SepayCheckoutPage() {
   const orderCode = location.state?.orderCode
   const [isSuccess, setIsSuccess] = useState(false)
   const [copiedField, setCopiedField] = useState<string | null>(null)
+  const [timeLeft, setTimeLeft] = useState(15 * 60) // 15 minutes in seconds
 
   const handleCopy = (text: string, field: string) => {
     navigator.clipboard.writeText(text)
@@ -25,8 +26,19 @@ export default function SepayCheckoutPage() {
     }
   }, [qrUrl, orderCode, navigate])
 
+  // Countdown effect
   useEffect(() => {
-    if (!orderCode || isSuccess) return
+    if (timeLeft <= 0 || isSuccess) return
+
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => prev - 1)
+    }, 1000)
+
+    return () => clearInterval(timer)
+  }, [timeLeft, isSuccess])
+
+  useEffect(() => {
+    if (!orderCode || isSuccess || timeLeft === 0) return
 
     const checkOrderStatus = async () => {
       try {
@@ -43,7 +55,17 @@ export default function SepayCheckoutPage() {
     // Kiểm tra mỗi 3 giây
     const intervalId = setInterval(checkOrderStatus, 3000)
     return () => clearInterval(intervalId)
-  }, [orderCode, isSuccess])
+  }, [orderCode, isSuccess, timeLeft])
+
+  // Tự động chuyển hướng sau khi thành công
+  useEffect(() => {
+    if (isSuccess) {
+      const timer = setTimeout(() => {
+        navigate(PATHS.orders)
+      }, 3000)
+      return () => clearTimeout(timer)
+    }
+  }, [isSuccess, navigate])
 
   const urlObj = qrUrl ? new URL(qrUrl) : null
   const bank = urlObj?.searchParams.get('bank') || 'MBBank'
@@ -54,24 +76,33 @@ export default function SepayCheckoutPage() {
 
   if (!qrUrl) return null
 
+  const minutes = Math.floor(timeLeft / 60)
+  const seconds = timeLeft % 60
+  const timeString = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+
   return (
     <div className="payment-return">
       <div className="payment-return__card" style={{ maxWidth: '750px', width: '100%' }}>
         <div className="payment-return__header">
           <div className="payment-return__icon payment-return__icon--success">
-            ✓
+            {isSuccess ? '✓' : (timeLeft === 0 ? '✕' : '⏳')}
           </div>
           <h2 className="payment-return__title">
-            {isSuccess ? 'Thanh toán Thành công!' : 'Thanh toán Đơn hàng'}
+            {isSuccess ? 'Thanh toán Thành công!' : (timeLeft === 0 ? 'Mã thanh toán đã hết hạn' : 'Thanh toán Đơn hàng')}
           </h2>
           <p className="payment-return__desc">
             {isSuccess
               ? 'Cảm ơn bạn! Đơn hàng của bạn đã được thanh toán và đang được xử lý.'
-              : 'Vui lòng sử dụng App Ngân hàng của bạn để quét mã QR dưới đây.'}
+              : (timeLeft === 0 ? 'Đơn hàng đã quá thời gian thanh toán. Vui lòng tạo đơn hàng mới.' : 'Vui lòng sử dụng App Ngân hàng của bạn để quét mã QR dưới đây.')}
           </p>
+          {!isSuccess && timeLeft > 0 && (
+            <div style={{ marginTop: '12px', fontSize: '18px', fontWeight: 'bold', color: '#dc2626' }}>
+              Thời gian còn lại: {timeString}
+            </div>
+          )}
         </div>
 
-        {!isSuccess && (
+        {!isSuccess && timeLeft > 0 && (
           <div className="payment-return__details" style={{ display: 'flex', flexWrap: 'wrap', gap: '24px', background: '#fff', padding: '24px', borderRadius: '12px', alignItems: 'center', justifyContent: 'center' }}>
             
             {/* Cột trái: Thông tin chuyển khoản */}

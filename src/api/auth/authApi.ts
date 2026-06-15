@@ -20,4 +20,10 @@ export const authApi = {
     const { data } = await axiosClient.post<AuthResponse>('/api/auth/google', { idToken })
     return data
   },
+  sendForgotPasswordOtp: async (email: string) => {
+    await axiosClient.post('/api/auth/forgot-password/send-otp', { email })
+  },
+  resetPassword: async (payload: { email: string; otp: string; newPassword: string }) => {
+    await axiosClient.post('/api/auth/forgot-password/reset', payload)
+  },
 }

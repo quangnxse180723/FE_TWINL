@@ -8,6 +8,7 @@ import App from './App.tsx'
 import { store } from './store'
 import { appTheme } from './config/theme'
 import './index.css'
+import './i18n'
 
 import { GoogleOAuthProvider } from '@react-oauth/google'
 

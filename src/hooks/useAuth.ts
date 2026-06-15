@@ -43,3 +43,15 @@ export const useGoogleLoginMutation = () => {
     },
   })
 }
+
+export const useSendForgotPasswordOtpMutation = () => {
+  return useMutation({
+    mutationFn: (email: string) => authApi.sendForgotPasswordOtp(email),
+  })
+}
+
+export const useResetPasswordMutation = () => {
+  return useMutation({
+    mutationFn: (payload: { email: string; otp: string; newPassword: string }) => authApi.resetPassword(payload),
+  })
+}

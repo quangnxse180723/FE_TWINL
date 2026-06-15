@@ -11,10 +11,12 @@ import { updateAuthUser } from '../../utils/authStorage'
 import { API_BASE_URL } from '../../config/constants'
 import { useVNLocations } from '../../hooks/useVNLocations'
 import type { RootState } from '../../store'
+import { useTranslation } from 'react-i18next'
 import '../../styles/pages/profile.css'
 import type { UserProfile } from '../../types/user'
 
 export default function ProfilePage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const user = useSelector((state: RootState) => state.auth.user)
@@ -61,7 +63,7 @@ export default function ProfilePage() {
         setProfile(data)
         syncFormState(data)
       } catch {
-        setError('Không thể tải thông tin hồ sơ. Hãy thử lại.')
+        setError(t('profile.update_failed'))
       } finally {
         setIsLoading(false)
       }
@@ -82,13 +84,13 @@ export default function ProfilePage() {
   }, [profile, user])
 
   const formatDate = (value: string | null) => {
-    if (!value) return 'Chưa cập nhật'
+    if (!value) return t('profile.not_updated')
     const parsed = new Date(value)
     if (Number.isNaN(parsed.getTime())) return value
     return parsed.toLocaleDateString('vi-VN')
   }
 
-  const renderValue = (value: string | null | undefined) => value?.trim() ? value : 'Chưa cập nhật'
+  const renderValue = (value: string | null | undefined) => value?.trim() ? value : t('profile.not_updated')
 
   const normalizeDate = (value: string) => {
     if (!value) return ''
@@ -128,8 +130,9 @@ export default function ProfilePage() {
       dispatch(updateUser({ ...updated }))
       updateAuthUser({ ...updated })
       setIsEditing(false)
+      toast.success(t('profile.update_success'))
     } catch {
-      setSaveError('Không thể cập nhật hồ sơ. Vui lòng thử lại.')
+      setSaveError(t('profile.update_failed'))
     } finally {
       setIsSaving(false)
     }
@@ -190,8 +193,8 @@ export default function ProfilePage() {
       <div className="profile__card">
         <div className="profile__header">
           <div>
-            <p className="profile__eyebrow">Tài khoản của bạn</p>
-            <h1>Hồ sơ người dùng</h1>
+            <p className="profile__eyebrow">{t('profile.eyebrow')}</p>
+            <h1>{t('profile.title')}</h1>
           </div>
           <div className="profile__avatar">
             {avatarSrc ? (
@@ -204,7 +207,7 @@ export default function ProfilePage() {
 
         <div className="profile__upload" style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
           <label className="profile__upload-label">
-            {isUploading ? 'Đang tải ảnh...' : 'Tải ảnh đại diện'}
+            {isUploading ? t('profile.uploading') : t('profile.avatar')}
             <input
               type="file"
               accept="image/*"
@@ -218,18 +221,18 @@ export default function ProfilePage() {
              style={{ cursor: 'pointer', background: '#3b82f6', color: 'white', border: 'none', marginLeft: '10px' }}
              onClick={() => setIsChangingPassword(!isChangingPassword)}
           >
-             Đổi mật khẩu
+             {t('profile.change_pwd')}
           </button>
           {uploadError && <div className="profile__error">{uploadError}</div>}
         </div>
 
         {isChangingPassword && (
           <form className="profile__form" style={{ marginTop: '24px', padding: '24px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }} onSubmit={handleChangePassword}>
-            <h3 style={{ marginBottom: '16px', fontSize: '18px', fontWeight: 'bold' }}>Đổi mật khẩu</h3>
+            <h3 style={{ marginBottom: '16px', fontSize: '18px', fontWeight: 'bold' }}>{t('profile.change_pwd')}</h3>
             {passwordError && <div className="profile__error" style={{ marginBottom: '16px' }}>{passwordError}</div>}
             
             <div style={{ marginBottom: '16px' }}>
-              <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500', color: '#475569' }}>Mật khẩu hiện tại</label>
+              <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500', color: '#475569' }}>{t('profile.current_pwd')}</label>
               <div style={{ position: 'relative' }}>
                 <input 
                   type={showOldPassword ? 'text' : 'password'} 
@@ -246,7 +249,7 @@ export default function ProfilePage() {
             </div>
             
             <div style={{ marginBottom: '16px' }}>
-              <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500', color: '#475569' }}>Mật khẩu mới</label>
+              <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500', color: '#475569' }}>{t('profile.new_pwd')}</label>
               <div style={{ position: 'relative' }}>
                 <input 
                   type={showNewPassword ? 'text' : 'password'} 
@@ -263,7 +266,7 @@ export default function ProfilePage() {
             </div>
             
             <div style={{ marginBottom: '24px' }}>
-              <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500', color: '#475569' }}>Xác nhận mật khẩu mới</label>
+              <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500', color: '#475569' }}>{t('profile.confirm_new_pwd')}</label>
               <div style={{ position: 'relative' }}>
                 <input 
                   type={showConfirmPassword ? 'text' : 'password'} 
@@ -285,28 +288,28 @@ export default function ProfilePage() {
                 onClick={() => setIsChangingPassword(false)}
                 style={{ padding: '10px 20px', borderRadius: '8px', border: '1px solid #cbd5e1', background: 'white', color: '#475569', fontWeight: '500', cursor: 'pointer' }}
               >
-                Hủy
+                {t('profile.cancel')}
               </button>
               <button 
                 type="submit" 
                 disabled={isSubmittingPassword}
                 style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', background: '#3b82f6', color: 'white', fontWeight: '500', cursor: 'pointer', opacity: isSubmittingPassword ? 0.7 : 1 }}
               >
-                {isSubmittingPassword ? 'Đang lưu...' : 'Lưu mật khẩu mới'}
+                {isSubmittingPassword ? '...' : t('profile.save_pwd')}
               </button>
             </div>
           </form>
         )}
 
         {isLoading ? (
-          <div className="profile__loading">Đang tải thông tin...</div>
+          <div className="profile__loading">{t('profile.loading')}</div>
         ) : error ? (
           <div className="profile__error">{error}</div>
         ) : (
           <div className="profile__content">
             <div className="profile__grid">
               <div className="profile__item">
-                <span>Tên hiển thị</span>
+                <span>{t('profile.display_name')}</span>
                 {isEditing ? (
                   <input
                     type="text"
@@ -314,7 +317,7 @@ export default function ProfilePage() {
                     onChange={(event) => setDisplayName(event.target.value)}
                   />
                 ) : (
-                  <strong>{fullName || 'Chưa cập nhật'}</strong>
+                  <strong>{fullName || t('profile.not_updated')}</strong>
                 )}
               </div>
               <div className="profile__item">
@@ -326,7 +329,7 @@ export default function ProfilePage() {
                 )}
               </div>
               <div className="profile__item">
-                <span>Số điện thoại</span>
+                <span>{t('profile.phone')}</span>
                 {isEditing ? (
                   <input
                     type="text"
@@ -338,7 +341,7 @@ export default function ProfilePage() {
                 )}
               </div>
               <div className="profile__item">
-                <span>Địa chỉ</span>
+                <span>{t('profile.address')}</span>
                 {isEditing ? (
                   <input
                     type="text"
@@ -350,7 +353,7 @@ export default function ProfilePage() {
                 )}
               </div>
               <div className="profile__item">
-                <span>Tỉnh/Thành</span>
+                <span>{t('profile.province')}</span>
                 {isEditing ? (
                   <select
                     value={provinceId}
@@ -375,7 +378,7 @@ export default function ProfilePage() {
                 )}
               </div>
               <div className="profile__item">
-                <span>Quận/Huyện</span>
+                <span>{t('profile.district')}</span>
                 {isEditing ? (
                   <select
                     value={districtId}
@@ -400,7 +403,7 @@ export default function ProfilePage() {
                 )}
               </div>
               <div className="profile__item">
-                <span>Phường/Xã</span>
+                <span>{t('profile.ward')}</span>
                 {isEditing ? (
                   <select
                     value={wardCode}
@@ -422,7 +425,7 @@ export default function ProfilePage() {
                 )}
               </div>
               <div className="profile__item">
-                <span>Giới tính</span>
+                <span>{t('profile.gender')}</span>
                 {isEditing ? (
                   <select value={gender} onChange={(event) => setGender(event.target.value)}>
                     <option value="">Chọn giới tính</option>
@@ -435,7 +438,7 @@ export default function ProfilePage() {
                 )}
               </div>
               <div className="profile__item">
-                <span>Ngày sinh</span>
+                <span>{t('profile.dob')}</span>
                 {isEditing ? (
                   <input
                     type="date"
@@ -459,7 +462,7 @@ export default function ProfilePage() {
                     onClick={handleSave}
                     disabled={isSaving}
                   >
-                    {isSaving ? 'Đang lưu...' : 'Lưu thay đổi'}
+                    {isSaving ? '...' : t('profile.save')}
                   </button>
                   <button
                     type="button"
@@ -467,7 +470,7 @@ export default function ProfilePage() {
                     onClick={handleCancel}
                     disabled={isSaving}
                   >
-                    Hủy sửa
+                    {t('profile.cancel_edit')}
                   </button>
                 </>
               ) : (
@@ -476,7 +479,7 @@ export default function ProfilePage() {
                   className="profile__button"
                   onClick={() => setIsEditing(true)}
                 >
-                  Sửa thông tin
+                  {t('profile.edit')}
                 </button>
               )}
             </div>
@@ -487,7 +490,7 @@ export default function ProfilePage() {
                 className="profile__button profile__button--secondary"
                 onClick={() => navigate(PATHS.orders)}
               >
-                Lịch sử đơn hàng mua
+                {t('profile.orders')}
               </button>
               <button
                 type="button"
@@ -495,7 +498,7 @@ export default function ProfilePage() {
                 style={{ backgroundColor: '#2563eb', color: 'white', border: 'none', marginLeft: '12px' }}
                 onClick={() => navigate(PATHS.sellerDashboard)}
               >
-                Kênh Người Bán (Ký gửi)
+                {t('profile.seller_channel')}
               </button>
             </div>
           </div>

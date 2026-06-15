@@ -20,6 +20,7 @@ import OrderHistoryPage from '../pages/orders/OrderHistoryPage'
 import OrderTrackingPage from '../pages/orders/OrderTrackingPage'
 import LoginPage from '../pages/auth/LoginPage'
 import RegisterPage from '../pages/auth/RegisterPage'
+import ForgotPasswordPage from '../pages/auth/ForgotPasswordPage'
 import ProfilePage from '../pages/profile/ProfilePage'
 import SellerDashboardPage from '../pages/seller/SellerDashboardPage'
 import AdminGuard from '../admin/components/AdminGuard'
@@ -68,6 +69,7 @@ export default function AppRoutes() {
       <Route element={<AuthLayout />}>
         <Route path={PATHS.login} element={<LoginPage />} />
         <Route path={PATHS.register} element={<RegisterPage />} />
+        <Route path={PATHS.forgotPassword} element={<ForgotPasswordPage />} />
       </Route>
       <Route
         path={PATHS.admin}

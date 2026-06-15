@@ -1,40 +1,42 @@
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { PATHS } from '../../routes/paths'
 import '../../styles/components/footer.css'
 
 export default function Footer() {
+  const { t } = useTranslation()
   return (
-    <footer className="footer">
+    <footer className="footer dark-section">
       <div className="footer__top">
         <div className="footer__brand">
           <span className="footer__logo">Twinl</span>
-          <p>Thời trang đa dạng, phong cách, cá tính.</p>
+          <p>{t('footer.brand_desc')}</p>
         </div>
         <div className="footer__column">
-          <h4>Sản phẩm</h4>
-          <Link to={PATHS.women}>Nữ</Link>
-          <Link to={PATHS.men}>Nam</Link>
-          <Link to={PATHS.kids}>Trẻ em</Link>
-          <Link to={PATHS.sport}>Thể thao</Link>
+          <h4>{t('footer.products')}</h4>
+          <Link to={PATHS.women}>{t('header.women')}</Link>
+          <Link to={PATHS.men}>{t('header.men')}</Link>
+          <Link to={PATHS.kids}>{t('header.kids')}</Link>
+          <Link to={PATHS.sport}>{t('header.sport')}</Link>
         </div>
         <div className="footer__column">
-          <h4>Giới thiệu</h4>
-          <a href="#">Về chúng tôi</a>
-          <Link to={PATHS.contact}>Liên hệ</Link>
-          <a href="#">Quan tâm</a>
-          <a href="#">Văn hóa</a>
-          <a href="#">Bài viết</a>
+          <h4>{t('footer.about')}</h4>
+          <a href="#">{t('footer.link_about')}</a>
+          <Link to={PATHS.contact}>{t('header.contact')}</Link>
+          <a href="#">{t('footer.link_care')}</a>
+          <a href="#">{t('footer.link_culture')}</a>
+          <a href="#">{t('footer.link_blog')}</a>
         </div>
         <div className="footer__column">
-          <h4>Hỗ trợ</h4>
-          <a href="#">Getting started</a>
-          <a href="#">Help center</a>
-          <a href="#">Server status</a>
-          <a href="#">Report a bug</a>
-          <a href="#">Chat support</a>
+          <h4>{t('footer.support')}</h4>
+          <a href="#">{t('footer.link_getting_started')}</a>
+          <a href="#">{t('footer.link_help_center')}</a>
+          <a href="#">{t('footer.link_server_status')}</a>
+          <a href="#">{t('footer.link_report_bug')}</a>
+          <a href="#">{t('footer.link_chat_support')}</a>
         </div>
         <div className="footer__column">
-          <h4>Tải xuống</h4>
+          <h4>{t('footer.download')}</h4>
           <a href="#">iOS</a>
           <a href="#">Android</a>
           <a href="#">Mac</a>
@@ -43,10 +45,10 @@ export default function Footer() {
         </div>
       </div>
       <div className="footer__bottom">
-        <span>Copyright © 2026 Twinl - All Rights Reserved</span>
+        <span>{t('footer.copyright')}</span>
         <div className="footer__legal">
-          <a href="#">Terms and Conditions</a>
-          <a href="#">Privacy Policy</a>
+          <a href="#">{t('footer.terms')}</a>
+          <a href="#">{t('footer.privacy')}</a>
         </div>
       </div>
     </footer>

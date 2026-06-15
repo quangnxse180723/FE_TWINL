@@ -16,6 +16,7 @@ export const PATHS = {
   legitResult: '/legit-result',
   login: '/login',
   register: '/register',
+  forgotPassword: '/forgot-password',
   profile: '/profile',
   admin: '/admin',
   adminTraffic: '/admin/traffic',
