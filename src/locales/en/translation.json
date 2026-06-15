@@ -142,6 +142,19 @@
     "continue_shopping": "Continue Shopping"
   },
   "product": {
-    "login_required": "Please log in to view your cart and start shopping."
+    "login_required": "Please log in to view your cart and start shopping.",
+    "legit_check": "AI Legit Check",
+    "brand": "Brand",
+    "buy_now": "Buy Now",
+    "add_to_cart": "Add To Cart",
+    "out_of_stock": "Out of Stock",
+    "adding": "Adding...",
+    "added_success": "Added to cart successfully",
+    "description": "Product Description",
+    "related": "Related Products",
+    "delivery_returns": "Delivery & Returns",
+    "free_shipping": "Free over 500k",
+    "warranty": "12 Months Warranty",
+    "warranty_desc": "Guaranteed"
   }
 }

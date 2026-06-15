@@ -288,20 +288,20 @@ export default function ProductDetailPage() {
           </div>
           <div className="product-detail__benefits">
             <div>
-              <strong>Giao hàng & Trả hàng</strong>
-              <span>Miễn phí trên 500k</span>
+              <strong>{t('product.delivery_returns')}</strong>
+              <span>{t('product.free_shipping')}</span>
             </div>
             <div>
-              <strong>Bảo hành 12 tháng</strong>
-              <span>Đã đặt cam kết</span>
+              <strong>{t('product.warranty')}</strong>
+              <span>{t('product.warranty_desc')}</span>
             </div>
           </div>
         </aside>
       </div>
 
-      <div className="product-detail__similar">
-        <h2>{t('product.related')}</h2>
-        <div className="product-detail__similar-grid">
+        <div className="product-detail__similar">
+          <h2>{t('product.related')}</h2>
+          <div className="product-detail__similar-grid">
           {similar.length > 0 ? (
             similar.map((item) => (
               <Link

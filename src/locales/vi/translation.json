@@ -142,6 +142,19 @@
     "continue_shopping": "Tiếp tục mua sắm"
   },
   "product": {
-    "login_required": "Vui lòng đăng nhập để xem giỏ hàng và mua sắm."
+    "login_required": "Vui lòng đăng nhập để xem giỏ hàng và mua sắm.",
+    "legit_check": "Kiểm định AI",
+    "brand": "Thương hiệu",
+    "buy_now": "Mua Ngay",
+    "add_to_cart": "Thêm Vào Giỏ Hàng",
+    "out_of_stock": "Hết hàng",
+    "adding": "Đang thêm...",
+    "added_success": "Đã thêm vào giỏ hàng",
+    "description": "Mô Tả Sản Phẩm",
+    "related": "Sản Phẩm Liên Quan",
+    "delivery_returns": "Giao Hàng & Trả Hàng",
+    "free_shipping": "Miễn phí trên 500k",
+    "warranty": "Bảo Hành 12 Tháng",
+    "warranty_desc": "Đã đặt cam kết"
   }
 }
