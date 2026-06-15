@@ -157,7 +157,7 @@ export default function ProfilePage() {
       dispatch(updateUser({ ...updated }))
       updateAuthUser({ ...updated })
     } catch {
-      setUploadError('Vui lòng tải ảnh dưới 10 MB. Vui lòng thử lại.')
+      setUploadError(t('profile.avatar_err'))
     } finally {
       setIsUploading(false)
       event.target.value = ''
@@ -167,22 +167,22 @@ export default function ProfilePage() {
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault()
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      setPasswordError('Mật khẩu xác nhận không khớp.')
+      setPasswordError(t('profile.pwd_match_err'))
       return
     }
     if (passwordData.newPassword.length < 6) {
-      setPasswordError('Mật khẩu mới phải có ít nhất 6 ký tự.')
+      setPasswordError(t('profile.pwd_len_err'))
       return
     }
     setIsSubmittingPassword(true)
     setPasswordError('')
     try {
       await userApi.changePassword({ oldPassword: passwordData.oldPassword, newPassword: passwordData.newPassword })
-      toast.success('Đổi mật khẩu thành công')
+      toast.success(t('profile.pwd_success'))
       setIsChangingPassword(false)
       setPasswordData({ oldPassword: '', newPassword: '', confirmPassword: '' })
     } catch (err: any) {
-      setPasswordError(err.response?.data?.message || 'Có lỗi xảy ra. Vui lòng thử lại.')
+      setPasswordError(err.response?.data?.message || t('profile.generic_err'))
     } finally {
       setIsSubmittingPassword(false)
     }
@@ -239,7 +239,7 @@ export default function ProfilePage() {
                   required 
                   value={passwordData.oldPassword} 
                   onChange={(e) => setPasswordData(prev => ({ ...prev, oldPassword: e.target.value }))} 
-                  placeholder="Nhập mật khẩu hiện tại" 
+                  placeholder={t('profile.old_pwd_ph')} 
                   style={{ width: '100%', padding: '10px 40px 10px 12px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '15px', outline: 'none' }}
                 />
                 <button type="button" onClick={() => setShowOldPassword(!showOldPassword)} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', padding: 0, display: 'flex' }}>
@@ -256,7 +256,7 @@ export default function ProfilePage() {
                   required 
                   value={passwordData.newPassword} 
                   onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))} 
-                  placeholder="Nhập mật khẩu mới" 
+                  placeholder={t('profile.new_pwd_ph')} 
                   style={{ width: '100%', padding: '10px 40px 10px 12px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '15px', outline: 'none' }}
                 />
                 <button type="button" onClick={() => setShowNewPassword(!showNewPassword)} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', padding: 0, display: 'flex' }}>
@@ -273,7 +273,7 @@ export default function ProfilePage() {
                   required 
                   value={passwordData.confirmPassword} 
                   onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))} 
-                  placeholder="Nhập lại mật khẩu mới" 
+                  placeholder={t('profile.confirm_pwd_ph')} 
                   style={{ width: '100%', padding: '10px 40px 10px 12px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '15px', outline: 'none' }}
                 />
                 <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', padding: 0, display: 'flex' }}>
@@ -363,7 +363,7 @@ export default function ProfilePage() {
                       setWardCode('') // reset ward
                     }}
                   >
-                    <option value="">Chọn Tỉnh/Thành</option>
+                    <option value="">{t('profile.sel_prov')}</option>
                     {provinces.map((p) => (
                       <option key={p.code} value={p.code}>
                         {p.name}
@@ -388,7 +388,7 @@ export default function ProfilePage() {
                     }}
                     disabled={!provinceId}
                   >
-                    <option value="">Chọn Quận/Huyện</option>
+                    <option value="">{t('profile.sel_dist')}</option>
                     {districts.map((d) => (
                       <option key={d.code} value={d.code}>
                         {d.name}
@@ -410,7 +410,7 @@ export default function ProfilePage() {
                     onChange={(event) => setWardCode(event.target.value)}
                     disabled={!districtId}
                   >
-                    <option value="">Chọn Phường/Xã</option>
+                    <option value="">{t('profile.sel_ward')}</option>
                     {wards.map((w) => (
                       <option key={w.code} value={w.code}>
                         {w.name}
@@ -428,10 +428,10 @@ export default function ProfilePage() {
                 <span>{t('profile.gender')}</span>
                 {isEditing ? (
                   <select value={gender} onChange={(event) => setGender(event.target.value)}>
-                    <option value="">Chọn giới tính</option>
-                    <option value="Nam">Nam</option>
-                    <option value="Nữ">Nữ</option>
-                    <option value="Khác">Khác</option>
+                    <option value="">{t('profile.sel_gender')}</option>
+                    <option value="Nam">{t('profile.male')}</option>
+                    <option value="Nữ">{t('profile.female')}</option>
+                    <option value="Khác">{t('profile.other')}</option>
                   </select>
                 ) : (
                   <strong>{renderValue(profile?.gender)}</strong>
