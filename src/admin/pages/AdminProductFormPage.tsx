@@ -27,7 +27,7 @@ interface AiAutoFillResult {
 // ── Legit Check 6-slot state ─────────────────
 type LegitSlotKey = 'front' | 'back' | 'tag' | 'opt1' | 'opt2' | 'opt3'
 type LegitSlotState = {
-  file: File | null; preview: string | null
+  file: File | null; preview: string | null; originalUrl?: string
   validating: boolean; valid: boolean | null; errorMsg: string
 }
 const LEGIT_SLOTS: { key: LegitSlotKey; icon: string; title: string; hint: string; required: boolean }[] = [
@@ -123,6 +123,7 @@ export default function AdminProductFormPage() {
             updatedSlots[slotKeys[index]] = {
               file: null, // we don't have the File object yet, but we have preview
               preview: fullUrl,
+              originalUrl: url,
               validating: false,
               valid: true,
               errorMsg: ''
@@ -247,11 +248,9 @@ export default function AdminProductFormPage() {
         if (slot.file) {
           finalImageUrls.push(newUploadedUrls[newUrlIdx])
           newUrlIdx++
-        } else if (slot.preview) {
-          // It's an existing image, we need to extract the original path (relative)
-          // The preview is a full URL, e.g., http://localhost:8080/uploads/...
-          const urlObj = new URL(slot.preview, window.location.origin)
-          finalImageUrls.push(urlObj.pathname)
+        } else if (slot.originalUrl) {
+          // It's an existing image, keep original path
+          finalImageUrls.push(slot.originalUrl)
         }
       }
 
