@@ -68,7 +68,7 @@ export default function ContactPage() {
                 type="text"
                 value={form.name}
                 onChange={handleChange('name')}
-                placeholder="Nhập họ tên của bạn"
+                placeholder={t('contact.name_ph')}
                 required
               />
             </label>
@@ -78,7 +78,7 @@ export default function ContactPage() {
                 type="email"
                 value={form.email}
                 onChange={handleChange('email')}
-                placeholder="Nhập địa chỉ email"
+                placeholder={t('contact.email_ph')}
                 required
               />
             </label>
@@ -88,7 +88,7 @@ export default function ContactPage() {
                 type="text"
                 value={form.phone ?? ''}
                 onChange={handleChange('phone')}
-                placeholder="Nhập số điện thoại (tùy chọn)"
+                placeholder={t('contact.phone_ph')}
               />
             </label>
             <label>
@@ -97,7 +97,7 @@ export default function ContactPage() {
                 rows={6}
                 value={form.message}
                 onChange={handleChange('message')}
-                placeholder="Bạn cần hỗ trợ điều gì?"
+                placeholder={t('contact.message_ph')}
                 required
               />
             </label>
