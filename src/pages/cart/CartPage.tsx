@@ -245,18 +245,7 @@ export default function CartPage() {
                 <span>{t('cart.address')}</span>
                 <span>{user.address || t('cart.not_updated')}</span>
               </div>
-              <div className="cart__summary-row">
-                <span>Ward Code</span>
-                <span>{user.wardCode || t('cart.not_updated')}</span>
-              </div>
-              <div className="cart__summary-row">
-                <span>District ID</span>
-                <span>{user.districtId || t('cart.not_updated')}</span>
-              </div>
-              <div className="cart__summary-row">
-                <span>Province ID</span>
-                <span>{user.provinceId || t('cart.not_updated')}</span>
-              </div>
+
               {!hasShippingInfo ? (
                 <div className="cart__summary-alert">
                   {t('cart.update_info')}

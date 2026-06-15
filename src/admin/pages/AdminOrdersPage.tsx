@@ -21,6 +21,7 @@ const STATUS_LABELS: Record<string, string> = {
   DELIVERED: 'Đã giao hàng',
   COMPLETED: 'Hoàn thành',
   CANCELED: 'Đã hủy',
+  DISPUTED: 'Khiếu nại',
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -30,6 +31,7 @@ const STATUS_COLORS: Record<string, string> = {
   DELIVERED: '#10b981',
   COMPLETED: '#059669',
   CANCELED: '#ef4444',
+  DISPUTED: '#f97316',
 }
 
 // ─── Assign Shipper Modal ──────────────────────────────────────────────────

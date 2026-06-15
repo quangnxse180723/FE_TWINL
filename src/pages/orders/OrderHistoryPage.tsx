@@ -21,6 +21,7 @@ const STATUS_LABELS: Record<string, string> = {
   DELIVERED: 'Đã giao thành công',
   COMPLETED: 'Hoàn thành',
   CANCELED: 'Đã huỷ',
+  DISPUTED: 'Khiếu nại',
 }
 
 export default function OrderHistoryPage() {
@@ -46,6 +47,29 @@ export default function OrderHistoryPage() {
 
     fetchOrders()
   }, [page, sizePage])
+
+  const handleConfirmReceipt = async (id: number) => {
+    if (!window.confirm('Bạn có chắc chắn đã nhận được hàng?')) return;
+    try {
+      await orderApi.confirmReceipt(id);
+      alert('Xác nhận thành công!');
+      window.location.reload();
+    } catch {
+      alert('Có lỗi xảy ra, vui lòng thử lại.');
+    }
+  };
+
+  const handleReportMissing = async (id: number) => {
+    const reason = window.prompt('Vui lòng nhập lý do (tùy chọn):');
+    if (reason === null) return; // User cancelled prompt
+    try {
+      await orderApi.reportMissing(id, reason);
+      alert('Đã gửi báo cáo khiếu nại!');
+      window.location.reload();
+    } catch {
+      alert('Có lỗi xảy ra, vui lòng thử lại.');
+    }
+  };
 
   return (
     <section className="orders">
@@ -106,9 +130,31 @@ export default function OrderHistoryPage() {
                   <div className="orders__history-total">
                     Tổng tiền: <strong>{formatPrice(order.totalAmount)}</strong>
                   </div>
-                  <Link className="orders__history-btn" to={PATHS.orderTracking.replace(':code', order.code)}>
-                    Xem chi tiết
-                  </Link>
+                  <div style={{ display: 'flex', gap: '1rem' }}>
+                    {order.status === 'DELIVERED' && (
+                      <>
+                        <button
+                          type="button"
+                          className="orders__history-btn"
+                          style={{ backgroundColor: '#28a745', color: 'white', border: 'none' }}
+                          onClick={() => handleConfirmReceipt(order.id)}
+                        >
+                          Đã nhận hàng
+                        </button>
+                        <button
+                          type="button"
+                          className="orders__history-btn"
+                          style={{ backgroundColor: 'transparent', color: '#dc3545', border: '1px solid #dc3545' }}
+                          onClick={() => handleReportMissing(order.id)}
+                        >
+                          Chưa nhận hàng
+                        </button>
+                      </>
+                    )}
+                    <Link className="orders__history-btn" to={PATHS.orderTracking.replace(':code', order.code)}>
+                      Xem chi tiết
+                    </Link>
+                  </div>
                 </div>
               </div>
             ))}
