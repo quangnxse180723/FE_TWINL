@@ -15,12 +15,14 @@ export default function BrandsCategoryPage() {
   const [selectedStyle, setSelectedStyle] = useState('')
   const [selectedSize, setSelectedSize] = useState('')
   const [sortBy, setSortBy] = useState('')
+  const [conditionRange, setConditionRange] = useState<number>(50)
+  const [selectedDefects, setSelectedDefects] = useState<string>('')
   const [page, setPage] = useState(0)
   const navigate = useNavigate()
 
   useEffect(() => {
     fetchProducts()
-  }, [selectedBrand, selectedCategory, selectedStyle, selectedSize, sortBy, page])
+  }, [selectedBrand, selectedCategory, selectedStyle, selectedSize, conditionRange, selectedDefects, sortBy, page])
 
   const fetchProducts = async () => {
     setLoading(true)
@@ -34,6 +36,9 @@ export default function BrandsCategoryPage() {
       if (selectedCategory) params.category = selectedCategory
       if (selectedStyle) params.style = selectedStyle
       if (selectedSize) params.size = selectedSize
+      if (conditionRange > 50) params.minCondition = conditionRange
+      if (selectedDefects) params.defects = selectedDefects
+      if (sortBy) params.sortBy = sortBy
       if (sortBy === 'price_asc') params.minPrice = 0
       if (sortBy === 'price_desc') params.maxPrice = 999999999
 
@@ -56,11 +61,6 @@ export default function BrandsCategoryPage() {
     return new Intl.NumberFormat('vi-VN').format(price) + ' đ'
   }
 
-  const getTone = (index: number): string => {
-    const tones = ['warm', 'cool', 'dark', 'neutral', 'green', 'night', 'charcoal', 'blue', 'sand', 'graphite', 'navy', 'brown']
-    return tones[index % tones.length]
-  }
-
   return (
     <section className="category">
       <div className="category__hero">
@@ -72,12 +72,12 @@ export default function BrandsCategoryPage() {
       </div>
 
       <div className="category__container">
-        <aside className="category__filters">
-          <h3>Bộ lọc</h3>
+                <aside className="category__filters category__filters--stacked">
+          <h3 className="category__sidebar-title">BỘ LỌC</h3>
 
-          <div className="category__filter-group">
-            <label>Thương hiệu</label>
-            <select value={selectedBrand} onChange={(e) => { setSelectedBrand(e.target.value); setPage(0) }}>
+          <h3 className="category__sidebar-title">THƯƠNG HIỆU</h3>
+          <div className="category__search-wrapper" style={{marginBottom: 16}}>
+            <select style={{width: '100%', padding: '10px', border: '1px solid #dcdcdc', borderRadius: '4px', fontSize: '13px', background: '#f9f9f9', outline: 'none'}} value={selectedBrand} onChange={(e) => { setSelectedBrand(e.target.value); setPage(0) }}>
               <option value="">Tất cả</option>
               {brandOptions.map((brand) => (
                 <option key={brand} value={brand}>{brand}</option>
@@ -85,9 +85,9 @@ export default function BrandsCategoryPage() {
             </select>
           </div>
 
-          <div className="category__filter-group">
-            <label>Danh mục</label>
-            <select value={selectedCategory} onChange={(e) => { setSelectedCategory(e.target.value); setPage(0) }}>
+          <h3 className="category__sidebar-title">DANH MỤC</h3>
+          <div className="category__search-wrapper" style={{marginBottom: 16}}>
+            <select style={{width: '100%', padding: '10px', border: '1px solid #dcdcdc', borderRadius: '4px', fontSize: '13px', background: '#f9f9f9', outline: 'none'}} value={selectedCategory} onChange={(e) => { setSelectedCategory(e.target.value); setPage(0) }}>
               <option value="">Tất cả</option>
               <option value="Áo khoác">Áo khoác</option>
               <option value="Áo">Áo</option>
@@ -97,9 +97,9 @@ export default function BrandsCategoryPage() {
             </select>
           </div>
 
-          <div className="category__filter-group">
-            <label>Phong cách</label>
-            <select value={selectedStyle} onChange={(e) => { setSelectedStyle(e.target.value); setPage(0) }}>
+          <h3 className="category__sidebar-title">PHONG CÁCH</h3>
+          <div className="category__search-wrapper" style={{marginBottom: 24}}>
+            <select style={{width: '100%', padding: '10px', border: '1px solid #dcdcdc', borderRadius: '4px', fontSize: '13px', background: '#f9f9f9', outline: 'none'}} value={selectedStyle} onChange={(e) => { setSelectedStyle(e.target.value); setPage(0) }}>
               <option value="">Tất cả</option>
               <option value="Cơ bản">Cơ bản</option>
               <option value="Thể thao">Thể thao</option>
@@ -109,22 +109,53 @@ export default function BrandsCategoryPage() {
             </select>
           </div>
 
-          <div className="category__filter-group">
-            <label>Size</label>
-            <select value={selectedSize} onChange={(e) => { setSelectedSize(e.target.value); setPage(0) }}>
-              <option value="">Tất cả</option>
-              <option value="XS">XS</option>
-              <option value="S">S</option>
-              <option value="M">M</option>
-              <option value="L">L</option>
-              <option value="XL">XL</option>
-              <option value="XXL">XXL</option>
-            </select>
+          <h3 className="category__sidebar-title">SIZE</h3>
+          <div className="category__size-grid">
+            {['XS', 'S', 'M', 'L', 'XL', 'XXL'].map((size) => (
+              <div 
+                key={size}
+                onClick={() => { setSelectedSize(selectedSize === size ? '' : size); setPage(0) }}
+                className={`category__size-btn ${selectedSize === size ? 'is-active' : ''}`}
+              >
+                {size}
+              </div>
+            ))}
+          </div>
+
+          <h3 className="category__sidebar-title">ĐỘ MỚI (%)</h3>
+          <div className="category__filter-group" style={{marginBottom: '24px'}}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <input 
+                type="range" 
+                min="50" max="100" step="5"
+                value={conditionRange}
+                onChange={(e) => { setConditionRange(Number(e.target.value)); setPage(0) }}
+                style={{ width: '100%', cursor: 'pointer', accentColor: '#111' }}
+              />
+              <span style={{ fontSize: '12px', color: '#555', whiteSpace: 'nowrap' }}>Từ {conditionRange}%</span>
+            </div>
+          </div>
+
+          <h3 className="category__sidebar-title">TÌNH TRẠNG LỖI</h3>
+          <div className="category__size-grid">
+            {['MINT', 'MINOR_FLAW', 'STAINED', 'MISSING_BUTTON', 'TORN', 'FADED'].map((defect) => {
+              const defectLabel = { MINT: 'Không lỗi', MINOR_FLAW: 'Sờn nhẹ', STAINED: 'Bẩn/Ố', MISSING_BUTTON: 'Mất cúc', TORN: 'Rách nhỏ', FADED: 'Phai màu' }[defect];
+              return (
+                <div 
+                  key={defect}
+                  onClick={() => { setSelectedDefects(selectedDefects === defect ? '' : defect); setPage(0) }}
+                  className={`category__size-btn ${selectedDefects === defect ? 'is-active' : ''}`}
+                  style={{ fontSize: '10px' }}
+                >
+                  {defectLabel}
+                </div>
+              )
+            })}
           </div>
 
           <button
             type="button"
-            className="category__reset-btn"
+            className="category__reset-btn-new"
             onClick={() => {
               setSelectedBrand('')
               setSelectedCategory('')
@@ -134,23 +165,25 @@ export default function BrandsCategoryPage() {
               setPage(0)
             }}
           >
-            Đặt lại bộ lọc
+            ĐẶT LẠI BỘ LỌC
           </button>
         </aside>
 
         <div className="category__main">
-          <div className="category__toolbar">
-            <span className="category__count">{products.length} sản phẩm</span>
-            <select
-              className="category__sort"
-              value={sortBy}
-              onChange={(e) => handleSortChange(e.target.value)}
-            >
-              <option value="">Mặc định</option>
-              <option value="price_asc">Giá: Thấp đến cao</option>
-              <option value="price_desc">Giá: Cao đến thấp</option>
-              <option value="newest">Mới nhất</option>
-            </select>
+          <div className="category__toolbar-new">
+            <span>Hiển thị {products.length} sản phẩm</span>
+            <div>
+              <span style={{ marginRight: 8 }}>SẮP XẾP:</span>
+              <select
+                value={sortBy}
+                onChange={(e) => handleSortChange(e.target.value)}
+              >
+                <option value="">Mặc định</option>
+                <option value="price_asc">Giá: Thấp đến cao</option>
+                <option value="price_desc">Giá: Cao đến thấp</option>
+                <option value="newest">Mới nhất</option>
+              </select>
+            </div>
           </div>
 
           {loading ? (
@@ -172,26 +205,36 @@ export default function BrandsCategoryPage() {
           ) : (
             <>
               <div className="category__grid">
-                {products.map((product, index) => (
+                {products.map((product) => (
                   <article
                     key={product.id}
-                    className="category__card"
+                    className="category__card-new"
                     onClick={() => navigate(PATHS.productDetail.replace(':id', String(product.id)))}
                   >
-                    <div className={`category__card-media category__card-media--${getTone(index)}`}>
+                    <div className="category__card-media-new">
                       {product.imageUrls && product.imageUrls.length > 0 ? (
                         <img src={product.imageUrls[0]} alt={product.name} />
                       ) : (
                         <span>{product.name.split(' ')[0]}</span>
                       )}
+                      {product.conditionPercentage && (
+                        <span style={{ position: 'absolute', top: '8px', right: '8px', background: 'rgba(255, 255, 255, 0.9)', color: '#4f46e5', padding: '4px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold', zIndex: 10, boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
+                          Mới {product.conditionPercentage}%
+                        </span>
+                      )}
                     </div>
-                    <div className="category__card-body">
-                      <h4>{product.name}</h4>
-                      <p className="category__card-brand">{product.brand}</p>
-                      <div className="category__card-meta">
-                        <span className="category__card-size">{product.sizes?.join(', ')}</span>
+                    <div className="category__card-body-new">
+                      <p className="category__card-brand-new">{product.brand && product.brand !== 'Không xác định' ? product.brand : 'Không xác định'}</p>
+                      <h4 className="category__card-name-new">{product.name}</h4>
+                      <div className="category__card-footer-new">
+                        <span className="category__card-size-new">Size: {product.sizes && product.sizes.length > 0 ? product.sizes.join(', ') : 'Freesize'}</span>
+                        <strong className="category__card-price-new">{formatPrice(product.price)}</strong>
                       </div>
-                      <strong className="category__card-price">{formatPrice(product.price)}</strong>
+                      <p style={{ fontSize: '11px', color: '#ef4444', margin: 0, fontWeight: 500 }}>
+                        {product.defects && product.defects.length > 0 && !product.defects.includes('MINT') 
+                          ? `Lỗi: ${product.defects.map(d => (({ MINOR_FLAW: 'Sờn nhẹ', STAINED: 'Bẩn/Ố vàng', MISSING_BUTTON: 'Mất cúc', TORN: 'Rách nhỏ', FADED: 'Phai màu' })[d] || d)).join(', ')}` 
+                          : 'Tình trạng: Không lỗi'}
+                      </p>
                     </div>
                   </article>
                 ))}
@@ -203,7 +246,7 @@ export default function BrandsCategoryPage() {
                   disabled={page === 0}
                   onClick={() => setPage((p) => Math.max(0, p - 1))}
                 >
-                  ← Trang trước
+                  &larr; Trang trước
                 </button>
                 <span>Trang {page + 1}</span>
                 <button
@@ -211,7 +254,7 @@ export default function BrandsCategoryPage() {
                   disabled={products.length < 12}
                   onClick={() => setPage((p) => p + 1)}
                 >
-                  Trang sau →
+                  Trang sau &rarr;
                 </button>
               </div>
             </>

@@ -99,8 +99,6 @@ export default function Header() {
 
   const isActive = (path: string) => location.pathname === path
 
-  const isHome = location.pathname === '/'
-
   return (
     <>
       {/* ── FLOATING HEADER ─────────────────────────────────── */}

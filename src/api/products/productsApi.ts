@@ -16,6 +16,8 @@ export interface Product {
   sizes: string[];
   colorIds?: number[];
   colors: string[];
+  conditionPercentage?: number;
+  defects?: string[];
   createdAt: string;
   updatedAt: string;
 }
@@ -40,6 +42,10 @@ export interface ProductsParams {
   maxPrice?: string;
   style?: string;
   excludeStyle?: string;
+  minCondition?: number;
+  maxCondition?: number;
+  defects?: string;
+  sortBy?: string;
   page?: number;
   sizePage?: number;
 }

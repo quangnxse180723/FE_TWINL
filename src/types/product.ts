@@ -10,6 +10,7 @@ export interface Product {
   gender?: string;
   colorIds?: number[];
   colors?: string[];
+  conditionPercentage?: number;
 }
 
 export interface ProductResponse {
@@ -30,6 +31,7 @@ export interface ProductResponse {
   sizes?: string[];
   colorIds?: number[];
   colors?: string[];
+  conditionPercentage?: number;
   createdAt?: string;
   updatedAt?: string;
 }

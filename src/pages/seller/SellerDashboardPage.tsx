@@ -18,7 +18,7 @@ type Tab = 'overview' | 'products' | 'new-product' | 'orders' | 'my-orders' | 'w
 interface AiAutoFillResult {
   name?: string; brand?: string; style?: string; gender?: string;
   description?: string; estimatedPrice?: string; material?: string; condition?: string;
-  color?: string;
+  color?: string; conditionPercentage?: number; defects?: string[];
 }
 
 // Typewriter effect hook
@@ -62,13 +62,14 @@ export default function SellerDashboardPage() {
 
   // States cho Form Thêm Sản Phẩm
   const [formData, setFormData] = useState({
-    name: '', description: '', price: '', categoryId: '', brand: '', gender: 'Unisex', style: '', stock: '',
+    name: '', description: '', price: '', categoryId: '', brand: '', gender: 'Unisex', style: '', stock: '', conditionPercentage: '100',
   });
 
   const [sizes, setSizes] = useState('');
   const [colorIds, setColorIds] = useState<number[]>([]);
   const [categories, setCategories] = useState<{id: number, name: string}[]>([]);
   const [colors, setColors] = useState<{id: number, name: string}[]>([]);
+  const [defects, setDefects] = useState<string[]>([]);
 
   // AI Auto-fill states
   const [isAutoFilling, setIsAutoFilling] = useState(false);
@@ -188,7 +189,12 @@ export default function SellerDashboardPage() {
         style: data.style ?? prev.style,
         gender: data.gender ?? prev.gender,
         price: data.estimatedPrice ? String(Number(data.estimatedPrice.replace(/\D/g, ''))) || prev.price : prev.price,
+        conditionPercentage: data.conditionPercentage ? String(data.conditionPercentage) : prev.conditionPercentage
       }));
+      
+      if (data.defects && data.defects.length > 0) {
+        setDefects(data.defects.filter(d => d !== 'MINT'));
+      }
       
       let colorDetected = false;
       if (data.color) {
@@ -201,7 +207,7 @@ export default function SellerDashboardPage() {
         }
       }
 
-      setAiSuggested({ name: true, description: true, brand: !!data.brand, style: !!data.style, gender: !!data.gender, price: !!data.estimatedPrice, color: colorDetected });
+      setAiSuggested({ name: true, description: true, brand: !!data.brand, style: !!data.style, gender: !!data.gender, price: !!data.estimatedPrice, color: colorDetected, condition: !!data.conditionPercentage });
       toast.success('✨ AI đã điền thông tin xong!');
     } catch (e: any) {
       toast.error(e.message || 'AI phân tích thất bại.');
@@ -252,14 +258,17 @@ export default function SellerDashboardPage() {
         stock: Number(formData.stock),
         imageUrls: uploadedUrls,
         sizes: sizes.split(',').map((item) => item.trim()).filter(Boolean),
-        colorIds: colorIds
+        colorIds: colorIds,
+        conditionPercentage: Number(formData.conditionPercentage),
+        defects: defects.length > 0 ? defects : ['MINT']
       };
       await sellerApi.createProduct(payload);
       toast.success('Đăng sản phẩm thành công!');
-      setFormData({ name: '', description: '', price: '', categoryId: '', brand: '', gender: 'Unisex', style: '', stock: '' });
+      setFormData({ name: '', description: '', price: '', categoryId: '', brand: '', gender: 'Unisex', style: '', stock: '', conditionPercentage: '100' });
       setLegitSlots({ front: emptyLegitSlot(), back: emptyLegitSlot(), tag: emptyLegitSlot(), opt1: emptyLegitSlot(), opt2: emptyLegitSlot(), opt3: emptyLegitSlot() });
       setSizes('');
       setColorIds([]);
+      setDefects([]);
       setAiSuggested({});
       setAiResult({});
       setActiveTab('products');
@@ -542,11 +551,16 @@ export default function SellerDashboardPage() {
                             <tr key={product.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
                               <td className="p-4">
                                 <div className="flex items-center gap-3">
-                                  <div className="w-12 h-12 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
+                                  <div className="w-12 h-12 bg-gray-100 rounded-md overflow-hidden flex-shrink-0 relative">
                                     {product.imageUrls && product.imageUrls[0] ? (
                                       <img src={product.imageUrls[0].startsWith('http') ? product.imageUrls[0] : `${API_BASE_URL}${product.imageUrls[0]}`} alt={product.name} className="w-full h-full object-cover" />
                                     ) : (
                                       <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">No IMG</div>
+                                    )}
+                                    {product.conditionPercentage && (
+                                      <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-[9px] font-bold text-center py-0.5">
+                                        {product.conditionPercentage}%
+                                      </div>
                                     )}
                                   </div>
                                   <div>
@@ -827,8 +841,78 @@ export default function SellerDashboardPage() {
                             </div>
                           </div>
 
+
+                          {/* Tình trạng & Lỗi (Smart Filter cho đồ Si) */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-5">
+                            {/* Condition Percentage */}
+                            <div>
+                              <label className="text-sm font-medium text-gray-700 flex items-center gap-2 mb-1.5">
+                                Độ mới (%) *
+                                {aiSuggested.condition && <span className="bg-green-50 text-green-600 border border-green-200 text-[10px] px-2 py-0.5 rounded-full font-bold leading-none">✦ AI Gợi ý</span>}
+                              </label>
+                              <div className="flex items-center gap-4">
+                                <input 
+                                  type="range" 
+                                  min="50" 
+                                  max="100" 
+                                  step="5"
+                                  name="conditionPercentage" 
+                                  value={formData.conditionPercentage} 
+                                  onChange={handleInputChange} 
+                                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600" 
+                                />
+                                <span className="font-semibold text-blue-600 w-12">{formData.conditionPercentage}%</span>
+                              </div>
+                            </div>
+
+                            {/* Defects */}
+                            <div>
+                              <label className="text-sm font-medium text-gray-700 flex items-center gap-2 mb-2">
+                                Tình trạng lỗi
+                                {aiSuggested.condition && <span className="bg-green-50 text-green-600 border border-green-200 text-[10px] px-2 py-0.5 rounded-full font-bold leading-none">✦ AI Gợi ý</span>}
+                              </label>
+                              <div className="flex flex-wrap gap-2">
+                                {[
+                                  { value: 'MINT', label: 'Không lỗi' },
+                                  { value: 'MINOR_FLAW', label: 'Sờn nhẹ' },
+                                  { value: 'STAINED', label: 'Bẩn/Ố vàng' },
+                                  { value: 'MISSING_BUTTON', label: 'Mất cúc' },
+                                  { value: 'TORN', label: 'Rách nhỏ' },
+                                  { value: 'FADED', label: 'Phai màu' }
+                                ].map((defect) => (
+                                  <label 
+                                    key={defect.value}
+                                    className={`px-3 py-1.5 text-xs font-medium rounded-full cursor-pointer transition-all border ${
+                                      defects.includes(defect.value) || (defects.length === 0 && defect.value === 'MINT')
+                                        ? 'bg-red-50 text-red-700 border-red-200 shadow-sm'
+                                        : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+                                    }`}
+                                  >
+                                    <input
+                                      type="checkbox"
+                                      className="hidden"
+                                      checked={defects.includes(defect.value) || (defects.length === 0 && defect.value === 'MINT')}
+                                      onChange={(e) => {
+                                        if (defect.value === 'MINT') {
+                                          setDefects([]);
+                                        } else {
+                                          if (e.target.checked) {
+                                            setDefects(prev => [...prev.filter(d => d !== 'MINT'), defect.value]);
+                                          } else {
+                                            setDefects(prev => prev.filter(d => d !== defect.value));
+                                          }
+                                        }
+                                      }}
+                                    />
+                                    {defect.label}
+                                  </label>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+
                           {/* Kích thước */}
-                          <div>
+                          <div className="mt-5">
                             <label className="text-sm font-medium text-gray-700 flex items-center gap-2 mb-1.5">Kích thước (phân cách dấu phẩy)</label>
                             <input type="text" value={sizes} onChange={(e) => setSizes(e.target.value)} placeholder="Ví dụ: S, M, L, XL" className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all" />
                           </div>

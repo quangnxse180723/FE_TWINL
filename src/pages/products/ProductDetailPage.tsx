@@ -218,8 +218,37 @@ export default function ProductDetailPage() {
         <aside className="product-detail__info">
           <h1 style={{ fontSize: '24px', fontWeight: 700, color: '#111', marginBottom: '16px', lineHeight: 1.3 }}>{product.name}</h1>
           <div className="product-detail__price">{formatPrice(product.price)}</div>
-          <div className="product-detail__meta">
-            <span className="product-detail__badge">Size {product.sizes?.[0] || 'Free'}</span>
+          <div className="product-detail__meta" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '20px' }}>
+            <span className="product-detail__badge" style={{ padding: '4px 8px', background: '#f3f4f6', borderRadius: '4px', fontSize: '14px' }}>
+              Size {product.sizes?.[0] || 'Free'}
+            </span>
+            {product.conditionPercentage && (
+              <span className="product-detail__badge" style={{ padding: '4px 8px', background: '#e0e7ff', color: '#4f46e5', borderRadius: '4px', fontSize: '14px', fontWeight: 600 }}>
+                Độ mới: {product.conditionPercentage}%
+              </span>
+            )}
+            {product.defects && product.defects.length > 0 && product.defects[0] !== 'MINT' && (
+              <span className="product-detail__badge" style={{ padding: '4px 8px', background: '#fee2e2', color: '#dc2626', borderRadius: '4px', fontSize: '14px', fontWeight: 600 }}>
+                Lỗi: {product.defects.map(d => {
+                  const defectLabels: Record<string, string> = {
+                    'MINOR_FLAW': 'Sờn nhẹ',
+                    'STAINED': 'Bẩn/Ố vàng',
+                    'MISSING_BUTTON': 'Mất cúc',
+                    'TORN': 'Rách nhỏ',
+                    'FADED': 'Phai màu'
+                  };
+                  return defectLabels[d] || d;
+                }).join(', ')}
+              </span>
+            )}
+            {product.defects && product.defects.includes('MINT') && (
+              <span className="product-detail__badge" style={{ padding: '4px 8px', background: '#dcfce7', color: '#16a34a', borderRadius: '4px', fontSize: '14px', fontWeight: 600 }}>
+                Không lỗi (MINT)
+              </span>
+            )}
+          </div>
+          
+          <div style={{ marginBottom: '20px' }}>
             <span className="product-detail__status" style={{ 
               fontWeight: 600, 
               color: product.stock === 0 ? '#ef4444' : '#22c55e' 
