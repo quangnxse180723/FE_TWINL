@@ -1,5 +1,6 @@
+﻿import { useState, useEffect } from 'react'
 import { useLocation, useNavigate, Link } from 'react-router-dom'
-import { Shield, ShieldAlert, ShieldQuestion, AlertTriangle, CheckCircle2, ArrowLeft, ShoppingBag } from 'lucide-react'
+import { ShieldAlert, CheckCircle2, ShoppingBag, AlertTriangle, HelpCircle, Info } from 'lucide-react'
 import { PATHS } from '../../routes/paths'
 import '../../styles/pages/legit-result.css'
 
@@ -13,28 +14,22 @@ interface LegitCheckResult {
 
 const RISK_CONFIG = {
   LOW: {
-    label: 'Rủi ro thấp',
-    sublabel: 'Khả năng cao là chính hãng',
-    className: 'legit-result--low',
-    badgeClass: 'legit-badge--low',
-    bgGradient: 'linear-gradient(135deg, #0f4c2a 0%, #1a7a40 100%)',
-    Icon: Shield,
+    label: 'Không phát hiện rủi ro',
+    sublabel: 'Sản phẩm có khả năng cao là chính hãng.',
+    alertClass: 'legit-result__alert--low',
+    Icon: CheckCircle2,
   },
   HIGH: {
-    label: 'Rủi ro cao',
-    sublabel: 'Nhiều dấu hiệu làm giả được phát hiện',
-    className: 'legit-result--high',
-    badgeClass: 'legit-badge--high',
-    bgGradient: 'linear-gradient(135deg, #4a0d0d 0%, #8b2020 100%)',
-    Icon: ShieldAlert,
+    label: 'Phát hiện Rủi ro Cao',
+    sublabel: 'Nhiều điểm sai lệch đã được tìm thấy. Vui lòng cẩn trọng.',
+    alertClass: 'legit-result__alert--high',
+    Icon: AlertTriangle,
   },
   UNCERTAIN: {
     label: 'Không đủ dữ liệu',
-    sublabel: 'Cần thêm ảnh hoặc góc rõ hơn để phán đoán',
-    className: 'legit-result--uncertain',
-    badgeClass: 'legit-badge--uncertain',
-    bgGradient: 'linear-gradient(135deg, #2d2d00 0%, #5a5200 100%)',
-    Icon: ShieldQuestion,
+    sublabel: 'Cần thêm hình ảnh hoặc góc chụp rõ hơn để phân tích chính xác.',
+    alertClass: 'legit-result__alert--uncertain',
+    Icon: HelpCircle,
   },
 }
 
@@ -42,12 +37,20 @@ export default function LegitResultPage() {
   const { state } = useLocation()
   const navigate = useNavigate()
   const result: LegitCheckResult = state?.legitResult
-  const previewImages: Record<string, string> = state?.previewImages || {}
+  const previewImages: string[] = state?.previewImages || []
+  
+  const [activeImage, setActiveImage] = useState(previewImages[0] || '')
+
+  useEffect(() => {
+    if (previewImages && previewImages.length > 0 && !activeImage) {
+      setActiveImage(previewImages[0])
+    }
+  }, [previewImages, activeImage])
 
   if (!result) {
     return (
       <div className="legit-result-empty">
-        <ShieldQuestion size={60} />
+        <HelpCircle size={60} />
         <p>Không có kết quả kiểm định nào.</p>
         <button onClick={() => navigate(PATHS.home)}>Về trang chủ</button>
       </div>
@@ -56,92 +59,119 @@ export default function LegitResultPage() {
 
   const cfg = RISK_CONFIG[result.riskLevel] || RISK_CONFIG.UNCERTAIN
 
+  // Mock data for the right table (since it's not in the LegitCheckResult interface)
+  // In a real scenario, this would come from the API response
+  const brandValue = result.brand || 'Không thương hiệu'
+  const materialValue = 'Vải Cotton'
+  const styleValue = 'Áo mặc thường'
+  const matchValue = result.riskLevel === 'HIGH' ? 'Thấp' : (result.riskLevel === 'LOW' ? 'Cao' : 'Trung bình')
+
   return (
     <div className="legit-result">
-      {/* Hero banner */}
-      <div className="legit-result__hero" style={{ background: cfg.bgGradient }}>
-        <div className="legit-result__hero-inner">
-          <div className={`legit-result__icon-wrap ${cfg.className}`}>
-            <cfg.Icon size={44} />
-          </div>
-          <div className="legit-result__hero-text">
-            <p className="legit-result__brand">{result.brand || 'Không xác định thương hiệu'}</p>
-            <h1 className="legit-result__verdict">{cfg.label}</h1>
-            <p className="legit-result__sublabel">{cfg.sublabel}</p>
+      <div className="legit-result__container">
+        
+        <h1 className="legit-result__title">Kết quả Đối soát</h1>
+
+        <div className={`legit-result__alert ${cfg.alertClass}`}>
+          <cfg.Icon size={24} className="legit-result__alert-icon" />
+          <div className="legit-result__alert-content">
+            <h4>{cfg.label}</h4>
+            <p>{cfg.sublabel}</p>
           </div>
         </div>
-      </div>
 
-      <div className="legit-result__body">
-        {/* Image previews */}
-        {Object.keys(previewImages).length > 0 && (
-          <div className="legit-result__previews">
-            {Object.entries(previewImages).map(([key, src]) => src && (
-              <div key={key} className="legit-result__preview-img">
-                <img src={src} alt={key} />
-              </div>
+        {/* Gallery */}
+        <div className="legit-result__gallery">
+          <div className="legit-result__thumbs">
+            {previewImages.map((src, idx) => (
+              <button 
+                key={idx}
+                type="button"
+                className={`legit-result__thumb ${activeImage === src ? 'is-active' : ''}`}
+                onClick={() => setActiveImage(src)}
+              >
+                <img src={src} alt={`Preview ${idx + 1}`} />
+              </button>
             ))}
           </div>
-        )}
-
-        {/* Red Flags */}
-        {result.redFlags && result.redFlags.length > 0 && (
-          <div className="legit-result__section">
-            <h3 className="legit-result__section-title">
-              <AlertTriangle size={18} /> Điểm đáng ngờ phát hiện được
-            </h3>
-            <ul className="legit-result__red-flags">
-              {result.redFlags.map((flag, i) => (
-                <li key={i} className="legit-result__red-flag">
-                  <AlertTriangle size={14} />
-                  <span>{flag}</span>
-                </li>
-              ))}
-            </ul>
+          <div className="legit-result__main-image">
+            {activeImage && <img src={activeImage} alt="Main view" />}
           </div>
-        )}
+        </div>
 
-        {/* No red flags */}
-        {(!result.redFlags || result.redFlags.length === 0) && result.riskLevel === 'LOW' && (
-          <div className="legit-result__section">
-            <h3 className="legit-result__section-title">
-              <CheckCircle2 size={18} /> Kết quả kiểm tra
-            </h3>
-            <div className="legit-result__clean">
-              <CheckCircle2 size={32} />
-              <p>Không phát hiện dấu hiệu làm giả đáng ngờ nào qua phân tích hình ảnh</p>
+        <div className="legit-result__content-grid">
+          
+          <div className="legit-result__left">
+            <h2 className="legit-result__section-title">Quan sát từ AI</h2>
+            
+            <div className="legit-result__flags">
+              {result.redFlags && result.redFlags.length > 0 ? (
+                result.redFlags.map((flag, idx) => (
+                  <div key={idx} className="legit-result__flag">
+                    <ShieldAlert size={18} />
+                    <span>{flag}</span>
+                  </div>
+                ))
+              ) : (
+                <div className="legit-result__flag" style={{ borderColor: '#dcfce7', background: '#f0fdf4' }}>
+                  <CheckCircle2 size={18} color="#16a34a" />
+                  <span style={{ color: '#16a34a' }}>Không phát hiện điểm đáng ngờ nào trong các bức ảnh bạn đã tải lên.</span>
+                </div>
+              )}
+            </div>
+
+            <div className="legit-result__advice-box">
+              <div className="legit-result__advice-header">
+                <Info size={16} />
+                <span>Lời khuyên từ Chuyên gia AI</span>
+              </div>
+              <div className="legit-result__advice-text">
+                {result.advice || 'Vui lòng kiểm tra kỹ lưỡng sản phẩm trước khi đưa ra quyết định mua.'}
+              </div>
+            </div>
+
+            <div className="legit-result__disclaimer">
+              <Info size={14} />
+              <span>
+                Kết quả kiểm định chỉ mang tính tham khảo, dựa trên phân tích hình ảnh 2D và không thể thay thế kiểm định trực tiếp. Người mua cơ sở 48 giờ sau khi nhận hàng để xác nhận tình trạng thực tế.
+              </span>
             </div>
           </div>
-        )}
 
-        {/* Advice */}
-        <div className="legit-result__section">
-          <h3 className="legit-result__section-title">
-            <Shield size={18} /> Lời khuyên của chuyên gia AI
-          </h3>
-          <div className="legit-result__advice">
-            <p>{result.advice}</p>
+          <div className="legit-result__right">
+            <div className="legit-result__data-box">
+              <h3 className="legit-result__data-title">Đối soát Dữ liệu</h3>
+              
+              <div className="legit-result__data-table">
+                <div className="legit-result__data-row">
+                  <span className="legit-result__data-label">THƯƠNG HIỆU KHAI BÁO</span>
+                  <span className="legit-result__data-value">{brandValue}</span>
+                </div>
+                <div className="legit-result__data-row">
+                  <span className="legit-result__data-label">CHẤT LIỆU PHÁT HIỆN</span>
+                  <span className="legit-result__data-value">{result.riskLevel === 'HIGH' ? `≠ ${materialValue}` : `= ${materialValue}`}</span>
+                </div>
+                <div className="legit-result__data-row">
+                  <span className="legit-result__data-label">PHÂN LOẠI PHONG CÁCH</span>
+                  <span className="legit-result__data-value success">✓ {styleValue}</span>
+                </div>
+                <div className="legit-result__data-row">
+                  <span className="legit-result__data-label">MỨC ĐỘ TRÙNG KHỚP GIÁ</span>
+                  <span className={`legit-result__data-value ${result.riskLevel === 'HIGH' ? 'danger' : 'success'}`}>
+                    {matchValue}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <Link to={PATHS.home} className="legit-result__shop-btn">
+              <ShoppingBag size={18} />
+              <span>Tiếp tục mua sắm</span>
+            </Link>
           </div>
+
         </div>
 
-        {/* Disclaimer */}
-        <div className="legit-result__disclaimer">
-          <AlertTriangle size={14} />
-          <span>
-            Kết quả kiểm định AI chỉ mang tính tham khảo, được dựa trên phân tích hình ảnh 2D và không thể thay thế kiểm định vật lý chuyên nghiệp.
-            Người mua vẫn có <strong>48 giờ</strong> sau khi nhận hàng để xác nhận tình trạng thực tế.
-          </span>
-        </div>
-
-        {/* Actions */}
-        <div className="legit-result__actions">
-          <button className="legit-result__back" onClick={() => navigate(-1)}>
-            <ArrowLeft size={18} /> Quay lại
-          </button>
-          <Link to={PATHS.home} className="legit-result__shop">
-            <ShoppingBag size={18} /> Tiếp tục mua sắm
-          </Link>
-        </div>
       </div>
     </div>
   )

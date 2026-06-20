@@ -132,7 +132,7 @@ export default function AiResultPage() {
           </div>
 
           <div className="ai-footer-note">
-            *Kết quả đối soát dựa trên thuật toán AI với độ chính xác cao. Nếu bạn phát hiện sai sót, vui lòng sử dụng chức năng báo cáo.
+            *Kết quả đối soát dựa trên thuật toán AI với độ chính xác cao.
           </div>
         </div>
       </div>
