@@ -1,11 +1,11 @@
-import { useEffect, useMemo, useState } from 'react'
+﻿import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import productsApi, { type Product } from '../../api/products/productsApi'
 import cartApi from '../../api/cart/cartApi'
 import { PATHS } from '../../routes/paths'
 import type { RootState } from '../../store'
-import { Sparkles, Shield } from 'lucide-react'
+import { Shield, CheckCircle2, Truck, ShieldCheck } from 'lucide-react'
 import AiScannerModal from '../../components/shared/AiScannerModal'
 import LegitCheckModal from '../../components/shared/LegitCheckModal'
 import { toast } from 'react-toastify'
@@ -13,7 +13,7 @@ import { useTranslation } from 'react-i18next'
 import '../../styles/pages/productDetail.css'
 
 const formatPrice = (value: number) =>
-  new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value)
+  new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value).replace('?', 'd')
 
 export default function ProductDetailPage() {
   const { t } = useTranslation()
@@ -32,8 +32,10 @@ export default function ProductDetailPage() {
 
   const categoryLink = useMemo(() => {
     if (!product?.category) return PATHS.home
-    if (product.category === 'Nữ') return PATHS.women
+    if (product.category === 'N?') return PATHS.women
     if (product.category === 'Nam') return PATHS.men
+    if (product.category === 'Tr? em') return PATHS.kids
+    if (product.category === 'Th? thao') return PATHS.sport
     return PATHS.home
   }, [product?.category])
 
@@ -59,7 +61,7 @@ export default function ProductDetailPage() {
           setSimilar([])
         }
       } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : 'Không thể tải sản phẩm'
+        const message = err instanceof Error ? err.message : 'Không th? t?i s?n ph?m'
         setError(message)
       } finally {
         setLoading(false)
@@ -70,81 +72,11 @@ export default function ProductDetailPage() {
   }, [id])
 
   if (loading) {
-    return <section className="product-detail">Đang tải sản phẩm...</section>
+    return <section className="product-detail">Ðang t?i s?n ph?m...</section>
   }
 
   if (error || !product) {
-    return <section className="product-detail">{error || 'Không tìm thấy sản phẩm'}</section>
-  }
-
-  const flyToCart = (e: React.MouseEvent) => {
-    if (!mainImage) return
-
-    const img = document.createElement('img')
-    img.src = mainImage
-    img.style.position = 'fixed'
-    img.style.zIndex = '9999'
-    img.style.width = '120px'
-    img.style.height = '120px'
-    img.style.objectFit = 'cover'
-    img.style.borderRadius = '8px'
-    img.style.transition = 'all 0.8s cubic-bezier(0.25, 1, 0.5, 1)'
-    img.style.opacity = '1'
-
-    const target = e.currentTarget as HTMLElement
-    const rect = target.getBoundingClientRect()
-    img.style.top = `${rect.top - 60}px`
-    img.style.left = `${rect.left + rect.width / 2 - 60}px`
-
-    document.body.appendChild(img)
-
-    const cartIcon = document.getElementById('header-cart-icon')
-    const targetRect = cartIcon?.getBoundingClientRect() || { top: 20, left: window.innerWidth - 100 }
-
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        img.style.top = `${targetRect.top}px`
-        img.style.left = `${targetRect.left + 5}px`
-        img.style.width = '24px'
-        img.style.height = '24px'
-        img.style.opacity = '0.3'
-        img.style.borderRadius = '50%'
-        img.style.transform = 'scale(0.5) rotate(360deg)'
-      })
-    })
-
-    setTimeout(() => {
-      if (document.body.contains(img)) {
-        document.body.removeChild(img)
-      }
-    }, 800)
-  }
-
-  const handleAddToCart = async (e: React.MouseEvent) => {
-    if (!user) {
-      navigate(PATHS.login)
-      return
-    }
-    if (!product) return
-
-    flyToCart(e)
-    setAdding(true)
-    try {
-      const response = await cartApi.addItem({ productId: product.id, quantity: quantity })
-      // Dùng optional chaining để catch mọi khả năng cấu trúc response, ưu tiên items.length
-      // @ts-ignore
-      const newTotal = response?.data?.data?.items?.length ?? response?.data?.items?.length ?? null;
-      
-      if (newTotal !== null) {
-        window.dispatchEvent(new CustomEvent('cart-updated', { detail: newTotal }))
-      } else {
-        window.dispatchEvent(new Event('cart-updated'))
-      }
-      toast.success(t('product.added_success'))
-    } catch {
-    } finally {
-      setAdding(false)
-    }
+    return <section className="product-detail">{error || 'Không tìm th?y s?n ph?m'}</section>
   }
 
   const handleBuyNow = async () => {
@@ -159,6 +91,26 @@ export default function ProductDetailPage() {
       window.dispatchEvent(new Event('cart-updated'))
       navigate(PATHS.cart)
     } catch {
+      toast.error('Không th? thêm vào gi? hàng')
+    } finally {
+      setAdding(false)
+    }
+  }
+
+  const handleAddToCart = async () => {
+    if (!user) {
+      toast.info('Vui lòng dang nh?p d? thêm vào gi? hàng')
+      navigate(PATHS.login)
+      return
+    }
+    if (!product) return
+    setAdding(true)
+    try {
+      await cartApi.addItem({ productId: product.id, quantity: quantity })
+      window.dispatchEvent(new Event('cart-updated'))
+      toast.success('Ðã thêm vào gi? hàng thành công')
+    } catch {
+      toast.error('Không th? thêm vào gi? hàng')
     } finally {
       setAdding(false)
     }
@@ -167,10 +119,10 @@ export default function ProductDetailPage() {
   return (
     <section className="product-detail">
       <nav className="product-detail__breadcrumbs">
-        <Link to={PATHS.home}>Trang chủ</Link>
-        <span>/</span>
-        <Link to={categoryLink}>{product.category}</Link>
-        <span>/</span>
+        <Link to={PATHS.home}>Trang ch?</Link>
+        <span>&gt;</span>
+        <Link to={categoryLink}>{product.category || 'Danh m?c'}</Link>
+        <span>&gt;</span>
         <span>{product.name}</span>
       </nav>
 
@@ -188,7 +140,7 @@ export default function ProductDetailPage() {
               </button>
             ))}
           </div>
-          <div className="product-detail__main" style={{ position: 'relative' }}>
+          <div className="product-detail__main">
             {mainImage ? <img src={mainImage} alt={product.name} /> : null}
             {mainImage && (
               <div className="product-detail__ai-actions">
@@ -196,19 +148,19 @@ export default function ProductDetailPage() {
                   type="button" 
                   className="ai-scan-direct-btn"
                   onClick={() => setIsAiModalOpen(true)}
-                  title="Phân tích ảnh này bằng AI"
+                  title="Phân tích ?nh này b?ng AI"
                 >
-                  <Sparkles size={14} />
+                  <CheckCircle2 size={16} />
                   <span>Quét AI</span>
                 </button>
                 <button 
                   type="button" 
                   className="ai-legit-btn"
                   onClick={() => setIsLegitModalOpen(true)}
-                  title="Kiểm định chính hãng bằng AI"
+                  title="Ki?m d?nh chính hãng b?ng AI"
                 >
-                  <Shield size={14} />
-                  <span>{t('product.legit_check')}</span>
+                  <Shield size={16} />
+                  <span>Ki?m d?nh AI</span>
                 </button>
               </div>
             )}
@@ -216,25 +168,28 @@ export default function ProductDetailPage() {
         </div>
 
         <aside className="product-detail__info">
-          <h1 style={{ fontSize: '24px', fontWeight: 700, color: '#111', marginBottom: '16px', lineHeight: 1.3 }}>{product.name}</h1>
+          <div className="product-detail__title">
+            <h1>{product.name}</h1>
+          </div>
           <div className="product-detail__price">{formatPrice(product.price)}</div>
-          <div className="product-detail__meta" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '20px' }}>
-            <span className="product-detail__badge" style={{ padding: '4px 8px', background: '#f3f4f6', borderRadius: '4px', fontSize: '14px' }}>
-              Size {product.sizes?.[0] || 'Free'}
+          
+          <div className="product-detail__meta-badges">
+            <span className="product-detail__badge product-detail__badge--size">
+              Size {product.sizes?.[0] || 'M'}
             </span>
             {product.conditionPercentage && (
-              <span className="product-detail__badge" style={{ padding: '4px 8px', background: '#e0e7ff', color: '#4f46e5', borderRadius: '4px', fontSize: '14px', fontWeight: 600 }}>
-                Độ mới: {product.conditionPercentage}%
+              <span className="product-detail__badge product-detail__badge--condition">
+                Ð? m?i: {product.conditionPercentage}%
               </span>
             )}
             {product.defects && product.defects.length > 0 && product.defects[0] !== 'MINT' && (
-              <span className="product-detail__badge" style={{ padding: '4px 8px', background: '#fee2e2', color: '#dc2626', borderRadius: '4px', fontSize: '14px', fontWeight: 600 }}>
-                Lỗi: {product.defects.map(d => {
+              <span className="product-detail__badge product-detail__badge--defect">
+                L?i: {product.defects.map(d => {
                   const defectLabels: Record<string, string> = {
-                    'MINOR_FLAW': 'Sờn nhẹ',
-                    'STAINED': 'Bẩn/Ố vàng',
-                    'MISSING_BUTTON': 'Mất cúc',
-                    'TORN': 'Rách nhỏ',
+                    'MINOR_FLAW': 'S?n nh?',
+                    'STAINED': 'B?n/? vàng',
+                    'MISSING_BUTTON': 'M?t cúc',
+                    'TORN': 'Rách nh?',
                     'FADED': 'Phai màu'
                   };
                   return defectLabels[d] || d;
@@ -242,48 +197,44 @@ export default function ProductDetailPage() {
               </span>
             )}
             {product.defects && product.defects.includes('MINT') && (
-              <span className="product-detail__badge" style={{ padding: '4px 8px', background: '#dcfce7', color: '#16a34a', borderRadius: '4px', fontSize: '14px', fontWeight: 600 }}>
-                Không lỗi (MINT)
+              <span className="product-detail__badge product-detail__badge--mint">
+                Không l?i (MINT)
               </span>
             )}
           </div>
           
-          <div style={{ marginBottom: '20px' }}>
-            <span className="product-detail__status" style={{ 
-              fontWeight: 600, 
-              color: product.stock === 0 ? '#ef4444' : '#22c55e' 
-            }}>
-              Tình trạng: {product.stock === 0 ? 'Hết hàng' : 'Còn hàng'}
-            </span>
+          <div className={`product-detail__status ${product.stock === 0 ? 'out-of-stock' : 'in-stock'}`}>
+            <CheckCircle2 size={16} />
+            <span>Tình tr?ng: {product.stock === 0 ? 'H?t hàng' : 'Còn hàng'}</span>
           </div>
 
-          <div className="product-detail__meta" style={{ marginTop: '12px', display: 'flex', gap: '20px', alignItems: 'center' }}>
-            <div><strong style={{color: '#6b7280', fontWeight: 500}}>Màu sắc:</strong> {product.colors?.length ? product.colors.join(', ') : 'Đang cập nhật'}</div>
-            <div><strong style={{color: '#6b7280', fontWeight: 500}}>{t('product.brand')}:</strong> {product.brand || 'Đang cập nhật'}</div>
+          <div className="product-detail__attributes">
+            <div>Màu s?c: <span>{product.colors?.length ? product.colors.join(', ') : 'Chua c?p nh?t'}</span></div>
+            <div>Thuong hi?u: <span>{product.brand || 'Chua c?p nh?t'}</span></div>
           </div>
 
-          <div className="product-detail__meta" style={{ marginTop: '16px', alignItems: 'center', display: 'flex', gap: '16px' }}>
-             <strong style={{color: '#6b7280', fontWeight: 500}}>{t('cart.quantity')}:</strong>
-             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: '#f3f4f6', padding: '4px', borderRadius: '8px' }}>
-               <button
-                 type="button"
-                 disabled={quantity <= 1 || product.stock === 0}
-                 onClick={() => setQuantity(q => Math.max(1, q - 1))}
-                 style={{ width: '28px', height: '28px', borderRadius: '6px', border: 'none', background: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', color: '#374151', fontWeight: 'bold' }}
-               >
-                 -
-               </button>
-               <span style={{ minWidth: '24px', textAlign: 'center', fontWeight: 600, fontSize: '14px', color: '#111' }}>{quantity}</span>
-               <button
-                 type="button"
-                 disabled={quantity >= (product.stock || 1) || product.stock === 0}
-                 onClick={() => setQuantity(q => Math.min(product.stock || 1, q + 1))}
-                 style={{ width: '28px', height: '28px', borderRadius: '6px', border: 'none', background: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', color: '#374151', fontWeight: 'bold' }}
-               >
-                 +
-               </button>
-             </div>
-             <span style={{ fontSize: '13px', color: '#9ca3af' }}>{product.stock} sản phẩm có sẵn</span>
+          <div className="product-detail__quantity">
+            <span>S? lu?ng:</span>
+            <div className="product-detail__qty-controls">
+              <button
+                type="button"
+                className="product-detail__qty-btn"
+                disabled={quantity <= 1 || product.stock === 0}
+                onClick={() => setQuantity(q => Math.max(1, q - 1))}
+              >
+                -
+              </button>
+              <div className="product-detail__qty-value">{quantity}</div>
+              <button
+                type="button"
+                className="product-detail__qty-btn"
+                disabled={quantity >= (product.stock || 1) || product.stock === 0}
+                onClick={() => setQuantity(q => Math.min(product.stock || 1, q + 1))}
+              >
+                +
+              </button>
+            </div>
+            <span>{product.stock || 1} s?n ph?m có s?n</span>
           </div>
 
           <div className="product-detail__actions">
@@ -293,7 +244,7 @@ export default function ProductDetailPage() {
               onClick={handleBuyNow}
               disabled={adding || product.stock === 0}
             >
-              {product.stock === 0 ? t('product.out_of_stock') : (adding ? '...' : t('product.buy_now'))}
+              {product.stock === 0 ? t('product.out_of_stock') : (adding ? 'Ðang x? lý...' : 'Mua Ngay')}
             </button>
             <button
               type="button"
@@ -301,36 +252,40 @@ export default function ProductDetailPage() {
               onClick={handleAddToCart}
               disabled={adding || product.stock === 0}
             >
-              {product.stock === 0 ? t('product.out_of_stock') : (adding ? t('product.adding') : t('product.add_to_cart'))}
+              {product.stock === 0 ? t('product.out_of_stock') : (adding ? t('product.adding') : 'Thêm Vào Gi? Hàng')}
             </button>
           </div>
 
           <div className="product-detail__divider" />
+          
           <div className="product-detail__section">
-            <h3>{t('product.description')}</h3>
-            <p>{product.description || 'Sản phẩm thời trang tinh tế, phù hợp nhiều phong cách.'}</p>
+            <h3>MÔ T? S?N PH?M</h3>
+            <p>{product.description || 'S?n ph?m th?i trang secondhand du?c tuy?n ch?n k? lu?ng, mang d?n phong cách d?c dáo và ch?t lu?ng vu?t tr?i.'}</p>
             <ul>
-              <li>Danh mục: {product.category}</li>
-              <li>{t('product.brand')}: {product.brand}</li>
-              <li>Phong cách: {product.style || 'Tinh tế'} </li>
+              <li>Danh m?c: {product.category}</li>
+              <li>Thuong hi?u: {product.brand || 'Khác'}</li>
+              <li>Phong cách: {product.style || 'Casual, Streetwear'}</li>
             </ul>
           </div>
+          
           <div className="product-detail__benefits">
-            <div>
-              <strong>{t('product.delivery_returns')}</strong>
-              <span>{t('product.free_shipping')}</span>
+            <div className="product-detail__benefits-card">
+              <Truck size={24} />
+              <strong>Giao Hàng & Tr? Hàng</strong>
+              <span>Mi?n phí trên 500k</span>
             </div>
-            <div>
-              <strong>{t('product.warranty')}</strong>
-              <span>{t('product.warranty_desc')}</span>
+            <div className="product-detail__benefits-card">
+              <ShieldCheck size={24} />
+              <strong>B?o Hành 48 gi?</strong>
+              <span>Ðã d?t cam k?t</span>
             </div>
           </div>
         </aside>
       </div>
 
-        <div className="product-detail__similar">
-          <h2>{t('product.related')}</h2>
-          <div className="product-detail__similar-grid">
+      <div className="product-detail__similar">
+        <h2>S?n Ph?m Liên Quan</h2>
+        <div className="product-detail__similar-grid">
           {similar.length > 0 ? (
             similar.map((item) => (
               <Link
@@ -348,7 +303,7 @@ export default function ProductDetailPage() {
               </Link>
             ))
           ) : (
-            <div className="product-detail__empty">Chưa có sản phẩm tương tự</div>
+            <div className="product-detail__empty">Chua có s?n ph?m tuong t?</div>
           )}
         </div>
       </div>
