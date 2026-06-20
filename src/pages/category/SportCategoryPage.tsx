@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import productsApi, { type Product } from '../../api/products/productsApi'
 import { PATHS } from '../../routes/paths'
@@ -29,7 +29,7 @@ export default function SportCategoryPage() {
     setError('')
     try {
       const params: Record<string, unknown> = {
-        category: 'Thá»ƒ thao',
+        category: 'Thể thao',
         page,
         sizePage: 8,
       }
@@ -47,7 +47,7 @@ export default function SportCategoryPage() {
       const response = await productsApi.getProducts(params)
       setProducts(response.data.content)
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'KhÃ´ng thá»ƒ táº£i sáº£n pháº©m'
+      const message = err instanceof Error ? err.message : 'Không thể tải sản phẩm'
       setError(message)
     } finally {
       setLoading(false)
@@ -60,7 +60,7 @@ export default function SportCategoryPage() {
   }
 
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('vi-VN').format(price) + ' Ä‘'
+    return new Intl.NumberFormat('vi-VN').format(price) + ' đ'
   }
 
   return (
@@ -68,49 +68,49 @@ export default function SportCategoryPage() {
       <div className="category__hero">
         <img src={bannerThethao} alt="Sport" />
         <div className="category__hero-content">
-          <h1>Thá»ƒ Thao</h1>
-          <p>Trang phá»¥c nÄƒng Ä‘á»™ng cho má»i hoáº¡t Ä‘á»™ng</p>
+          <h1>Thể Thao</h1>
+          <p>Trang phục năng động cho mọi hoạt động</p>
         </div>
       </div>
 
       <div className="category__container">
                 <aside className="category__filters category__filters--stacked">
-          <h3 className="category__sidebar-title">Bá»˜ Lá»ŒC</h3>
+          <h3 className="category__sidebar-title">BỘ LỌC</h3>
           
           <div className="category__search-wrapper">
             <input
               type="text"
-              placeholder="TÃ¬m kiáº¿m sáº£n pháº©m..."
+              placeholder="Tìm kiếm sản phẩm..."
               value={searchKeyword}
               onChange={(e) => { setSearchKeyword(e.target.value); setPage(0) }}
             />
             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
           </div>
 
-          <h3 className="category__sidebar-title">KHOáº¢NG GIÃ (VNÄ)</h3>
+          <h3 className="category__sidebar-title">KHOẢNG GIÁ (VNĐ)</h3>
           <div className="category__price-inputs">
             <input
               type="number"
-              placeholder="Tá»«"
+              placeholder="Từ"
               value={minPrice}
               onChange={(e) => { setMinPrice(e.target.value); setPage(0) }}
             />
             <span>-</span>
             <input
               type="number"
-              placeholder="Äáº¿n"
+              placeholder="Đến"
               value={maxPrice}
               onChange={(e) => { setMaxPrice(e.target.value); setPage(0) }}
             />
           </div>
 
-          <h3 className="category__sidebar-title">MÃ€U Sáº®C</h3>
+          <h3 className="category__sidebar-title">MÀU SẮC</h3>
           <div className="category__color-grid">
-            {['Tráº¯ng', 'Äen', 'Äá»', 'Xanh dÆ°Æ¡ng', 'Xanh lÃ¡', 'VÃ ng', 'Há»“ng', 'XÃ¡m', 'NÃ¢u', 'TÃ­m', 'Cam'].map((color) => {
+            {['Trắng', 'Đen', 'Đỏ', 'Xanh dương', 'Xanh lá', 'Vàng', 'Hồng', 'Xám', 'Nâu', 'Tím', 'Cam'].map((color) => {
               const colorHex = {
-                'Tráº¯ng': '#ffffff', 'Äen': '#111111', 'Äá»': '#ef4444', 'Xanh dÆ°Æ¡ng': '#3b82f6',
-                'Xanh lÃ¡': '#22c55e', 'VÃ ng': '#eab308', 'Há»“ng': '#ec4899', 'XÃ¡m': '#9ca3af',
-                'NÃ¢u': '#78350f', 'TÃ­m': '#a855f7', 'Cam': '#f97316'
+                'Trắng': '#ffffff', 'Đen': '#111111', 'Đỏ': '#ef4444', 'Xanh dương': '#3b82f6',
+                'Xanh lá': '#22c55e', 'Vàng': '#eab308', 'Hồng': '#ec4899', 'Xám': '#9ca3af',
+                'Nâu': '#78350f', 'Tím': '#a855f7', 'Cam': '#f97316'
               }[color] || '#ddd';
               
               return (
@@ -138,7 +138,7 @@ export default function SportCategoryPage() {
             ))}
           </div>
 
-          <h3 className="category__sidebar-title">Äá»˜ Má»šI (%)</h3>
+          <h3 className="category__sidebar-title">ĐỘ MỚI (%)</h3>
           <div className="category__filter-group" style={{marginBottom: '24px'}}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <input 
@@ -148,14 +148,14 @@ export default function SportCategoryPage() {
                 onChange={(e) => { setConditionRange(Number(e.target.value)); setPage(0) }}
                 style={{ width: '100%', cursor: 'pointer', accentColor: '#111' }}
               />
-              <span style={{ fontSize: '12px', color: '#555', whiteSpace: 'nowrap' }}>Tá»« {conditionRange}%</span>
+              <span style={{ fontSize: '12px', color: '#555', whiteSpace: 'nowrap' }}>Từ {conditionRange}%</span>
             </div>
           </div>
 
-          <h3 className="category__sidebar-title">TÃŒNH TRáº NG Lá»–I</h3>
+          <h3 className="category__sidebar-title">TÌNH TRẠNG LỖI</h3>
           <div className="category__size-grid">
             {['MINT', 'MINOR_FLAW', 'STAINED', 'MISSING_BUTTON', 'TORN', 'FADED'].map((defect) => {
-              const defectLabel = { MINT: 'KhÃ´ng lá»—i', MINOR_FLAW: 'Sá»n nháº¹', STAINED: 'Báº©n/á»', MISSING_BUTTON: 'Máº¥t cÃºc', TORN: 'RÃ¡ch nhá»', FADED: 'Phai mÃ u' }[defect];
+              const defectLabel = { MINT: 'Không lỗi', MINOR_FLAW: 'Sờn nhẹ', STAINED: 'Bẩn/Ố', MISSING_BUTTON: 'Mất cúc', TORN: 'Rách nhỏ', FADED: 'Phai màu' }[defect];
               return (
                 <div 
                   key={defect}
@@ -182,41 +182,41 @@ export default function SportCategoryPage() {
               setPage(0);
             }}
           >
-            Äáº¶T Láº I Bá»˜ Lá»ŒC
+            ĐẶT LẠI BỘ LỌC
           </button>
         </aside>
 
         <div className="category__main">
           <div className="category__toolbar-new">
-            <span>Hiá»ƒn thá»‹ {products.length} sáº£n pháº©m</span>
+            <span>Hiển thị {products.length} sản phẩm</span>
             <div>
-              <span style={{ marginRight: 8 }}>Sáº®P Xáº¾P:</span>
+              <span style={{ marginRight: 8 }}>SẮP XẾP:</span>
               <select
                 value={sortBy}
                 onChange={(e) => handleSortChange(e.target.value)}
               >
-                <option value="">Máº·c Ä‘á»‹nh</option>
-                <option value="price_asc">GiÃ¡: Tháº¥p Ä‘áº¿n cao</option>
-                <option value="price_desc">GiÃ¡: Cao Ä‘áº¿n tháº¥p</option>
-                <option value="newest">Má»›i nháº¥t</option>
+                <option value="">Mặc định</option>
+                <option value="price_asc">Giá: Thấp đến cao</option>
+                <option value="price_desc">Giá: Cao đến thấp</option>
+                <option value="newest">Mới nhất</option>
               </select>
             </div>
           </div>
 
           {loading ? (
             <div className="category__loading">
-              <p>Äang táº£i sáº£n pháº©m...</p>
+              <p>Đang tải sản phẩm...</p>
             </div>
           ) : error ? (
             <div className="category__error">
               <p>{error}</p>
-              <button type="button" onClick={fetchProducts}>Thá»­ láº¡i</button>
+              <button type="button" onClick={fetchProducts}>Thử lại</button>
             </div>
           ) : products.length === 0 ? (
             <div className="category__empty">
-              <p>KhÃ´ng cÃ³ sáº£n pháº©m nÃ o phÃ¹ há»£p</p>
+              <p>Không có sản phẩm nào phù hợp</p>
               <button type="button" onClick={() => { setSearchKeyword(''); setMinPrice(''); setMaxPrice(''); setSelectedColor(''); setSelectedSize('') }}>
-                Xem táº¥t cáº£ sáº£n pháº©m
+                Xem tất cả sản phẩm
               </button>
             </div>
           ) : (
@@ -241,12 +241,12 @@ export default function SportCategoryPage() {
                       )}
                       {product.conditionPercentage && (
                         <span style={{ position: 'absolute', top: '8px', right: '8px', background: 'rgba(255, 255, 255, 0.9)', color: '#4f46e5', padding: '4px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold', zIndex: 10, boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
-                          Má»›i {product.conditionPercentage}%
+                          Mới {product.conditionPercentage}%
                         </span>
                       )}
                     </div>
                     <div className="category__card-body-new">
-                      <p className="category__card-brand-new">{product.brand && product.brand !== 'KhÃ´ng xÃ¡c Ä‘á»‹nh' ? product.brand : 'KhÃ´ng xÃ¡c Ä‘á»‹nh'}</p>
+                      <p className="category__card-brand-new">{product.brand && product.brand !== 'Không xác định' ? product.brand : 'Không xác định'}</p>
                       <h4 className="category__card-name-new">{product.name}</h4>
                       <div className="category__card-footer-new">
                         <span className="category__card-size-new">Size: {product.sizes && product.sizes.length > 0 ? product.sizes.join(', ') : 'Freesize'}</span>
@@ -254,8 +254,8 @@ export default function SportCategoryPage() {
                       </div>
                       <p style={{ fontSize: '11px', color: '#ef4444', margin: 0, fontWeight: 500 }}>
                         {product.defects && product.defects.length > 0 && !product.defects.includes('MINT') 
-                          ? `Lá»—i: ${product.defects.map(d => (({ MINOR_FLAW: 'Sá»n nháº¹', STAINED: 'Báº©n/á» vÃ ng', MISSING_BUTTON: 'Máº¥t cÃºc', TORN: 'RÃ¡ch nhá»', FADED: 'Phai mÃ u' })[d] || d)).join(', ')}` 
-                          : 'TÃ¬nh tráº¡ng: KhÃ´ng lá»—i'}
+                          ? `Lỗi: ${product.defects.map(d => (({ MINOR_FLAW: 'Sờn nhẹ', STAINED: 'Bẩn/Ố vàng', MISSING_BUTTON: 'Mất cúc', TORN: 'Rách nhỏ', FADED: 'Phai màu' })[d] || d)).join(', ')}` 
+                          : 'Tình trạng: Không lỗi'}
                       </p>
                     </div>
                   </article>
@@ -268,7 +268,7 @@ export default function SportCategoryPage() {
                   disabled={page === 0}
                   onClick={() => setPage((p) => Math.max(0, p - 1))}
                 >
-                  &larr; Trang trÆ°á»›c
+                  &larr; Trang trước
                 </button>
                 <span>Trang {page + 1}</span>
                 <button
