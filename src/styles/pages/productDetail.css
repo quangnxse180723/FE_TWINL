@@ -490,3 +490,12 @@
     gap: 12px;
   }
 }
+
+.product-detail__card-image .secondary-img {
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.product-detail__card:hover .product-detail__card-image .secondary-img {
+  opacity: 1;
+}

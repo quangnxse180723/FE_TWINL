@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import productsApi, { type Product } from '../../api/products/productsApi'
@@ -294,7 +294,14 @@ export default function ProductDetailPage() {
                 className="product-detail__card"
               >
                 <div className="product-detail__card-image">
-                  {item.imageUrls?.[0] ? <img src={item.imageUrls[0]} alt={item.name} /> : null}
+                  {item.imageUrls?.[0] ? (
+                    <>
+                      <img src={item.imageUrls[0]} alt={item.name} className="primary-img" />
+                      {item.imageUrls[1] && (
+                        <img src={item.imageUrls[1]} alt={item.name} className="secondary-img" />
+                      )}
+                    </>
+                  ) : null}
                 </div>
                 <div className="product-detail__card-body">
                   <h4>{item.name}</h4>

@@ -690,6 +690,7 @@
   overflow: hidden;
 }
 .category__card-media-new img {
+  transition: opacity 0.3s ease;
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -753,4 +754,16 @@
   font-weight: 500;
   cursor: pointer;
   outline: none;
+}
+
+
+.category__card-media-new .secondary-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+}
+
+.category__card-new:hover .category__card-media-new .secondary-img {
+  opacity: 1;
 }

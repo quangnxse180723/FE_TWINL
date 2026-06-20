@@ -213,7 +213,12 @@ export default function BrandsCategoryPage() {
                   >
                     <div className="category__card-media-new">
                       {product.imageUrls && product.imageUrls.length > 0 ? (
-                        <img src={product.imageUrls[0]} alt={product.name} />
+                        <>
+                          <img src={product.imageUrls[0]} alt={product.name} className="primary-img" />
+                          {product.imageUrls[1] && (
+                            <img src={product.imageUrls[1]} alt={product.name} className="secondary-img" />
+                          )}
+                        </>
                       ) : (
                         <span>{product.name.split(' ')[0]}</span>
                       )}
