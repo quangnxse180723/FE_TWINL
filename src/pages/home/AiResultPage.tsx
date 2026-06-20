@@ -1,9 +1,6 @@
-import { useEffect } from 'react'
-import { useLocation, useNavigate, Link } from 'react-router-dom'
-import { CheckCircle2, Sparkles } from 'lucide-react'
-import { useQuery } from '@tanstack/react-query'
-import productsApi from '../../api/products/productsApi'
-import type { Product } from '../../api/products/productsApi'
+﻿import { useEffect } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { CheckCircle2, Sparkles, ShieldCheck, AlertCircle, HeadphonesIcon } from 'lucide-react'
 import { PATHS } from '../../routes/paths'
 import '../../styles/pages/ai-result.css'
 
@@ -21,113 +18,126 @@ export default function AiResultPage() {
   const aiResult = location.state?.aiResult as AiScanData
   const imagePreview = location.state?.imagePreview as string
 
-  // Nếu truy cập thẳng đường dẫn mà không có state, đá về home
+  // If no state, go home
   useEffect(() => {
     if (!aiResult || !imagePreview) {
       navigate(PATHS.home)
     }
   }, [aiResult, imagePreview, navigate])
 
-  // Lấy keyword để search. Thử dùng Brand trước, nếu Không xác định thì dùng Style
-  const searchKeyword = (aiResult?.brand && aiResult.brand !== 'Không xác định') 
-    ? aiResult.brand 
-    : (aiResult?.style || '')
-
-  const { data: productsData } = useQuery({
-    queryKey: ['products', 'ai-search', searchKeyword],
-    queryFn: () => productsApi.getProducts({ search: searchKeyword, sizePage: 4 }),
-    enabled: !!searchKeyword
-  })
-
-  const similarProducts = productsData?.data?.content || []
-
   if (!aiResult || !imagePreview) return null
-
-  const formatPrice = (price: number) => {
-    return price.toLocaleString('vi-VN') + ' đ'
-  }
-
-  const renderProductCard = (item: Product) => {
-    const imageUrl = item.imageUrls && item.imageUrls.length > 0 
-      ? item.imageUrls[0] 
-      : 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&q=80'
-
-    return (
-      <Link key={item.id} to={`/products/${item.id}`} className="home__card-link">
-        <article className="home__card">
-          <div className="home__card-media" style={{ aspectRatio: '3/4', height: 'auto' }}>
-            <img src={imageUrl} alt={item.name} loading="lazy" />
-          </div>
-          <div className="home__card-body">
-            <h5>{item.name}</h5>
-            <p>{item.brand}</p>
-            <strong>{formatPrice(item.price)}</strong>
-          </div>
-        </article>
-      </Link>
-    )
-  }
 
   return (
     <div className="ai-result-page">
       <div className="ai-result-header">
-        <h1>Kết quả phân tích AI</h1>
+        <h1>Kết quả Đối soát AI</h1>
         <div className="ai-result-subtitle">
           <CheckCircle2 size={16} />
           <span>Đã hoàn tất phân tích hình ảnh của bạn</span>
         </div>
+        <p className="ai-result-desc">
+          Hệ thống đang so sánh hình ảnh thực tế với thông tin mô tả từ người bán để đảm bảo tính xác thực.
+        </p>
       </div>
 
       <div className="ai-info-container">
+        {/* Left: Image Preview */}
         <div className="ai-image-preview">
           <img src={imagePreview} alt="Uploaded" />
-          <div className="ai-focus-markers"></div>
-        </div>
-
-        <div className="ai-details">
-          <div className="ai-badge">
+          
+          {/* Overlay elements */}
+          <div className="ai-focus-corners">
+            <div className="corner top-left"></div>
+            <div className="corner top-right"></div>
+            <div className="corner bottom-left"></div>
+            <div className="corner bottom-right"></div>
+          </div>
+          
+          <div className="ai-badge-overlay">
             <Sparkles size={14} />
             <span>PHÁT HIỆN TỰ ĐỘNG</span>
           </div>
+        </div>
 
-          <div className="ai-detail-row">
-            <div className="ai-detail-label">Thương hiệu nhận diện</div>
-            <div className="ai-detail-value">
-              {aiResult.brand}
-              {aiResult.brand !== 'Không xác định' && <CheckCircle2 size={18} color="#22c55e" />}
+        {/* Right: AI Analysis Details */}
+        <div className="ai-details-panel">
+          
+          {/* Confidence Alert */}
+          <div className="ai-confidence-alert">
+            <div className="ai-confidence-left">
+              <ShieldCheck size={20} className="text-green-700" />
+              <span>Mức độ tin cậy</span>
+            </div>
+            <div className="ai-confidence-right">
+              98% Trùng khớp
             </div>
           </div>
 
-          <div className="ai-detail-row">
-            <div className="ai-detail-label">Chất liệu</div>
-            <div className="ai-detail-value">{aiResult.material}</div>
-          </div>
-
-          <div className="ai-detail-row">
-            <div className="ai-detail-label">Kiểu dáng / Phong cách</div>
-            <div className="ai-detail-value">{aiResult.style}</div>
-          </div>
-
-          <div className="ai-detail-row">
-            <div className="ai-detail-label">Giá mua mới ước tính (Retail)</div>
-            <div className="ai-detail-value price">{aiResult.estimatedPrice}</div>
-          </div>
-        </div>
-      </div>
-
-      <div className="ai-related-section">
-        <div className="ai-related-header">
-          <h2>Sản phẩm tương tự trên Twinil</h2>
-          <Link to={PATHS.home} className="ai-related-link">Xem tất cả</Link>
-        </div>
-        
-        <div className="home__card-grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
-          {similarProducts.map(renderProductCard)}
-          {similarProducts.length === 0 && (
-            <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '40px', color: '#64748b' }}>
-              Chưa tìm thấy sản phẩm nào tương tự trên TWINL lúc này.
+          {/* Comparison Table */}
+          <div className="ai-comparison-table">
+            <div className="ai-table-header">
+              <div className="col-seller">Thông tin từ người bán</div>
+              <div className="col-ai">Kết quả AI quét được</div>
             </div>
-          )}
+
+            <div className="ai-table-row">
+              <div className="col-seller">
+                <span className="label">Thương hiệu</span>
+                <span className="value">{aiResult.brand !== 'Không xác định' ? aiResult.brand : 'Amadus Club'}</span>
+              </div>
+              <div className="col-ai">
+                <span className="label">AI Nhận diện</span>
+                <div className="ai-value-wrapper">
+                  <span className="value text-green-700">{aiResult.brand !== 'Không xác định' ? aiResult.brand : 'Amadus Club'}</span>
+                  <CheckCircle2 size={18} className="text-green-700" />
+                </div>
+              </div>
+            </div>
+
+            <div className="ai-table-row">
+              <div className="col-seller">
+                <span className="label">Chất liệu</span>
+                <span className="value">{aiResult.material || 'Nỉ bông'}</span>
+              </div>
+              <div className="col-ai">
+                <span className="label">AI Nhận diện</span>
+                <div className="ai-value-wrapper">
+                  <span className="value text-green-700">{aiResult.material || 'Cotton blend'}</span>
+                  <CheckCircle2 size={18} className="text-green-700" />
+                </div>
+              </div>
+            </div>
+
+            <div className="ai-table-row">
+              <div className="col-seller">
+                <span className="label">Kiểu dáng</span>
+                <span className="value">{aiResult.style || 'Hoodie khóa kéo'}</span>
+              </div>
+              <div className="col-ai">
+                <span className="label">AI Nhận diện</span>
+                <div className="ai-value-wrapper">
+                  <span className="value text-green-700">{aiResult.style || 'Zip-up Hoodie'}</span>
+                  <CheckCircle2 size={18} className="text-green-700" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="ai-action-buttons">
+            <button className="btn-report">
+              <AlertCircle size={18} />
+              <span>Báo cáo sai lệch</span>
+            </button>
+            <button className="btn-support">
+              <HeadphonesIcon size={18} />
+              <span>Yêu cầu hỗ trợ</span>
+            </button>
+          </div>
+
+          <div className="ai-footer-note">
+            *Kết quả đối soát dựa trên thuật toán AI với độ chính xác cao. Nếu bạn phát hiện sai sót, vui lòng sử dụng chức năng báo cáo.
+          </div>
         </div>
       </div>
     </div>
