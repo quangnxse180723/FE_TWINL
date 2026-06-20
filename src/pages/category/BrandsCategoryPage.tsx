@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import productsApi, { type Product } from '../../api/products/productsApi'
 import { PATHS } from '../../routes/paths'
@@ -30,7 +30,7 @@ export default function BrandsCategoryPage() {
     try {
       const params: Record<string, unknown> = {
         page,
-        sizePage: 12,
+        sizePage: 8,
       }
       if (selectedBrand) params.brand = selectedBrand
       if (selectedCategory) params.category = selectedCategory
@@ -45,7 +45,7 @@ export default function BrandsCategoryPage() {
       const response = await productsApi.getProducts(params)
       setProducts(response.data.content)
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Không thể tải sản phẩm'
+      const message = err instanceof Error ? err.message : 'KhÃ´ng thá»ƒ táº£i sáº£n pháº©m'
       setError(message)
     } finally {
       setLoading(false)
@@ -58,7 +58,7 @@ export default function BrandsCategoryPage() {
   }
 
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('vi-VN').format(price) + ' đ'
+    return new Intl.NumberFormat('vi-VN').format(price) + ' Ä‘'
   }
 
   return (
@@ -66,46 +66,46 @@ export default function BrandsCategoryPage() {
       <div className="category__hero">
         <img src="https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=1200" alt="Brands" />
         <div className="category__hero-content">
-          <h1>Thương Hiệu</h1>
-          <p>Lựa chọn thương hiệu yêu thích của bạn</p>
+          <h1>ThÆ°Æ¡ng Hiá»‡u</h1>
+          <p>Lá»±a chá»n thÆ°Æ¡ng hiá»‡u yÃªu thÃ­ch cá»§a báº¡n</p>
         </div>
       </div>
 
       <div className="category__container">
                 <aside className="category__filters category__filters--stacked">
-          <h3 className="category__sidebar-title">BỘ LỌC</h3>
+          <h3 className="category__sidebar-title">Bá»˜ Lá»ŒC</h3>
 
-          <h3 className="category__sidebar-title">THƯƠNG HIỆU</h3>
+          <h3 className="category__sidebar-title">THÆ¯Æ NG HIá»†U</h3>
           <div className="category__search-wrapper" style={{marginBottom: 16}}>
             <select style={{width: '100%', padding: '10px', border: '1px solid #dcdcdc', borderRadius: '4px', fontSize: '13px', background: '#f9f9f9', outline: 'none'}} value={selectedBrand} onChange={(e) => { setSelectedBrand(e.target.value); setPage(0) }}>
-              <option value="">Tất cả</option>
+              <option value="">Táº¥t cáº£</option>
               {brandOptions.map((brand) => (
                 <option key={brand} value={brand}>{brand}</option>
               ))}
             </select>
           </div>
 
-          <h3 className="category__sidebar-title">DANH MỤC</h3>
+          <h3 className="category__sidebar-title">DANH Má»¤C</h3>
           <div className="category__search-wrapper" style={{marginBottom: 16}}>
             <select style={{width: '100%', padding: '10px', border: '1px solid #dcdcdc', borderRadius: '4px', fontSize: '13px', background: '#f9f9f9', outline: 'none'}} value={selectedCategory} onChange={(e) => { setSelectedCategory(e.target.value); setPage(0) }}>
-              <option value="">Tất cả</option>
-              <option value="Áo khoác">Áo khoác</option>
-              <option value="Áo">Áo</option>
-              <option value="Quần">Quần</option>
-              <option value="Giày">Giày</option>
-              <option value="Phụ kiện">Phụ kiện</option>
+              <option value="">Táº¥t cáº£</option>
+              <option value="Ão khoÃ¡c">Ão khoÃ¡c</option>
+              <option value="Ão">Ão</option>
+              <option value="Quáº§n">Quáº§n</option>
+              <option value="GiÃ y">GiÃ y</option>
+              <option value="Phá»¥ kiá»‡n">Phá»¥ kiá»‡n</option>
             </select>
           </div>
 
-          <h3 className="category__sidebar-title">PHONG CÁCH</h3>
+          <h3 className="category__sidebar-title">PHONG CÃCH</h3>
           <div className="category__search-wrapper" style={{marginBottom: 24}}>
             <select style={{width: '100%', padding: '10px', border: '1px solid #dcdcdc', borderRadius: '4px', fontSize: '13px', background: '#f9f9f9', outline: 'none'}} value={selectedStyle} onChange={(e) => { setSelectedStyle(e.target.value); setPage(0) }}>
-              <option value="">Tất cả</option>
-              <option value="Cơ bản">Cơ bản</option>
-              <option value="Thể thao">Thể thao</option>
-              <option value="Công sở">Công sở</option>
-              <option value="Dạo phố">Dạo phố</option>
-              <option value="Tiệc">Tiệc</option>
+              <option value="">Táº¥t cáº£</option>
+              <option value="CÆ¡ báº£n">CÆ¡ báº£n</option>
+              <option value="Thá»ƒ thao">Thá»ƒ thao</option>
+              <option value="CÃ´ng sá»Ÿ">CÃ´ng sá»Ÿ</option>
+              <option value="Dáº¡o phá»‘">Dáº¡o phá»‘</option>
+              <option value="Tiá»‡c">Tiá»‡c</option>
             </select>
           </div>
 
@@ -122,7 +122,7 @@ export default function BrandsCategoryPage() {
             ))}
           </div>
 
-          <h3 className="category__sidebar-title">ĐỘ MỚI (%)</h3>
+          <h3 className="category__sidebar-title">Äá»˜ Má»šI (%)</h3>
           <div className="category__filter-group" style={{marginBottom: '24px'}}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <input 
@@ -132,14 +132,14 @@ export default function BrandsCategoryPage() {
                 onChange={(e) => { setConditionRange(Number(e.target.value)); setPage(0) }}
                 style={{ width: '100%', cursor: 'pointer', accentColor: '#111' }}
               />
-              <span style={{ fontSize: '12px', color: '#555', whiteSpace: 'nowrap' }}>Từ {conditionRange}%</span>
+              <span style={{ fontSize: '12px', color: '#555', whiteSpace: 'nowrap' }}>Tá»« {conditionRange}%</span>
             </div>
           </div>
 
-          <h3 className="category__sidebar-title">TÌNH TRẠNG LỖI</h3>
+          <h3 className="category__sidebar-title">TÃŒNH TRáº NG Lá»–I</h3>
           <div className="category__size-grid">
             {['MINT', 'MINOR_FLAW', 'STAINED', 'MISSING_BUTTON', 'TORN', 'FADED'].map((defect) => {
-              const defectLabel = { MINT: 'Không lỗi', MINOR_FLAW: 'Sờn nhẹ', STAINED: 'Bẩn/Ố', MISSING_BUTTON: 'Mất cúc', TORN: 'Rách nhỏ', FADED: 'Phai màu' }[defect];
+              const defectLabel = { MINT: 'KhÃ´ng lá»—i', MINOR_FLAW: 'Sá»n nháº¹', STAINED: 'Báº©n/á»', MISSING_BUTTON: 'Máº¥t cÃºc', TORN: 'RÃ¡ch nhá»', FADED: 'Phai mÃ u' }[defect];
               return (
                 <div 
                   key={defect}
@@ -165,41 +165,41 @@ export default function BrandsCategoryPage() {
               setPage(0)
             }}
           >
-            ĐẶT LẠI BỘ LỌC
+            Äáº¶T Láº I Bá»˜ Lá»ŒC
           </button>
         </aside>
 
         <div className="category__main">
           <div className="category__toolbar-new">
-            <span>Hiển thị {products.length} sản phẩm</span>
+            <span>Hiá»ƒn thá»‹ {products.length} sáº£n pháº©m</span>
             <div>
-              <span style={{ marginRight: 8 }}>SẮP XẾP:</span>
+              <span style={{ marginRight: 8 }}>Sáº®P Xáº¾P:</span>
               <select
                 value={sortBy}
                 onChange={(e) => handleSortChange(e.target.value)}
               >
-                <option value="">Mặc định</option>
-                <option value="price_asc">Giá: Thấp đến cao</option>
-                <option value="price_desc">Giá: Cao đến thấp</option>
-                <option value="newest">Mới nhất</option>
+                <option value="">Máº·c Ä‘á»‹nh</option>
+                <option value="price_asc">GiÃ¡: Tháº¥p Ä‘áº¿n cao</option>
+                <option value="price_desc">GiÃ¡: Cao Ä‘áº¿n tháº¥p</option>
+                <option value="newest">Má»›i nháº¥t</option>
               </select>
             </div>
           </div>
 
           {loading ? (
             <div className="category__loading">
-              <p>Đang tải sản phẩm...</p>
+              <p>Äang táº£i sáº£n pháº©m...</p>
             </div>
           ) : error ? (
             <div className="category__error">
               <p>{error}</p>
-              <button type="button" onClick={fetchProducts}>Thử lại</button>
+              <button type="button" onClick={fetchProducts}>Thá»­ láº¡i</button>
             </div>
           ) : products.length === 0 ? (
             <div className="category__empty">
-              <p>Không có sản phẩm nào phù hợp</p>
+              <p>KhÃ´ng cÃ³ sáº£n pháº©m nÃ o phÃ¹ há»£p</p>
               <button type="button" onClick={() => { setSelectedBrand(''); setSelectedCategory(''); setSelectedStyle(''); setSelectedSize('') }}>
-                Xem tất cả sản phẩm
+                Xem táº¥t cáº£ sáº£n pháº©m
               </button>
             </div>
           ) : (
@@ -224,12 +224,12 @@ export default function BrandsCategoryPage() {
                       )}
                       {product.conditionPercentage && (
                         <span style={{ position: 'absolute', top: '8px', right: '8px', background: 'rgba(255, 255, 255, 0.9)', color: '#4f46e5', padding: '4px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold', zIndex: 10, boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
-                          Mới {product.conditionPercentage}%
+                          Má»›i {product.conditionPercentage}%
                         </span>
                       )}
                     </div>
                     <div className="category__card-body-new">
-                      <p className="category__card-brand-new">{product.brand && product.brand !== 'Không xác định' ? product.brand : 'Không xác định'}</p>
+                      <p className="category__card-brand-new">{product.brand && product.brand !== 'KhÃ´ng xÃ¡c Ä‘á»‹nh' ? product.brand : 'KhÃ´ng xÃ¡c Ä‘á»‹nh'}</p>
                       <h4 className="category__card-name-new">{product.name}</h4>
                       <div className="category__card-footer-new">
                         <span className="category__card-size-new">Size: {product.sizes && product.sizes.length > 0 ? product.sizes.join(', ') : 'Freesize'}</span>
@@ -237,8 +237,8 @@ export default function BrandsCategoryPage() {
                       </div>
                       <p style={{ fontSize: '11px', color: '#ef4444', margin: 0, fontWeight: 500 }}>
                         {product.defects && product.defects.length > 0 && !product.defects.includes('MINT') 
-                          ? `Lỗi: ${product.defects.map(d => (({ MINOR_FLAW: 'Sờn nhẹ', STAINED: 'Bẩn/Ố vàng', MISSING_BUTTON: 'Mất cúc', TORN: 'Rách nhỏ', FADED: 'Phai màu' })[d] || d)).join(', ')}` 
-                          : 'Tình trạng: Không lỗi'}
+                          ? `Lá»—i: ${product.defects.map(d => (({ MINOR_FLAW: 'Sá»n nháº¹', STAINED: 'Báº©n/á» vÃ ng', MISSING_BUTTON: 'Máº¥t cÃºc', TORN: 'RÃ¡ch nhá»', FADED: 'Phai mÃ u' })[d] || d)).join(', ')}` 
+                          : 'TÃ¬nh tráº¡ng: KhÃ´ng lá»—i'}
                       </p>
                     </div>
                   </article>
@@ -251,12 +251,12 @@ export default function BrandsCategoryPage() {
                   disabled={page === 0}
                   onClick={() => setPage((p) => Math.max(0, p - 1))}
                 >
-                  &larr; Trang trước
+                  &larr; Trang trÆ°á»›c
                 </button>
                 <span>Trang {page + 1}</span>
                 <button
                   type="button"
-                  disabled={products.length < 12}
+                  disabled={products.length < 8}
                   onClick={() => setPage((p) => p + 1)}
                 >
                   Trang sau &rarr;
