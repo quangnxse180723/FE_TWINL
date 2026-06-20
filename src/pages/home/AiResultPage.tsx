@@ -17,6 +17,7 @@ export default function AiResultPage() {
   
   const aiResult = location.state?.aiResult as AiScanData
   const imagePreview = location.state?.imagePreview as string
+  const returnUrl = location.state?.returnUrl as string
 
   // If no state, go home
   useEffect(() => {

@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+﻿import { useState, useEffect } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { X, Bot, CheckCircle2, Search, Settings } from 'lucide-react'
 import { PATHS } from '../../routes/paths'
 import { API_BASE_URL } from '../../config/constants'
@@ -16,8 +16,9 @@ export default function AiScannerModal({ isOpen, onClose, directScanImageUrls }:
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
   const [isScanning, setIsScanning] = useState(false)
   const [scanProgress, setScanProgress] = useState(0)
-  const [loadingText, setLoadingText] = useState('AI của TWINL đang phân tích chất liệu và thương hiệu...')
+  const [loadingText, setLoadingText] = useState('AI cá»§a TWINL Ä‘ang phÃ¢n tÃ­ch cháº¥t liá»‡u vÃ  thÆ°Æ¡ng hiá»‡u...')
   const navigate = useNavigate()
+  const location = useLocation()
 
   useEffect(() => {
     if (!isOpen) {
@@ -25,7 +26,7 @@ export default function AiScannerModal({ isOpen, onClose, directScanImageUrls }:
       setIsScanning(false)
       setScanProgress(0)
     } else if (directScanImageUrls && directScanImageUrls.length > 0) {
-      // Bắt đầu scan trực tiếp
+      // Báº¯t Ä‘áº§u scan trá»±c tiáº¿p
       const initiateDirectScan = async () => {
         setSelectedImage(directScanImageUrls[0])
         setIsScanning(true)
@@ -39,7 +40,7 @@ export default function AiScannerModal({ isOpen, onClose, directScanImageUrls }:
           }
           await scanFiles(filesToScan, directScanImageUrls[0])
         } catch (error) {
-          toast.error('Không thể tải ảnh trực tiếp để quét.')
+          toast.error('KhÃ´ng thá»ƒ táº£i áº£nh trá»±c tiáº¿p Ä‘á»ƒ quÃ©t.')
           setIsScanning(false)
         }
       }
@@ -61,10 +62,10 @@ export default function AiScannerModal({ isOpen, onClose, directScanImageUrls }:
   useEffect(() => {
     if (isScanning) {
       const texts = [
-        'AI của TWINL đang phân tích toàn bộ góc độ sản phẩm...',
-        'Đang quét cấu trúc bề mặt vải...',
-        'Đang đối chiếu hình ảnh mặt trước và sau...',
-        'Đang xác thực chi tiết mác và logo...',
+        'AI cá»§a TWINL Ä‘ang phÃ¢n tÃ­ch toÃ n bá»™ gÃ³c Ä‘á»™ sáº£n pháº©m...',
+        'Äang quÃ©t cáº¥u trÃºc bá» máº·t váº£i...',
+        'Äang Ä‘á»‘i chiáº¿u hÃ¬nh áº£nh máº·t trÆ°á»›c vÃ  sau...',
+        'Äang xÃ¡c thá»±c chi tiáº¿t mÃ¡c vÃ  logo...',
       ]
       let idx = 0
       const interval = setInterval(() => {
@@ -98,19 +99,19 @@ export default function AiScannerModal({ isOpen, onClose, directScanImageUrls }:
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => null)
-        throw new Error(errorData?.message || 'API phân tích bị lỗi')
+        throw new Error(errorData?.message || 'API phÃ¢n tÃ­ch bá»‹ lá»—i')
       }
 
       const data = await response.json()
       
       setTimeout(() => {
         onClose()
-        navigate(PATHS.aiResult, { state: { aiResult: data, imagePreview: imageUrlPreview } })
+        navigate(PATHS.aiResult, { state: { aiResult: data, imagePreview: imageUrlPreview, returnUrl: location.pathname } })
       }, 1000)
 
     } catch (error: any) {
       clearInterval(progressInterval)
-      toast.error(error.message || 'Quét ảnh thất bại, vui lòng thử lại sau.')
+      toast.error(error.message || 'QuÃ©t áº£nh tháº¥t báº¡i, vui lÃ²ng thá»­ láº¡i sau.')
       setIsScanning(false)
       setSelectedImage(null)
     }
@@ -128,7 +129,7 @@ export default function AiScannerModal({ isOpen, onClose, directScanImageUrls }:
 
         {!isScanning && !selectedImage && (
           <div className="ai-upload-state">
-            <h3 style={{ marginTop: 24, fontSize: 18, color: '#64748b' }}>Đang nạp ảnh vào hệ thống...</h3>
+            <h3 style={{ marginTop: 24, fontSize: 18, color: '#64748b' }}>Äang náº¡p áº£nh vÃ o há»‡ thá»‘ng...</h3>
           </div>
         )}
 
@@ -140,7 +141,7 @@ export default function AiScannerModal({ isOpen, onClose, directScanImageUrls }:
               <div className="scanning-markers"></div>
               {directScanImageUrls && directScanImageUrls.length > 1 && (
                 <div style={{ position: 'absolute', bottom: 12, right: 12, background: 'rgba(0,0,0,0.6)', color: 'white', padding: '4px 8px', borderRadius: 12, fontSize: 11, fontWeight: 600, zIndex: 10 }}>
-                  Đang quét {directScanImageUrls.length} ảnh
+                  Äang quÃ©t {directScanImageUrls.length} áº£nh
                 </div>
               )}
             </div>
@@ -161,9 +162,9 @@ export default function AiScannerModal({ isOpen, onClose, directScanImageUrls }:
                   <div className="ai-step-icon">
                     {scanProgress > 30 ? <CheckCircle2 size={16} /> : <Search size={16} />}
                   </div>
-                  <span>Quét bề mặt da & chất liệu</span>
+                  <span>QuÃ©t bá» máº·t da & cháº¥t liá»‡u</span>
                   <span style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 600 }}>
-                    {scanProgress > 30 ? 'Hoàn tất' : 'Đang xử lý'}
+                    {scanProgress > 30 ? 'HoÃ n táº¥t' : 'Äang xá»­ lÃ½'}
                   </span>
                 </div>
                 
@@ -171,9 +172,9 @@ export default function AiScannerModal({ isOpen, onClose, directScanImageUrls }:
                   <div className="ai-step-icon">
                     {scanProgress > 70 ? <CheckCircle2 size={16} /> : <Settings size={16} />}
                   </div>
-                  <span>Nhận dạng kiểu dáng</span>
+                  <span>Nháº­n dáº¡ng kiá»ƒu dÃ¡ng</span>
                   <span style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 600 }}>
-                    {scanProgress > 70 ? 'Hoàn tất' : (scanProgress > 30 ? 'Đang xử lý' : 'Chờ...')}
+                    {scanProgress > 70 ? 'HoÃ n táº¥t' : (scanProgress > 30 ? 'Äang xá»­ lÃ½' : 'Chá»...')}
                   </span>
                 </div>
               </div>
