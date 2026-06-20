@@ -1,6 +1,6 @@
-﻿import { useEffect } from 'react'
+import { useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { CheckCircle2, Sparkles, ShieldCheck, AlertCircle, HeadphonesIcon } from 'lucide-react'
+import { CheckCircle2, Sparkles, ShieldCheck } from 'lucide-react'
 import { PATHS } from '../../routes/paths'
 import '../../styles/pages/ai-result.css'
 
@@ -126,13 +126,8 @@ export default function AiResultPage() {
 
           {/* Action Buttons */}
           <div className="ai-action-buttons">
-            <button className="btn-report">
-              <AlertCircle size={18} />
-              <span>Báo cáo sai lệch</span>
-            </button>
-            <button className="btn-support">
-              <HeadphonesIcon size={18} />
-              <span>Yêu cầu hỗ trợ</span>
+            <button className="btn-support" style={{ width: '100%', padding: '16px', background: '#0f172a', color: 'white', border: 'none', cursor: 'pointer', borderRadius: '12px', fontWeight: 600, fontSize: '15px' }} onClick={() => navigate(returnUrl || PATHS.home)}>
+              <span>Quay lại mua sắm</span>
             </button>
           </div>
 
