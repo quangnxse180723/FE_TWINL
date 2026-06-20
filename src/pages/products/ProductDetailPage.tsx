@@ -116,6 +116,14 @@ export default function ProductDetailPage() {
     }
   }
 
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const { left, top, width, height } = e.currentTarget.getBoundingClientRect()
+    const x = ((e.clientX - left) / width) * 100
+    const y = ((e.clientY - top) / height) * 100
+    e.currentTarget.style.setProperty('--x', `${x}%`)
+    e.currentTarget.style.setProperty('--y', `${y}%`)
+  }
+
   return (
     <section className="product-detail">
       <nav className="product-detail__breadcrumbs">
@@ -140,8 +148,11 @@ export default function ProductDetailPage() {
               </button>
             ))}
           </div>
-          <div className="product-detail__main">
-            {mainImage ? <img src={mainImage} alt={product.name} /> : null}
+          <div 
+            className="product-detail__main zoom-container"
+            onMouseMove={handleMouseMove}
+          >
+            {mainImage ? <img src={mainImage} alt={product.name} className="zoom-image" /> : null}
             {mainImage && (
               <div className="product-detail__ai-actions">
                 <button 
@@ -198,7 +209,7 @@ export default function ProductDetailPage() {
             )}
             {product.defects && product.defects.includes('MINT') && (
               <span className="product-detail__badge product-detail__badge--mint">
-                Không lỗi
+                Không lỗi (MINT)
               </span>
             )}
           </div>

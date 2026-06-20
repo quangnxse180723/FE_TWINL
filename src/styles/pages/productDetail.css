@@ -499,3 +499,19 @@
 .product-detail__card:hover .product-detail__card-image .secondary-img {
   opacity: 1;
 }
+
+
+.zoom-container {
+  overflow: hidden;
+  position: relative;
+  cursor: crosshair;
+}
+
+.zoom-container .zoom-image {
+  transform-origin: var(--x) var(--y);
+  transition: transform 0.1s ease;
+}
+
+.zoom-container:hover .zoom-image {
+  transform: scale(2);
+}
