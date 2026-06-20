@@ -13,7 +13,7 @@ import { useTranslation } from 'react-i18next'
 import '../../styles/pages/productDetail.css'
 
 const formatPrice = (value: number) =>
-  new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value).replace('?', 'd')
+  new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value).replace('₫', 'đ')
 
 export default function ProductDetailPage() {
   const { t } = useTranslation()
@@ -32,10 +32,10 @@ export default function ProductDetailPage() {
 
   const categoryLink = useMemo(() => {
     if (!product?.category) return PATHS.home
-    if (product.category === 'N?') return PATHS.women
+    if (product.category === 'Nữ') return PATHS.women
     if (product.category === 'Nam') return PATHS.men
-    if (product.category === 'Tr? em') return PATHS.kids
-    if (product.category === 'Th? thao') return PATHS.sport
+    if (product.category === 'Trẻ em') return PATHS.kids
+    if (product.category === 'Thể thao') return PATHS.sport
     return PATHS.home
   }, [product?.category])
 
@@ -61,7 +61,7 @@ export default function ProductDetailPage() {
           setSimilar([])
         }
       } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : 'Không th? t?i s?n ph?m'
+        const message = err instanceof Error ? err.message : 'Không thể tải sản phẩm'
         setError(message)
       } finally {
         setLoading(false)
@@ -72,11 +72,11 @@ export default function ProductDetailPage() {
   }, [id])
 
   if (loading) {
-    return <section className="product-detail">Ðang t?i s?n ph?m...</section>
+    return <section className="product-detail">Đang tải sản phẩm...</section>
   }
 
   if (error || !product) {
-    return <section className="product-detail">{error || 'Không tìm th?y s?n ph?m'}</section>
+    return <section className="product-detail">{error || 'Không tìm thấy sản phẩm'}</section>
   }
 
   const handleBuyNow = async () => {
@@ -91,7 +91,7 @@ export default function ProductDetailPage() {
       window.dispatchEvent(new Event('cart-updated'))
       navigate(PATHS.cart)
     } catch {
-      toast.error('Không th? thêm vào gi? hàng')
+      toast.error('Không thể thêm vào giỏ hàng')
     } finally {
       setAdding(false)
     }
@@ -99,7 +99,7 @@ export default function ProductDetailPage() {
 
   const handleAddToCart = async () => {
     if (!user) {
-      toast.info('Vui lòng dang nh?p d? thêm vào gi? hàng')
+      toast.info('Vui lòng đăng nhập để thêm vào giỏ hàng')
       navigate(PATHS.login)
       return
     }
@@ -108,9 +108,9 @@ export default function ProductDetailPage() {
     try {
       await cartApi.addItem({ productId: product.id, quantity: quantity })
       window.dispatchEvent(new Event('cart-updated'))
-      toast.success('Ðã thêm vào gi? hàng thành công')
+      toast.success('Đã thêm vào giỏ hàng thành công')
     } catch {
-      toast.error('Không th? thêm vào gi? hàng')
+      toast.error('Không thể thêm vào giỏ hàng')
     } finally {
       setAdding(false)
     }
@@ -119,9 +119,9 @@ export default function ProductDetailPage() {
   return (
     <section className="product-detail">
       <nav className="product-detail__breadcrumbs">
-        <Link to={PATHS.home}>Trang ch?</Link>
+        <Link to={PATHS.home}>Trang chủ</Link>
         <span>&gt;</span>
-        <Link to={categoryLink}>{product.category || 'Danh m?c'}</Link>
+        <Link to={categoryLink}>{product.category || 'Danh mục'}</Link>
         <span>&gt;</span>
         <span>{product.name}</span>
       </nav>
@@ -148,7 +148,7 @@ export default function ProductDetailPage() {
                   type="button" 
                   className="ai-scan-direct-btn"
                   onClick={() => setIsAiModalOpen(true)}
-                  title="Phân tích ?nh này b?ng AI"
+                  title="Phân tích ảnh này bằng AI"
                 >
                   <CheckCircle2 size={16} />
                   <span>Quét AI</span>
@@ -157,10 +157,10 @@ export default function ProductDetailPage() {
                   type="button" 
                   className="ai-legit-btn"
                   onClick={() => setIsLegitModalOpen(true)}
-                  title="Ki?m d?nh chính hãng b?ng AI"
+                  title="Kiểm định chính hãng bằng AI"
                 >
                   <Shield size={16} />
-                  <span>Ki?m d?nh AI</span>
+                  <span>Kiểm định AI</span>
                 </button>
               </div>
             )}
@@ -179,17 +179,17 @@ export default function ProductDetailPage() {
             </span>
             {product.conditionPercentage && (
               <span className="product-detail__badge product-detail__badge--condition">
-                Ð? m?i: {product.conditionPercentage}%
+                Độ mới: {product.conditionPercentage}%
               </span>
             )}
             {product.defects && product.defects.length > 0 && product.defects[0] !== 'MINT' && (
               <span className="product-detail__badge product-detail__badge--defect">
-                L?i: {product.defects.map(d => {
+                Lỗi: {product.defects.map(d => {
                   const defectLabels: Record<string, string> = {
-                    'MINOR_FLAW': 'S?n nh?',
-                    'STAINED': 'B?n/? vàng',
-                    'MISSING_BUTTON': 'M?t cúc',
-                    'TORN': 'Rách nh?',
+                    'MINOR_FLAW': 'Sờn nhẹ',
+                    'STAINED': 'Bẩn/Ố vàng',
+                    'MISSING_BUTTON': 'Mất cúc',
+                    'TORN': 'Rách nhỏ',
                     'FADED': 'Phai màu'
                   };
                   return defectLabels[d] || d;
@@ -198,23 +198,23 @@ export default function ProductDetailPage() {
             )}
             {product.defects && product.defects.includes('MINT') && (
               <span className="product-detail__badge product-detail__badge--mint">
-                Không l?i (MINT)
+                Không lỗi (MINT)
               </span>
             )}
           </div>
           
           <div className={`product-detail__status ${product.stock === 0 ? 'out-of-stock' : 'in-stock'}`}>
             <CheckCircle2 size={16} />
-            <span>Tình tr?ng: {product.stock === 0 ? 'H?t hàng' : 'Còn hàng'}</span>
+            <span>Tình trạng: {product.stock === 0 ? 'Hết hàng' : 'Còn hàng'}</span>
           </div>
 
           <div className="product-detail__attributes">
-            <div>Màu s?c: <span>{product.colors?.length ? product.colors.join(', ') : 'Chua c?p nh?t'}</span></div>
-            <div>Thuong hi?u: <span>{product.brand || 'Chua c?p nh?t'}</span></div>
+            <div>Màu sắc: <span>{product.colors?.length ? product.colors.join(', ') : 'Chưa cập nhật'}</span></div>
+            <div>Thương hiệu: <span>{product.brand || 'Chưa cập nhật'}</span></div>
           </div>
 
           <div className="product-detail__quantity">
-            <span>S? lu?ng:</span>
+            <span>Số lượng:</span>
             <div className="product-detail__qty-controls">
               <button
                 type="button"
@@ -234,7 +234,7 @@ export default function ProductDetailPage() {
                 +
               </button>
             </div>
-            <span>{product.stock || 1} s?n ph?m có s?n</span>
+            <span>{product.stock || 1} sản phẩm có sẵn</span>
           </div>
 
           <div className="product-detail__actions">
@@ -244,7 +244,7 @@ export default function ProductDetailPage() {
               onClick={handleBuyNow}
               disabled={adding || product.stock === 0}
             >
-              {product.stock === 0 ? t('product.out_of_stock') : (adding ? 'Ðang x? lý...' : 'Mua Ngay')}
+              {product.stock === 0 ? t('product.out_of_stock') : (adding ? 'Đang xử lý...' : 'Mua Ngay')}
             </button>
             <button
               type="button"
@@ -252,18 +252,18 @@ export default function ProductDetailPage() {
               onClick={handleAddToCart}
               disabled={adding || product.stock === 0}
             >
-              {product.stock === 0 ? t('product.out_of_stock') : (adding ? t('product.adding') : 'Thêm Vào Gi? Hàng')}
+              {product.stock === 0 ? t('product.out_of_stock') : (adding ? t('product.adding') : 'Thêm Vào Giỏ Hàng')}
             </button>
           </div>
 
           <div className="product-detail__divider" />
           
           <div className="product-detail__section">
-            <h3>MÔ T? S?N PH?M</h3>
-            <p>{product.description || 'S?n ph?m th?i trang secondhand du?c tuy?n ch?n k? lu?ng, mang d?n phong cách d?c dáo và ch?t lu?ng vu?t tr?i.'}</p>
+            <h3>MÔ TẢ SẢN PHẨM</h3>
+            <p>{product.description || 'Sản phẩm thời trang secondhand được tuyển chọn kỹ lưỡng, mang đến phong cách độc đáo và chất lượng vượt trội.'}</p>
             <ul>
-              <li>Danh m?c: {product.category}</li>
-              <li>Thuong hi?u: {product.brand || 'Khác'}</li>
+              <li>Danh mục: {product.category}</li>
+              <li>Thương hiệu: {product.brand || 'Khác'}</li>
               <li>Phong cách: {product.style || 'Casual, Streetwear'}</li>
             </ul>
           </div>
@@ -271,20 +271,20 @@ export default function ProductDetailPage() {
           <div className="product-detail__benefits">
             <div className="product-detail__benefits-card">
               <Truck size={24} />
-              <strong>Giao Hàng & Tr? Hàng</strong>
-              <span>Mi?n phí trên 500k</span>
+              <strong>Giao Hàng & Trả Hàng</strong>
+              <span>Miễn phí trên 500k</span>
             </div>
             <div className="product-detail__benefits-card">
               <ShieldCheck size={24} />
-              <strong>B?o Hành 48 gi?</strong>
-              <span>Ðã d?t cam k?t</span>
+              <strong>Bảo Hành 48 giờ</strong>
+              <span>Đã đặt cam kết</span>
             </div>
           </div>
         </aside>
       </div>
 
       <div className="product-detail__similar">
-        <h2>S?n Ph?m Liên Quan</h2>
+        <h2>Sản Phẩm Liên Quan</h2>
         <div className="product-detail__similar-grid">
           {similar.length > 0 ? (
             similar.map((item) => (
@@ -303,7 +303,7 @@ export default function ProductDetailPage() {
               </Link>
             ))
           ) : (
-            <div className="product-detail__empty">Chua có s?n ph?m tuong t?</div>
+            <div className="product-detail__empty">Chưa có sản phẩm tương tự</div>
           )}
         </div>
       </div>
