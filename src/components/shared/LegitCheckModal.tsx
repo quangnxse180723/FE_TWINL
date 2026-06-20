@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { X, Shield, AlertTriangle, Bot, Camera, CheckCircle2, RotateCcw, Loader2 } from 'lucide-react'
 import { PATHS } from '../../routes/paths'
 import { API_BASE_URL } from '../../config/constants'
@@ -51,6 +51,7 @@ const emptySlot = (): SlotState => ({
 
 export default function LegitCheckModal({ isOpen, onClose, productImageUrls }: LegitCheckModalProps) {
   const navigate = useNavigate()
+  const location = useLocation()
 
   // Step: 'upload' | 'scanning'
   const [step, setStep] = useState<'upload' | 'scanning'>('upload')
@@ -178,7 +179,7 @@ export default function LegitCheckModal({ isOpen, onClose, productImageUrls }: L
 
       setTimeout(() => {
         onClose()
-        navigate(PATHS.legitResult, { state: { legitResult: data, previewImages } })
+        navigate(PATHS.legitResult, { state: { legitResult: data, previewImages, returnUrl: location.pathname } })
       }, 800)
 
     } catch (error: any) {
@@ -238,7 +239,7 @@ export default function LegitCheckModal({ isOpen, onClose, productImageUrls }: L
 
       setTimeout(() => {
         onClose()
-        navigate(PATHS.legitResult, { state: { legitResult: data, previewImages: previewImagesMap } })
+        navigate(PATHS.legitResult, { state: { legitResult: data, previewImages: previewImagesMap, returnUrl: location.pathname } })
       }, 800)
     } catch (error: any) {
       clearInterval(progressInterval)

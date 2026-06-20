@@ -39,6 +39,7 @@ export default function LegitResultPage() {
   const result: LegitCheckResult = state?.legitResult
   const previewImagesObj: Record<string, string> = state?.previewImages || {}
   const previewImages = Object.values(previewImagesObj).filter(Boolean) as string[]
+  const returnUrl = state?.returnUrl as string
   
   const [activeImage, setActiveImage] = useState(previewImages[0] || '')
 
@@ -165,7 +166,7 @@ export default function LegitResultPage() {
               </div>
             </div>
 
-            <Link to={PATHS.home} className="legit-result__shop-btn">
+            <Link to={returnUrl || PATHS.home} className="legit-result__shop-btn">
               <ShoppingBag size={18} />
               <span>Tiếp tục mua sắm</span>
             </Link>
