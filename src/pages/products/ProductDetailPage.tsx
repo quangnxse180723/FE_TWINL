@@ -198,7 +198,7 @@ export default function ProductDetailPage() {
             )}
             {product.defects && product.defects.includes('MINT') && (
               <span className="product-detail__badge product-detail__badge--mint">
-                Không lỗi (MINT)
+                Không lỗi
               </span>
             )}
           </div>
