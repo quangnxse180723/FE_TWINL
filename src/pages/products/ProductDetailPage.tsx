@@ -276,6 +276,15 @@ export default function ProductDetailPage() {
               <li>Danh mục: {product.category}</li>
               <li>Thương hiệu: {product.brand || 'Khác'}</li>
               <li>Phong cách: {product.style || 'Casual, Streetwear'}</li>
+              {(product.length || product.shoulder || product.chest || product.waist) && (
+                <li>
+                  Số đo: 
+                  {product.length ? ` Dài ${product.length}cm` : ''}
+                  {product.shoulder ? `, Vai ${product.shoulder}cm` : ''}
+                  {product.chest ? `, Ngực ${product.chest}cm` : ''}
+                  {product.waist ? `, Eo ${product.waist}cm` : ''}
+                </li>
+              )}
             </ul>
           </div>
           

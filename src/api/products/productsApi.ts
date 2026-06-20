@@ -17,6 +17,10 @@ export interface Product {
   colorIds?: number[];
   colors: string[];
   conditionPercentage?: number;
+  length?: number;
+  shoulder?: number;
+  chest?: number;
+  waist?: number;
   defects?: string[];
   createdAt: string;
   updatedAt: string;

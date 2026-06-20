@@ -63,6 +63,7 @@ export default function SellerDashboardPage() {
   // States cho Form Thêm Sản Phẩm
   const [formData, setFormData] = useState({
     name: '', description: '', price: '', categoryId: '', brand: '', gender: 'Unisex', style: '', stock: '', conditionPercentage: '100',
+    length: '', shoulder: '', chest: '', waist: ''
   });
 
   const [sizes, setSizes] = useState('');
@@ -256,6 +257,10 @@ export default function SellerDashboardPage() {
         price: Number(formData.price),
         categoryId: Number(formData.categoryId),
         stock: Number(formData.stock),
+        length: formData.length ? Number(formData.length) : null,
+        shoulder: formData.shoulder ? Number(formData.shoulder) : null,
+        chest: formData.chest ? Number(formData.chest) : null,
+        waist: formData.waist ? Number(formData.waist) : null,
         imageUrls: uploadedUrls,
         sizes: sizes.split(',').map((item) => item.trim()).filter(Boolean),
         colorIds: colorIds,
@@ -264,7 +269,7 @@ export default function SellerDashboardPage() {
       };
       await sellerApi.createProduct(payload);
       toast.success('Đăng sản phẩm thành công!');
-      setFormData({ name: '', description: '', price: '', categoryId: '', brand: '', gender: 'Unisex', style: '', stock: '', conditionPercentage: '100' });
+      setFormData({ name: '', description: '', price: '', categoryId: '', brand: '', gender: 'Unisex', style: '', stock: '', conditionPercentage: '100', length: '', shoulder: '', chest: '', waist: '' });
       setLegitSlots({ front: emptyLegitSlot(), back: emptyLegitSlot(), tag: emptyLegitSlot(), opt1: emptyLegitSlot(), opt2: emptyLegitSlot(), opt3: emptyLegitSlot() });
       setSizes('');
       setColorIds([]);
@@ -915,6 +920,29 @@ export default function SellerDashboardPage() {
                           <div className="mt-5">
                             <label className="text-sm font-medium text-gray-700 flex items-center gap-2 mb-1.5">Kích thước (phân cách dấu phẩy)</label>
                             <input type="text" value={sizes} onChange={(e) => setSizes(e.target.value)} placeholder="Ví dụ: S, M, L, XL" className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all" />
+                          </div>
+
+                          {/* Số đo chi tiết */}
+                          <div className="mt-5">
+                            <label className="text-sm font-medium text-gray-700 flex items-center gap-2 mb-1.5">Số đo chi tiết (tuỳ chọn - tính bằng cm)</label>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                              <div>
+                                <label className="text-xs text-gray-500 mb-1 block">Dài</label>
+                                <input type="number" name="length" value={formData.length} onChange={handleInputChange} placeholder="Ví dụ: 124" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all" />
+                              </div>
+                              <div>
+                                <label className="text-xs text-gray-500 mb-1 block">Vai</label>
+                                <input type="number" name="shoulder" value={formData.shoulder} onChange={handleInputChange} placeholder="Ví dụ: 53" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all" />
+                              </div>
+                              <div>
+                                <label className="text-xs text-gray-500 mb-1 block">Ngực</label>
+                                <input type="number" name="chest" value={formData.chest} onChange={handleInputChange} placeholder="Ví dụ: 116" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all" />
+                              </div>
+                              <div>
+                                <label className="text-xs text-gray-500 mb-1 block">Eo</label>
+                                <input type="number" name="waist" value={formData.waist} onChange={handleInputChange} placeholder="Ví dụ: 116" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all" />
+                              </div>
+                            </div>
                           </div>
 
                           {/* Màu sắc */}

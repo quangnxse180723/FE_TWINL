@@ -32,6 +32,10 @@ export interface ProductResponse {
   colorIds?: number[];
   colors?: string[];
   conditionPercentage?: number;
+  length?: number;
+  shoulder?: number;
+  chest?: number;
+  waist?: number;
   createdAt?: string;
   updatedAt?: string;
 }
