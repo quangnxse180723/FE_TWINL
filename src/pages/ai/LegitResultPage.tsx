@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useLocation, useNavigate, Link } from 'react-router-dom'
 import { ShieldAlert, CheckCircle2, ShoppingBag, AlertTriangle, HelpCircle, Info } from 'lucide-react'
 import { PATHS } from '../../routes/paths'
@@ -37,7 +37,8 @@ export default function LegitResultPage() {
   const { state } = useLocation()
   const navigate = useNavigate()
   const result: LegitCheckResult = state?.legitResult
-  const previewImages: string[] = state?.previewImages || []
+  const previewImagesObj: Record<string, string> = state?.previewImages || {}
+  const previewImages = Object.values(previewImagesObj).filter(Boolean) as string[]
   
   const [activeImage, setActiveImage] = useState(previewImages[0] || '')
 
