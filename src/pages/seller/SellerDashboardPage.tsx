@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Package, PlusCircle, ShoppingBag, Loader2, Sparkles, CheckCircle2, AlertTriangle, Clock, Wallet as WalletIcon, CreditCard, Save, TrendingUp, LayoutDashboard, Shield, Camera, RotateCcw } from 'lucide-react';
+import { Package, PlusCircle, ShoppingBag, Loader2, Sparkles, CheckCircle2, AlertTriangle, Clock, Wallet as WalletIcon, CreditCard, Save, TrendingUp, LayoutDashboard, Shield, Camera, RotateCcw, Store } from 'lucide-react';
 import { sellerApi } from '../../api/seller/sellerApi';
 import { categoriesApi } from '../../api/categories/categoriesApi';
+import type { Category } from '../../api/categories/categoriesApi';
 import { colorsApi } from '../../api/colors/colorsApi';
 import type { ProductResponse } from '../../types/product';
 import type { Order } from '../../types/order';
@@ -11,6 +12,7 @@ import { walletApi } from '../../api/wallet/walletApi';
 import type { WalletResponse } from '../../api/wallet/walletApi';
 import orderApi from '../../api/orders/orderApi';
 import { compressImage } from '../../utils/imageCompressor';
+import '../../styles/pages/seller.css';
 
 type Tab = 'overview' | 'products' | 'new-product' | 'orders' | 'my-orders' | 'wallet';
 
@@ -19,6 +21,8 @@ interface AiAutoFillResult {
   name?: string; brand?: string; style?: string; gender?: string;
   description?: string; estimatedPrice?: string; material?: string; condition?: string;
   color?: string; conditionPercentage?: number; defects?: string[];
+  category?: string; categoryId?: number;
+  colorIds?: number[]; colorNames?: string[];
 }
 
 // Typewriter effect hook
@@ -68,7 +72,7 @@ export default function SellerDashboardPage() {
 
   const [sizes, setSizes] = useState('');
   const [colorIds, setColorIds] = useState<number[]>([]);
-  const [categories, setCategories] = useState<{id: number, name: string}[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [colors, setColors] = useState<{id: number, name: string}[]>([]);
   const [defects, setDefects] = useState<string[]>([]);
 
@@ -184,8 +188,33 @@ export default function SellerDashboardPage() {
       if (data.name) setTwName(data.name);
       if (data.description) setTwDesc(data.description);
 
+      let detectedCategoryId = formData.categoryId;
+      if (data.categoryId && data.category) {
+        const strId = data.categoryId.toString();
+        const exists = categories.some(cat => cat.id.toString() === strId || cat.children?.some(c => c.id.toString() === strId));
+        if (!exists) {
+          setCategories(prev => [...prev, { id: data.categoryId!, name: data.category!, children: [] }]);
+        }
+        detectedCategoryId = strId;
+      } else if (data.category) {
+        for (const cat of categories) {
+          if (cat.name.toLowerCase() === data.category.toLowerCase()) {
+            detectedCategoryId = cat.id.toString();
+            break;
+          }
+          if (cat.children) {
+            const childMatch = cat.children.find(c => c.name.toLowerCase() === data.category?.toLowerCase());
+            if (childMatch) {
+              detectedCategoryId = childMatch.id.toString();
+              break;
+            }
+          }
+        }
+      }
+
       setFormData(prev => ({
         ...prev,
+        categoryId: detectedCategoryId,
         brand: data.brand ?? prev.brand,
         style: data.style ?? prev.style,
         gender: data.gender ?? prev.gender,
@@ -198,7 +227,20 @@ export default function SellerDashboardPage() {
       }
       
       let colorDetected = false;
-      if (data.color) {
+      if (data.colorIds && data.colorIds.length > 0 && data.colorNames) {
+        const newColorIds = data.colorIds;
+        setColors(prev => {
+          const updated = [...prev];
+          data.colorIds!.forEach((cId, i) => {
+            if (!updated.some(c => c.id === cId)) {
+              updated.push({ id: cId, name: data.colorNames![i] });
+            }
+          });
+          return updated;
+        });
+        setColorIds(prev => Array.from(new Set([...prev, ...newColorIds])));
+        colorDetected = true;
+      } else if (data.color) {
         const detectedColorIds = colors
           .filter(c => data.color?.toLowerCase().includes(c.name.toLowerCase()))
           .map(c => c.id);
@@ -246,6 +288,14 @@ export default function SellerDashboardPage() {
     const requiredFiles = [legitSlots.front.file, legitSlots.back.file, legitSlots.tag.file].filter(Boolean);
     if (requiredFiles.length < 3) {
       toast.error('Vui lòng chụp đủ 3 ảnh bắt buộc (mặt trước, sau, mác).');
+      return;
+    }
+    if (!sizes.trim()) {
+      toast.error('Vui lòng nhập kích thước sản phẩm.');
+      return;
+    }
+    if (colorIds.length === 0) {
+      toast.error('Vui lòng chọn ít nhất 1 màu sắc.');
       return;
     }
     setIsLoading(true);
@@ -304,43 +354,66 @@ export default function SellerDashboardPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 min-h-screen">
-      <div className="flex flex-col md:flex-row gap-8">
-        
-        {/* Sidebar */}
-        <div className="w-full md:w-64 flex-shrink-0">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sticky top-8">
-            <h2 className="text-xl font-bold text-gray-800 mb-6 px-2">Quản lý trung tâm</h2>
-            <nav className="space-y-2">
-              <button onClick={() => setActiveTab('overview')} className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${activeTab === 'overview' ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-50'}`}>
-                <LayoutDashboard size={20} /><span>Tổng quan (Thống kê)</span>
-              </button>
-              
-              <div className="pt-2 pb-1 px-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Kênh Người Bán</div>
-              <button onClick={() => setActiveTab('products')} className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${activeTab === 'products' ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-50'}`}>
-                <Package size={20} /><span>Sản phẩm ký gửi</span>
-              </button>
-              <button onClick={() => setActiveTab('new-product')} className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${activeTab === 'new-product' ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-50'}`}>
-                <PlusCircle size={20} /><span>Đăng bán sản phẩm</span>
-              </button>
-              <button onClick={() => setActiveTab('orders')} className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${activeTab === 'orders' ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-50'}`}>
-                <ShoppingBag size={20} /><span>Đơn hàng chờ xử lý</span>
-              </button>
-              
-              
-              <div className="pt-2 pb-1 px-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Tài chính</div>
-              <button onClick={() => setActiveTab('wallet')} className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${activeTab === 'wallet' ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-50'}`}>
-                <WalletIcon size={20} /><span>Ví & Ngân hàng</span>
-              </button>
-            </nav>
-          </div>
-        </div>
+    <div className="seller-page">
+      <div className="seller-layout">
 
-        {/* Main Content */}
-        <div className="flex-1">
+        {/* ── SIDEBAR ──────────────────────────── */}
+        <aside className="seller-sidebar">
+          <div className="seller-sidebar__brand">
+            <div className="seller-sidebar__brand-icon">
+              <Store size={20} />
+            </div>
+            <div>
+              <div className="seller-sidebar__brand-text">Kênh người bán</div>
+              <div className="seller-sidebar__brand-sub">Quản lý trung tâm</div>
+            </div>
+          </div>
+
+          <nav className="seller-sidebar__nav">
+            <button
+              onClick={() => setActiveTab('overview')}
+              className={`seller-sidebar__nav-item${activeTab === 'overview' ? ' active' : ''}`}
+            >
+              <LayoutDashboard size={16} /> Tổng quan
+            </button>
+
+            <div className="seller-sidebar__section-label">Kênh người bán</div>
+
+            <button
+              onClick={() => setActiveTab('products')}
+              className={`seller-sidebar__nav-item${activeTab === 'products' ? ' active' : ''}`}
+            >
+              <Package size={16} /> Sản phẩm ký gửi
+            </button>
+            <button
+              onClick={() => setActiveTab('new-product')}
+              className={`seller-sidebar__nav-item${activeTab === 'new-product' ? ' active' : ''}`}
+            >
+              <PlusCircle size={16} /> Đăng bán sản phẩm
+            </button>
+            <button
+              onClick={() => setActiveTab('orders')}
+              className={`seller-sidebar__nav-item${activeTab === 'orders' ? ' active' : ''}`}
+            >
+              <ShoppingBag size={16} /> Đơn hàng chờ xử lý
+            </button>
+
+            <div className="seller-sidebar__section-label">Tài chính</div>
+
+            <button
+              onClick={() => setActiveTab('wallet')}
+              className={`seller-sidebar__nav-item${activeTab === 'wallet' ? ' active' : ''}`}
+            >
+              <WalletIcon size={16} /> Ví & Ngân hàng
+            </button>
+          </nav>
+        </aside>
+
+        {/* ── MAIN CONTENT ─────────────────────── */}
+        <main className="seller-main">
           {isLoading && activeTab !== 'new-product' ? (
-            <div className="flex justify-center items-center h-64">
-              <Loader2 className="animate-spin text-blue-600" size={32} />
+            <div className="seller-loading">
+              <Loader2 className="animate-spin" size={32} />
             </div>
           ) : (
             <>
@@ -578,8 +651,8 @@ export default function SellerDashboardPage() {
                               <td className="p-4 text-sm font-medium text-blue-600">{formatMoney(product.price)}</td>
                               <td className="p-4 text-sm text-gray-600">{product.stock}</td>
                               <td className="p-4">
-                                <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${product.status === 'ACTIVE' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>
-                                  {product.status || 'ACTIVE'}
+                                <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${product.status === 'ACTIVE' ? 'bg-green-100 text-green-700' : product.status === 'PENDING' ? 'bg-amber-100 text-amber-700' : product.status === 'REJECTED' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700'}`}>
+                                  {product.status === 'PENDING' ? 'Chờ duyệt' : product.status === 'REJECTED' ? 'Từ chối' : product.status === 'ACTIVE' ? 'Đã duyệt' : (product.status || 'Đã duyệt')}
                                 </span>
                               </td>
                             </tr>
@@ -808,25 +881,32 @@ export default function SellerDashboardPage() {
                             {/* Danh mục */}
                             <div>
                               <label className="text-sm font-medium text-gray-700 flex items-center gap-2 mb-1.5">Danh mục *</label>
-                              <select required name="categoryId" value={formData.categoryId} onChange={handleInputChange} className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all bg-white">
+                              <select required name="categoryId" value={formData.categoryId} onChange={(e) => {
+                                const selectedId = e.target.value;
+                                let detectedGender = formData.gender;
+                                for (const cat of categories) {
+                                  if (cat.id.toString() === selectedId) { detectedGender = cat.name; break; }
+                                  if (cat.children?.some(child => child.id.toString() === selectedId)) {
+                                    if (['Nữ', 'Nam', 'Thể thao'].includes(cat.name)) {
+                                      detectedGender = cat.name;
+                                    }
+                                    break;
+                                  }
+                                }
+                                setFormData(prev => ({ ...prev, categoryId: selectedId, gender: detectedGender }));
+                              }} className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all bg-white">
                                 <option value="" disabled>Chọn danh mục</option>
                                 {categories.map((category) => (
-                                  <option key={category.id} value={category.id}>{category.name}</option>
+                                  <optgroup key={category.id} label={category.name}>
+                                    {category.children && category.children.length > 0 ? (
+                                      category.children.map(child => (
+                                        <option key={child.id} value={child.id}>{child.name}</option>
+                                      ))
+                                    ) : (
+                                      <option value={category.id}>{category.name}</option>
+                                    )}
+                                  </optgroup>
                                 ))}
-                              </select>
-                            </div>
-
-                            {/* Giới tính */}
-                            <div>
-                              <label className="text-sm font-medium text-gray-700 flex items-center gap-2 mb-1.5">
-                                Giới tính
-                                {aiSuggested.gender && <span className="bg-green-50 text-green-600 border border-green-200 text-[10px] px-2 py-0.5 rounded-full font-bold leading-none">✦ AI Gợi ý</span>}
-                              </label>
-                              <select name="gender" value={formData.gender} onChange={handleInputChange} className={`w-full px-4 py-2.5 border rounded-lg outline-none transition-colors bg-white ${aiSuggested.gender ? 'bg-green-50/30 border-green-300 focus:border-green-500' : 'border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100'}`}>
-                                <option value="Men">Nam</option>
-                                <option value="Women">Nữ</option>
-                                <option value="Kids">Trẻ em</option>
-                                <option value="Unisex">Unisex</option>
                               </select>
                             </div>
 
@@ -918,8 +998,8 @@ export default function SellerDashboardPage() {
 
                           {/* Kích thước */}
                           <div className="mt-5">
-                            <label className="text-sm font-medium text-gray-700 flex items-center gap-2 mb-1.5">Kích thước (phân cách dấu phẩy)</label>
-                            <input type="text" value={sizes} onChange={(e) => setSizes(e.target.value)} placeholder="Ví dụ: S, M, L, XL" className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all" />
+                            <label className="text-sm font-medium text-gray-700 flex items-center gap-2 mb-1.5">Kích thước (phân cách dấu phẩy) <span className="text-red-500">*</span></label>
+                            <input required type="text" value={sizes} onChange={(e) => setSizes(e.target.value)} placeholder="Ví dụ: S, M, L, XL" className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all" />
                           </div>
 
                           {/* Số đo chi tiết */}
@@ -948,7 +1028,7 @@ export default function SellerDashboardPage() {
                           {/* Màu sắc */}
                           <div>
                             <label className="text-sm font-medium text-gray-700 flex items-center gap-2 mb-2">
-                                Màu sắc 
+                                Màu sắc <span className="text-red-500">*</span> 
                                 {aiSuggested.color && <span className="bg-green-50 text-green-600 border border-green-200 text-[10px] px-2 py-0.5 rounded-full font-bold leading-none">✦ AI Gợi ý</span>}
                             </label>
                             <div className="flex flex-wrap gap-2.5">
@@ -1010,7 +1090,7 @@ export default function SellerDashboardPage() {
               )}
             </>
           )}
-        </div>
+        </main>
       </div>
     </div>
   );

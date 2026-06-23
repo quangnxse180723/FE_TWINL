@@ -5,11 +5,22 @@ import { adminProductsApi } from '../api/adminProductsApi'
 import { PATHS } from '../../routes/paths'
 import { API_BASE_URL } from '../../config/constants'
 import type { AdminProduct } from '../types'
+import ConfirmModal from '../../components/shared/ConfirmModal'
 
 const formatPrice = (value: number) =>
   new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value)
 
-type ProductTab = 'ALL' | 'SYSTEM' | 'SELLER';
+const DEFECT_MAP: Record<string, string> = {
+  MINT: 'Như mới',
+  MINOR_FLAW: 'Lỗi nhẹ',
+  STAINED: 'Dính bẩn',
+  MISSING_BUTTON: 'Mất cúc',
+  TORN: 'Rách',
+  FADED: 'Phai màu',
+  OTHER: 'Khác'
+}
+
+type ProductTab = 'ALL' | 'SYSTEM' | 'SELLER' | 'PENDING';
 
 export default function AdminProductsPage() {
   const queryClient = useQueryClient()
@@ -19,12 +30,26 @@ export default function AdminProductsPage() {
   const [sizePage] = useState(1000)
   const [activeTab, setActiveTab] = useState<ProductTab>('ALL')
   const [expandedId, setExpandedId] = useState<number | null>(null)
+  const [confirmConfig, setConfirmConfig] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    isDestructive: boolean;
+    onConfirm: () => void;
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    isDestructive: false,
+    onConfirm: () => {}
+  });
 
   const queryParams = useMemo(
     () => ({
       search: search.trim() || undefined,
       page,
       sizePage,
+      status: 'ALL',
     }),
     [search, page, sizePage],
   )
@@ -41,10 +66,39 @@ export default function AdminProductsPage() {
     },
   })
 
+  const statusMutation = useMutation({
+    mutationFn: ({ id, status }: { id: number; status: string }) => adminProductsApi.updateStatus(id, status),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-products'] })
+    },
+  })
+
+  const handleUpdateStatus = (id: number, status: string, e: React.MouseEvent) => {
+    e.stopPropagation()
+    const statusText = status === 'ACTIVE' ? '"Đã duyệt"' : status === 'REJECTED' ? '"Từ chối"' : status;
+    setConfirmConfig({
+      isOpen: true,
+      title: 'Xác nhận trạng thái',
+      message: `Bạn có chắc chắn muốn chuyển trạng thái sản phẩm thành ${statusText}?`,
+      isDestructive: status === 'REJECTED',
+      onConfirm: () => {
+        statusMutation.mutate({ id, status })
+        setConfirmConfig(prev => ({ ...prev, isOpen: false }))
+      }
+    });
+  }
+
   const handleDelete = (id: number) => {
-    if (window.confirm('Xóa sản phẩm này?')) {
-      deleteMutation.mutate(id)
-    }
+    setConfirmConfig({
+      isOpen: true,
+      title: 'Xác nhận xóa',
+      message: 'Bạn có chắc chắn muốn xóa sản phẩm này? Hành động này không thể hoàn tác.',
+      isDestructive: true,
+      onConfirm: () => {
+        deleteMutation.mutate(id)
+        setConfirmConfig(prev => ({ ...prev, isOpen: false }))
+      }
+    });
   }
 
   const toggleExpand = (id: number) => {
@@ -55,6 +109,7 @@ export default function AdminProductsPage() {
     if (!data?.content) return [];
     if (activeTab === 'SYSTEM') return data.content.filter(p => !p.sellerId);
     if (activeTab === 'SELLER') return data.content.filter(p => p.sellerId);
+    if (activeTab === 'PENDING') return data.content.filter(p => p.status === 'PENDING');
     return data.content;
   }, [data, activeTab]);
 
@@ -81,7 +136,16 @@ export default function AdminProductsPage() {
         <td>{formatPrice(product.price)}</td>
         <td>{product.stock}</td>
         <td>
+          {product.status === 'PENDING' ? <span style={{ color: '#d97706', fontWeight: 600 }}>Chờ duyệt</span> : product.status === 'REJECTED' ? <span style={{ color: '#dc2626', fontWeight: 600 }}>Từ chối</span> : <span style={{ color: '#16a34a', fontWeight: 600 }}>{product.status === 'ACTIVE' ? 'Đã duyệt' : (product.status || 'Đã duyệt')}</span>}
+        </td>
+        <td>
           <div className="admin-table__actions" onClick={e => e.stopPropagation()}>
+            {product.status === 'PENDING' && (
+              <>
+                <button type="button" onClick={(e) => handleUpdateStatus(product.id, 'ACTIVE', e)} title="Duyệt">✅</button>
+                <button type="button" onClick={(e) => handleUpdateStatus(product.id, 'REJECTED', e)} title="Từ chối">❌</button>
+              </>
+            )}
             <button type="button" onClick={() => navigate(PATHS.adminProductEdit.replace(':id', String(product.id)))}>✏️</button>
             <button type="button" onClick={() => handleDelete(product.id)}>🗑️</button>
           </div>
@@ -95,11 +159,14 @@ export default function AdminProductsPage() {
                 <p><strong>Thương hiệu:</strong> {product.brand || 'N/A'}</p>
                 <p><strong>Giới tính:</strong> {product.gender || 'N/A'}</p>
                 <p><strong>Phong cách:</strong> {product.style || 'N/A'}</p>
-                <p><strong>Trạng thái:</strong> {product.status || 'ACTIVE'}</p>
+                <p><strong>Trạng thái:</strong> {product.status === 'PENDING' ? 'Chờ duyệt' : product.status === 'REJECTED' ? 'Từ chối' : product.status === 'ACTIVE' ? 'Đã duyệt' : (product.status || 'Đã duyệt')}</p>
+                <p><strong>Độ mới:</strong> {product.conditionPercentage ? `${product.conditionPercentage}%` : 'N/A'}</p>
+                <p><strong>Tình trạng lỗi:</strong> {product.defects && product.defects.length > 0 ? product.defects.map(d => DEFECT_MAP[d] || d).join(', ') : 'Không'}</p>
               </div>
               <div>
                 <p><strong>Kích thước:</strong> {product.sizes && product.sizes.length > 0 ? product.sizes.join(', ') : 'N/A'}</p>
-                <p><strong>Màu sắc (IDs):</strong> {product.colorIds && product.colorIds.length > 0 ? product.colorIds.join(', ') : 'N/A'}</p>
+                <p><strong>Chi tiết (Dài/Vai/Ngực/Eo):</strong> {product.length || '-'} / {product.shoulder || '-'} / {product.chest || '-'} / {product.waist || '-'}</p>
+                <p><strong>Màu sắc:</strong> {product.colors && product.colors.length > 0 ? product.colors.join(', ') : 'N/A'}</p>
                 <p><strong>Mô tả:</strong> <span style={{ color: '#6b7280' }}>{product.description || 'Không có mô tả'}</span></p>
                 {product.sellerName && (
                   <p style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px solid #e5e7eb' }}>
@@ -144,6 +211,12 @@ export default function AdminProductsPage() {
           >
             Sản phẩm Ký gửi
           </button>
+          <button 
+            style={{ padding: '6px 16px', borderRadius: '20px', border: '1px solid #d1d5db', background: activeTab === 'PENDING' ? '#d97706' : '#fff', color: activeTab === 'PENDING' ? '#fff' : '#d97706', cursor: 'pointer', fontWeight: 500 }}
+            onClick={() => setActiveTab('PENDING')}
+          >
+            Chờ duyệt
+          </button>
         </div>
         <div className="admin-panel__filters">
           <input
@@ -170,6 +243,7 @@ export default function AdminProductsPage() {
                 <th>Danh mục</th>
                 <th>Giá bán</th>
                 <th>Tồn kho</th>
+                <th>Trạng thái</th>
                 <th>Thao tác</th>
               </tr>
             </thead>
@@ -193,6 +267,15 @@ export default function AdminProductsPage() {
           </button>
         </div>
       </div>
+      
+      <ConfirmModal
+        isOpen={confirmConfig.isOpen}
+        title={confirmConfig.title}
+        message={confirmConfig.message}
+        isDestructive={confirmConfig.isDestructive}
+        onConfirm={confirmConfig.onConfirm}
+        onCancel={() => setConfirmConfig(prev => ({ ...prev, isOpen: false }))}
+      />
     </section>
   )
 }

@@ -16,6 +16,12 @@ export interface AdminProduct {
   sizes?: string[]
   colorIds?: number[]
   colors?: string[]
+  conditionPercentage?: number | null
+  length?: number | null
+  shoulder?: number | null
+  chest?: number | null
+  waist?: number | null
+  defects?: string[] | null
   createdAt?: string
   updatedAt?: string
 }
@@ -23,6 +29,7 @@ export interface AdminProduct {
 export interface AdminOrderItem {
   productId: number | null
   productName: string | null
+  imageUrl?: string | null
   quantity: number
   unitPrice: number
   lineTotal: number
@@ -77,6 +84,12 @@ export interface AdminProductPayload {
   stock: number
   sizes?: string[]
   colorIds?: number[]
+  conditionPercentage?: number
+  length?: number | null
+  shoulder?: number | null
+  chest?: number | null
+  waist?: number | null
+  defects?: string[]
 }
 
 export interface AdminUser {

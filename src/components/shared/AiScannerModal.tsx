@@ -153,7 +153,7 @@ export default function AiScannerModal({ isOpen, onClose, directScanImageUrls }:
                 <h4>TWINL AI</h4>
               </div>
               
-              <div className="ai-scanning-text">
+              <div className="ai-scanning-text" key={loadingText}>
                 {loadingText}
               </div>
 
@@ -182,7 +182,7 @@ export default function AiScannerModal({ isOpen, onClose, directScanImageUrls }:
               <div className="ai-progress-bar">
                 <div className="ai-progress-fill" style={{ width: `${scanProgress}%` }}></div>
               </div>
-              <div className="ai-progress-text">{scanProgress}%</div>
+              <div className="ai-progress-text" translate="no">{scanProgress}%</div>
             </div>
           </div>
         )}

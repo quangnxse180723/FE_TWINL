@@ -1,17 +1,20 @@
 import { useEffect, useState, useRef } from 'react';
 import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { Bell } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { notificationApi } from '../../api/notifications/notificationApi';
 import type { NotificationResponse } from '../../types/notification';
 import type { RootState } from '../../store';
 import { API_BASE_URL } from '../../config/constants';
+import { PATHS } from '../../routes/paths';
 
 export default function NotificationBell() {
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<NotificationResponse[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   const token = useSelector((state: RootState) => state.auth.token);
   const user = useSelector((state: RootState) => state.auth.user);
@@ -97,6 +100,17 @@ export default function NotificationBell() {
     }
   };
 
+  const handleNotificationClick = async (notification: NotificationResponse) => {
+    await handleMarkAsRead(notification.id, notification.isRead);
+    setIsOpen(false);
+    
+    if (notification.type === 'NEW_PRODUCT_PENDING') {
+      navigate(PATHS.adminProducts);
+    } else if (notification.type === 'NEW_ORDER_PAID') {
+      navigate(PATHS.adminOrders);
+    }
+  };
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleString('vi-VN', {
@@ -126,9 +140,9 @@ export default function NotificationBell() {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-100 z-50 overflow-hidden">
+        <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-100 z-50 overflow-hidden text-left">
           <div className="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
-            <h3 className="font-semibold text-gray-800">Thông báo</h3>
+            <h3 className="font-semibold text-gray-800 m-0 text-base">Thông báo</h3>
             {unreadCount > 0 && (
               <span className="text-xs font-medium bg-blue-100 text-blue-600 px-2 py-1 rounded-full">
                 {unreadCount} mới
@@ -141,7 +155,7 @@ export default function NotificationBell() {
               notifications.map((notification) => (
                 <div
                   key={notification.id}
-                  onClick={() => handleMarkAsRead(notification.id, notification.isRead)}
+                  onClick={() => handleNotificationClick(notification)}
                   className={`p-4 border-b border-gray-50 cursor-pointer transition-colors hover:bg-gray-50 ${
                     notification.isRead ? 'bg-white' : 'bg-blue-50/50'
                   }`}

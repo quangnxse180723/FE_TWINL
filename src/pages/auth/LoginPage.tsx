@@ -6,13 +6,13 @@ import { PATHS } from '../../routes/paths'
 import { useLoginMutation, useGoogleLoginMutation } from '../../hooks/useAuth'
 import { useGoogleLogin } from '@react-oauth/google'
 import { getApiErrorMessage } from '../../utils/apiError'
-import { useTranslation } from 'react-i18next'
+
 import type { RootState } from '../../store'
 import logo from '../../assets/images/logo-removebg.png'
 import '../../styles/pages/auth.css'
 
 export default function LoginPage() {
-  const { t } = useTranslation()
+  
   const loginMutation = useLoginMutation()
   const googleLoginMutation = useGoogleLoginMutation()
   const navigate = useNavigate()
@@ -55,19 +55,19 @@ export default function LoginPage() {
       <div className="auth-left">
         <div className="auth-manifesto">
           <h1 className="auth-manifesto__headline">
-            <span className="auth-manifesto__line">{t('auth.manifesto_l1')}</span>
-            <span className="auth-manifesto__line auth-manifesto__line--indent">{t('auth.manifesto_l2')}</span>
-            <span className="auth-manifesto__line">{t('auth.manifesto_l3')}</span>
+            <span className="auth-manifesto__line">{'WEAR'}</span>
+            <span className="auth-manifesto__line auth-manifesto__line--indent">{'THE'}</span>
+            <span className="auth-manifesto__line">{'STORY.'}</span>
           </h1>
           <hr className="auth-manifesto__rule" />
           <p className="auth-manifesto__sub" style={{ whiteSpace: 'pre-line' }}>
-            {t('auth.manifesto_sub')}
+            {'TRUST\nTHE PROCESS.'}
           </p>
         </div>
 
         <div className="auth-footnotes">
-          <p className="auth-footnote"><sup>1</sup> {t('auth.footnote_1')}</p>
-          <p className="auth-footnote"><sup>2</sup> {t('auth.footnote_2')}</p>
+          <p className="auth-footnote"><sup>1</sup> {'1 AI Legit Check — mỗi sản phẩm đều được kiểm định bằng trí tuệ nhân tạo'}</p>
+          <p className="auth-footnote"><sup>2</sup> {'2 48h Secure Escrow — tiền của bạn được bảo vệ cho đến khi xác nhận nhận hàng'}</p>
         </div>
       </div>
 
@@ -77,12 +77,12 @@ export default function LoginPage() {
           <img src={logo} alt="TWINL" className="auth-logo-img" />
         </Link>
         <div style={{ textAlign: 'left' }}>
-          <span className="auth-heading-badge">{t('auth.login')}</span>
+          <span className="auth-heading-badge">{'Đăng nhập'}</span>
         </div>
 
         <form className="auth-form" onSubmit={handleSubmit} noValidate>
           <div className="auth-field">
-            <label className="auth-field__label" htmlFor="login-email">{t('auth.email')}</label>
+            <label className="auth-field__label" htmlFor="login-email">{'Email'}</label>
             <input
               id="login-email"
               type="email"
@@ -94,7 +94,7 @@ export default function LoginPage() {
           </div>
 
           <div className="auth-field">
-            <label className="auth-field__label" htmlFor="login-password">{t('auth.password')}</label>
+            <label className="auth-field__label" htmlFor="login-password">{'Mật khẩu'}</label>
             <div className="auth-field__pw-wrap">
               <input
                 id="login-password"
@@ -118,15 +118,15 @@ export default function LoginPage() {
           )}
 
           <div className="auth-forgot">
-            <Link to={PATHS.forgotPassword}>{t('auth.forgot_pwd')}</Link>
+            <Link to={PATHS.forgotPassword}>{'Quên mật khẩu?'}</Link>
           </div>
 
           <button type="submit" className="auth-btn auth-btn--primary" disabled={loginMutation.isPending}>
-            {loginMutation.isPending ? '...' : t('auth.login_btn')}
+            {loginMutation.isPending ? '...' : 'Đăng nhập'}
           </button>
         </form>
 
-        <div className="auth-divider">{t('auth.or', 'hoặc')}</div>
+        <div className="auth-divider">{'Hoặc'}</div>
 
         <button
           type="button"
@@ -140,11 +140,11 @@ export default function LoginPage() {
             <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
             <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
           </svg>
-          {googleLoginMutation.isPending ? '...' : t('auth.google_login')}
+          {googleLoginMutation.isPending ? '...' : 'Đăng nhập với Google'}
         </button>
 
         <div className="auth-footer">
-          {t('auth.no_account')} <Link to={PATHS.register}>{t('auth.register')}</Link>
+          {'Chưa có tài khoản?'} <Link to={PATHS.register}>{'Tạo tài khoản'}</Link>
         </div>
       </div>
     </div>

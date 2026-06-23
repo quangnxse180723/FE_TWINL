@@ -3,7 +3,7 @@ import { useState, type ChangeEvent, type FormEvent } from 'react'
 import { adminUsersApi } from '../api/adminUsersApi'
 import type { AdminUser, AdminUserCreatePayload, AdminUserUpdatePayload } from '../types'
 
-type FormMode = 'create' | 'edit' | null
+type FormMode = 'create' | 'edit' | 'view' | null
 
 type UserFormState = {
   displayName: string
@@ -69,6 +69,12 @@ export default function AdminUsersPage() {
     setFormMode('create')
     setEditingUser(null)
     setFormState(emptyFormState)
+    setFormError(null)
+  }
+
+  const handleOpenView = (user: AdminUser) => {
+    setFormMode('view')
+    setEditingUser(user)
     setFormError(null)
   }
 
@@ -201,7 +207,59 @@ export default function AdminUsersPage() {
         </div>
       </div>
 
-      {formMode && (
+      {formMode === 'view' && editingUser && (
+        <div className="admin-panel" style={{ animation: 'slideDown 0.3s ease' }}>
+          <div className="admin-panel__header">
+            <h3>Chi tiết tài khoản</h3>
+            <button type="button" className="admin-secondary" onClick={handleCloseForm}>
+              Đóng
+            </button>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', padding: '20px' }}>
+            <div>
+              <p style={{ margin: '0 0 8px 0', color: '#6b7280', fontSize: '13px' }}>Tên hiển thị</p>
+              <p style={{ margin: '0 0 16px 0', fontWeight: 500, fontSize: '16px' }}>{editingUser.displayName || '--'}</p>
+              
+              <p style={{ margin: '0 0 8px 0', color: '#6b7280', fontSize: '13px' }}>Email</p>
+              <p style={{ margin: '0 0 16px 0', fontWeight: 500, fontSize: '16px', color: '#1a7a3e' }}>{editingUser.email}</p>
+              
+              <p style={{ margin: '0 0 8px 0', color: '#6b7280', fontSize: '13px' }}>Vai trò</p>
+              <p style={{ margin: '0 0 16px 0', fontWeight: 500 }}>
+                <span className="admin-pill">{editingUser.roles?.join(', ') || 'USER'}</span>
+              </p>
+
+              <p style={{ margin: '0 0 8px 0', color: '#6b7280', fontSize: '13px' }}>Trạng thái</p>
+              <p style={{ margin: '0 0 16px 0', fontWeight: 500 }}>
+                <span className={`admin-status ${editingUser.active === false ? 'admin-status--blocked' : 'admin-status--active'}`}>
+                  {editingUser.active === false ? 'Đã chặn' : 'Hoạt động'}
+                </span>
+              </p>
+            </div>
+            <div>
+              <p style={{ margin: '0 0 8px 0', color: '#6b7280', fontSize: '13px' }}>Số điện thoại</p>
+              <p style={{ margin: '0 0 16px 0', fontWeight: 500, fontSize: '16px' }}>{editingUser.phone || '--'}</p>
+              
+              <p style={{ margin: '0 0 8px 0', color: '#6b7280', fontSize: '13px' }}>Địa chỉ</p>
+              <p style={{ margin: '0 0 16px 0', fontWeight: 500, fontSize: '16px' }}>{editingUser.address || '--'}</p>
+
+              <p style={{ margin: '0 0 8px 0', color: '#6b7280', fontSize: '13px' }}>Giới tính</p>
+              <p style={{ margin: '0 0 16px 0', fontWeight: 500, fontSize: '16px' }}>{editingUser.gender || '--'}</p>
+
+              <p style={{ margin: '0 0 8px 0', color: '#6b7280', fontSize: '13px' }}>Ngày sinh</p>
+              <p style={{ margin: '0 0 16px 0', fontWeight: 500, fontSize: '16px' }}>{editingUser.dateOfBirth || '--'}</p>
+            </div>
+          </div>
+          <div style={{ padding: '0 20px 20px', display: 'flex', gap: '10px' }}>
+            {!editingUser.roles?.includes('ADMIN') && (
+              <button type="button" className="admin-primary" onClick={() => handleOpenEdit(editingUser)}>
+                Chỉnh sửa tài khoản
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {(formMode === 'create' || formMode === 'edit') && (
         <div className="admin-panel">
           <div className="admin-panel__header">
             <h3>{formMode === 'create' ? 'Thêm người dùng' : 'Chỉnh sửa tài khoản'}</h3>
@@ -307,7 +365,13 @@ export default function AdminUsersPage() {
             </thead>
             <tbody>
               {filteredUsers.map((user) => (
-                <tr key={user.id}>
+                <tr 
+                  key={user.id} 
+                  onClick={() => handleOpenView(user)}
+                  style={{ cursor: 'pointer', transition: 'all 0.2s' }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = ''}
+                >
                   <td>
                     <div className="admin-table__user">
                       <div className="admin-table__avatar">
@@ -333,10 +397,18 @@ export default function AdminUsersPage() {
                         <span className="admin-note"> </span>
                     ) : (
                       <div className="admin-table__actions">
-                        <button type="button" onClick={() => handleOpenEdit(user)} title="Sửa">
+                        <button 
+                          type="button" 
+                          onClick={(e) => { e.stopPropagation(); handleOpenEdit(user); }} 
+                          title="Sửa"
+                        >
                           ✏️
                         </button>
-                        <button type="button" onClick={() => handleToggleStatus(user)} title="Chặn/Mở">
+                        <button 
+                          type="button" 
+                          onClick={(e) => { e.stopPropagation(); handleToggleStatus(user); }} 
+                          title="Chặn/Mở"
+                        >
                           {user.active === false ? '✅' : '🚫'}
                         </button>
                       </div>

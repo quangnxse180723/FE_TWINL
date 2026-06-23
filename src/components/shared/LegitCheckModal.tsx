@@ -436,11 +436,11 @@ export default function LegitCheckModal({ isOpen, onClose, productImageUrls }: L
                 <Bot size={28} />
               </div>
               <h4 className="lc-scanning__title">TWINL AI đang kiểm định...</h4>
-              <p className="lc-scanning__text">{loadingText}</p>
+              <p className="lc-scanning__text" key={loadingText}>{loadingText}</p>
               <div className="lc-progress-bar">
                 <div className="lc-progress-fill" style={{ width: `${scanProgress}%` }} />
               </div>
-              <span className="lc-progress-pct">{scanProgress}%</span>
+              <span className="lc-progress-pct" translate="no">{scanProgress}%</span>
             </div>
 
             <div className="lc-notice" style={{ marginTop: 20 }}>

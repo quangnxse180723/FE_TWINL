@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import productsApi, { type Product } from '../../api/products/productsApi';
 import { PATHS } from '../../routes/paths'
 import bannerNu from '../../assets/images/banner-nu.png'
@@ -18,20 +18,34 @@ export default function WomenCategoryPage() {
   const [selectedDefects, setSelectedDefects] = useState<string>('')
   const [page, setPage] = useState(0)
   const navigate = useNavigate()
+  const location = useLocation()
+  
+  // Read category from URL initially
+  const queryParams = new URLSearchParams(location.search)
+  const initialCategory = queryParams.get('category') || ''
+  
+  const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory)
+
+  // Update selectedCategory if URL changes
+  useEffect(() => {
+    const currentParam = new URLSearchParams(location.search).get('category') || ''
+    setSelectedCategory(currentParam)
+  }, [location.search])
 
   useEffect(() => {
     fetchProducts()
-  }, [searchKeyword, minPrice, maxPrice, selectedColor, selectedSize, conditionRange, selectedDefects, sortBy, page])
+  }, [searchKeyword, minPrice, maxPrice, selectedColor, selectedSize, conditionRange, selectedDefects, sortBy, page, selectedCategory])
 
   const fetchProducts = async () => {
     setLoading(true)
     setError('')
     try {
       const params: Record<string, unknown> = {
-        category: 'Nữ',
+        gender: 'Nữ',
         page,
         sizePage: 8,
       }
+      if (selectedCategory) params.category = selectedCategory
       if (searchKeyword) params.search = searchKeyword
       if (minPrice) params.minPrice = minPrice
       if (maxPrice) params.maxPrice = maxPrice
@@ -178,6 +192,7 @@ export default function WomenCategoryPage() {
               setSelectedColor('');
               setSelectedSize('');
               setSortBy('');
+              setSelectedCategory('');
               setPage(0);
             }}
           >

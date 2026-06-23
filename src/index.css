@@ -39,3 +39,18 @@ a {
   display: flex;
   flex-direction: column;
 }
+
+/* Google Translate Hide Banner */
+body { top: 0 !important; }
+.skiptranslate > iframe.skiptranslate { display: none !important; visibility: hidden !important; }
+#goog-gt-tt { display: none !important; }
+
+/* Hide Google Translate UI completely */
+.goog-te-banner-frame.skiptranslate { display: none !important; }
+body { top: 0px !important; }
+#goog-gt-tt { display: none !important; }
+.goog-tooltip { display: none !important; }
+.goog-tooltip:hover { display: none !important; }
+.goog-text-highlight { background-color: transparent !important; border: none !important; box-shadow: none !important; }
+
+.skiptranslate iframe, .VIpgJd-ZVi9od-aZ2wEe-wOHMyf, .VIpgJd-ZVi9od-aZ2wEe-wOHMyf-ti6hGc, .goog-te-balloon-frame { display: none !important; }

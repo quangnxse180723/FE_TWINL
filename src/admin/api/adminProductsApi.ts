@@ -11,6 +11,7 @@ export interface AdminProductQuery {
   minPrice?: string
   maxPrice?: string
   inStock?: boolean
+  status?: string
   page?: number
   sizePage?: number
 }
@@ -30,6 +31,12 @@ export const adminProductsApi = {
   },
   update: async (id: string | number, payload: AdminProductPayload) => {
     const { data } = await axiosClient.put<AdminProduct>(`/api/products/${id}`, payload)
+    return data
+  },
+  updateStatus: async (id: string | number, status: string) => {
+    const { data } = await axiosClient.patch<AdminProduct>(`/api/products/${id}/status`, null, {
+      params: { status }
+    })
     return data
   },
   remove: async (id: string | number) => {

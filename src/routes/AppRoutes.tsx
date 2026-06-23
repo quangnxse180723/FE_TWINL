@@ -8,12 +8,16 @@ import AiResultPage from '../pages/home/AiResultPage'
 import LegitResultPage from '../pages/ai/LegitResultPage'
 import WomenCategoryPage from '../pages/category/WomenCategoryPage'
 import MenCategoryPage from '../pages/category/MenCategoryPage'
-import KidsCategoryPage from '../pages/category/KidsCategoryPage'
+
 import BrandsCategoryPage from '../pages/category/BrandsCategoryPage'
 import SportCategoryPage from '../pages/category/SportCategoryPage'
 import ProductDetailPage from '../pages/products/ProductDetailPage'
 import CartPage from '../pages/cart/CartPage'
 import ContactPage from '../pages/contact/ContactPage'
+import AboutPage from '../pages/info/AboutPage'
+import HelpCenterPage from '../pages/info/HelpCenterPage'
+import ReturnPolicyPage from '../pages/info/ReturnPolicyPage'
+import ReportBugPage from '../pages/info/ReportBugPage'
 import VnpayReturnPage from '../pages/payment/VnpayReturnPage'
 import SepayCheckoutPage from '../pages/payment/SepayCheckoutPage'
 import OrderHistoryPage from '../pages/orders/OrderHistoryPage'
@@ -31,6 +35,7 @@ import AdminProductsPage from '../admin/pages/AdminProductsPage'
 import AdminProductFormPage from '../admin/pages/AdminProductFormPage'
 import AdminUsersPage from '../admin/pages/AdminUsersPage'
 import AdminOrdersPage from '../admin/pages/AdminOrdersPage'
+import { AdminCategoriesPage } from '../admin/pages/AdminCategoriesPage'
 import StaffGuard from '../staff/components/StaffGuard'
 import StaffLayout from '../staff/layout/StaffLayout'
 import StaffOrdersPage from '../staff/pages/StaffOrdersPage'
@@ -53,7 +58,7 @@ export default function AppRoutes() {
         <Route path={PATHS.legitResult} element={<LegitResultPage />} />
         <Route path={PATHS.women} element={<WomenCategoryPage />} />
         <Route path={PATHS.men} element={<MenCategoryPage />} />
-        <Route path={PATHS.kids} element={<KidsCategoryPage />} />
+
         <Route path={PATHS.brands} element={<BrandsCategoryPage />} />
         <Route path={PATHS.sport} element={<SportCategoryPage />} />
         <Route path={PATHS.cart} element={<CartPage />} />
@@ -62,6 +67,10 @@ export default function AppRoutes() {
         <Route path={PATHS.orders} element={<OrderHistoryPage />} />
         <Route path={PATHS.orderTracking} element={<OrderTrackingPage />} />
         <Route path={PATHS.contact} element={<ContactPage />} />
+        <Route path={PATHS.about} element={<AboutPage />} />
+        <Route path={PATHS.helpCenter} element={<HelpCenterPage />} />
+        <Route path={PATHS.returnPolicy} element={<ReturnPolicyPage />} />
+        <Route path={PATHS.reportBug} element={<ReportBugPage />} />
         <Route path={PATHS.productDetail} element={<ProductDetailPage />} />
         <Route path={PATHS.profile} element={<ProfilePage />} />
         <Route path={PATHS.sellerDashboard} element={<SellerDashboardPage />} />
@@ -84,6 +93,7 @@ export default function AppRoutes() {
         <Route path={PATHS.adminProducts.replace('/admin/', '')} element={<AdminProductsPage />} />
         <Route path={PATHS.adminProductNew.replace('/admin/', '')} element={<AdminProductFormPage />} />
         <Route path={PATHS.adminProductEdit.replace('/admin/', '')} element={<AdminProductFormPage />} />
+        <Route path={PATHS.adminCategories.replace('/admin/', '')} element={<AdminCategoriesPage />} />
         <Route path={PATHS.adminUsers.replace('/admin/', '')} element={<AdminUsersPage />} />
         <Route path={PATHS.adminOrders.replace('/admin/', '')} element={<AdminOrdersPage />} />
       </Route>

@@ -16,12 +16,23 @@ const emptyForm: AdminProductPayload = {
   name: '', description: '', price: 0, categoryId: 0,
   brand: '', gender: '', imageUrls: [], status: 'ACTIVE',
   style: '', stock: 0, sizes: [], colorIds: [],
+  conditionPercentage: 100, length: 0, shoulder: 0, chest: 0, waist: 0, defects: ['MINT']
 }
 
-interface AiAutoFillResult {
-  name?: string; brand?: string; style?: string; gender?: string
-  description?: string; estimatedPrice?: string; material?: string; condition?: string
-  color?: string;
+export interface AiAutoFillResult {
+  name?: string
+  description?: string
+  brand?: string
+  style?: string
+  price?: number
+  condition?: string
+  material?: string
+  color?: string
+  colorIds?: number[]
+  colorNames?: string[]
+  category?: string
+  conditionPercentage?: number
+  defects?: string[]
 }
 
 // ── Legit Check 6-slot state ─────────────────
@@ -109,6 +120,9 @@ export default function AdminProductFormPage() {
         categoryId: data.categoryId ?? 0, brand: data.brand, gender: data.gender ?? '',
         imageUrls: data.imageUrls ?? [], status: data.status ?? 'ACTIVE',
         style: data.style ?? '', stock: data.stock, sizes: data.sizes ?? [], colorIds: data.colorIds ?? [],
+        conditionPercentage: data.conditionPercentage ?? 100, length: data.length ?? null,
+        shoulder: data.shoulder ?? null, chest: data.chest ?? null, waist: data.waist ?? null,
+        defects: data.defects && data.defects.length > 0 ? data.defects : ['MINT']
       })
       setSizes((data.sizes ?? []).join(', '))
       setColorIds(data.colorIds ?? [])
@@ -190,16 +204,51 @@ export default function AdminProductFormPage() {
       if (data.name) setTwName(data.name)
       if (data.description) setTwDesc(data.description)
 
+      let detectedCategoryId = form.categoryId;
+      if (data.category) {
+        for (const cat of categories) {
+          if (cat.name.toLowerCase() === data.category.toLowerCase()) {
+            detectedCategoryId = cat.id;
+            break;
+          }
+          if (cat.children) {
+            const childMatch = cat.children.find(c => c.name.toLowerCase() === data.category?.toLowerCase());
+            if (childMatch) {
+              detectedCategoryId = childMatch.id;
+              break;
+            }
+          }
+        }
+      }
+
       setForm(prev => ({
         ...prev,
+        name: twNameEffect.displayed ? prev.name : data.name,
+        description: twDescEffect.displayed ? prev.description : (data.description || prev.description),
+        categoryId: detectedCategoryId,
         brand: data.brand ?? prev.brand,
         style: data.style ?? prev.style,
-        gender: data.gender ?? prev.gender,
-        price: data.estimatedPrice ? Number(data.estimatedPrice.replace(/\D/g, '')) || prev.price : prev.price,
+        gender: data.category ?? prev.gender,
+        price: data.estimatedPrice ?? prev.price,
+        conditionPercentage: data.conditionPercentage ?? prev.conditionPercentage,
+        defects: data.defects && data.defects.length > 0 ? data.defects : prev.defects
       }))
       
       let colorDetected = false
-      if (data.color) {
+      if (data.colorIds && data.colorIds.length > 0 && data.colorNames) {
+        const newColorIds = data.colorIds;
+        queryClient.setQueryData(['colors'], (prev: any) => {
+          const updated = [...(prev || [])];
+          data.colorIds!.forEach((cId, i) => {
+            if (!updated.some((c: any) => c.id === cId)) {
+              updated.push({ id: cId, name: data.colorNames![i] });
+            }
+          });
+          return updated;
+        });
+        setColorIds(prev => Array.from(new Set([...prev, ...newColorIds])));
+        colorDetected = true;
+      } else if (data.color) {
         const detectedColorIds = colors
           .filter(c => data.color?.toLowerCase().includes(c.name.toLowerCase()))
           .map(c => c.id)
@@ -209,7 +258,7 @@ export default function AdminProductFormPage() {
         }
       }
 
-      setAiSuggested({ name: true, description: true, brand: !!data.brand, style: !!data.style, gender: !!data.gender, price: !!data.estimatedPrice, color: colorDetected })
+      setAiSuggested({ name: true, description: true, brand: !!data.brand, style: !!data.style, gender: !!data.category, price: !!data.estimatedPrice, color: colorDetected, condition: !!data.conditionPercentage })
       toast.success('✨ AI đã điền thông tin xong!')
     } catch (e: any) {
       toast.error(e.message || 'AI phân tích thất bại.')
@@ -225,6 +274,14 @@ export default function AdminProductFormPage() {
     const requiredSlots = [legitSlots.front, legitSlots.back, legitSlots.tag]
     if (requiredSlots.some(s => !s.preview)) {
       toast.error('Vui lòng chụp đủ 3 ảnh bắt buộc (mặt trước, sau, mác).')
+      return
+    }
+    if (!sizes.trim()) {
+      toast.error('Vui lòng nhập kích thước sản phẩm.')
+      return
+    }
+    if (colorIds.length === 0) {
+      toast.error('Vui lòng chọn ít nhất 1 màu sắc.')
       return
     }
 
@@ -254,12 +311,14 @@ export default function AdminProductFormPage() {
         }
       }
 
-      mutation.mutate({
+      const finalPayload: AdminProductPayload = {
         ...form,
         imageUrls: finalImageUrls,
-        colorIds,
         sizes: sizes.split(',').map(s => s.trim()).filter(Boolean),
-      })
+        colorIds,
+        defects: form.defects && form.defects.length > 0 ? form.defects : ['MINT']
+      }
+      mutation.mutate(finalPayload)
     } catch (err) {
       toast.error('Có lỗi xảy ra khi tải ảnh lên.')
     } finally {
@@ -273,12 +332,6 @@ export default function AdminProductFormPage() {
         <div>
           <h1>{isEdit ? 'Cập nhật sản phẩm' : 'Đăng bán sản phẩm mới'}</h1>
           <p>Tải ảnh lên và để AI tự động điền thông tin cho bạn.</p>
-        </div>
-        <div className="admin-form__actions">
-          <button type="button" className="admin-secondary" onClick={() => navigate(PATHS.adminProducts)}>Hủy bỏ</button>
-          <button type="submit" form="admin-product-form" className="admin-primary" disabled={mutation.isPending || isUploading}>
-            {mutation.isPending || isUploading ? 'Đang lưu...' : 'Lưu thay đổi'}
-          </button>
         </div>
       </div>
 
@@ -489,37 +542,112 @@ export default function AdminProductFormPage() {
                 <label>Danh mục</label>
                 <select
                   value={form.categoryId}
-                  onChange={e => { setFormError(''); setForm(p => ({ ...p, categoryId: Number(e.target.value) })) }}
+                  onChange={e => { 
+                    setFormError(''); 
+                    const selectedId = Number(e.target.value);
+                    let detectedGender = form.gender;
+                    // Auto-detect gender based on category parent
+                    for (const cat of categories) {
+                      if (cat.id === selectedId) { detectedGender = cat.name; break; }
+                      if (cat.children?.some(child => child.id === selectedId)) {
+                        if (['Nữ', 'Nam', 'Thể thao'].includes(cat.name)) {
+                          detectedGender = cat.name;
+                        }
+                        break;
+                      }
+                    }
+                    setForm(p => ({ ...p, categoryId: selectedId, gender: detectedGender })) 
+                  }}
                   required
                 >
                   <option value={0} disabled>Chọn danh mục</option>
-                  {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  {categories.map(c => (
+                    <optgroup key={c.id} label={c.name}>
+                      {c.children && c.children.length > 0 ? (
+                        c.children.map(child => (
+                          <option key={child.id} value={child.id}>{child.name}</option>
+                        ))
+                      ) : (
+                        <option value={c.id}>{c.name}</option>
+                      )}
+                    </optgroup>
+                  ))}
                 </select>
                 {formError && <p className="apf-error">{formError}</p>}
-              </div>
-
-              {/* Giới tính */}
-              <div className="apf-field">
-                <label>
-                  Giới tính
-                  {aiSuggested.gender && <span className="apf-ai-tag">✦ AI Gợi ý</span>}
-                </label>
-                <select
-                  value={form.gender ?? ''}
-                  onChange={e => setForm(p => ({ ...p, gender: e.target.value }))}
-                  className={aiSuggested.gender ? 'ai-filled' : ''}
-                >
-                  <option value="">Chọn giới tính</option>
-                  <option value="Nam">Nam</option>
-                  <option value="Nữ">Nữ</option>
-                  <option value="Khác">Khác</option>
-                  <option value="Unisex">Unisex</option>
-                </select>
               </div>
             </div>
 
             <div className="apf-field-row">
-              {/* Tình trạng */}
+              {/* Tình trạng % độ mới */}
+              <div className="apf-field">
+                <label>
+                  Tình trạng (% độ mới)
+                  {aiSuggested.condition && <span className="apf-ai-tag">✦ AI Gợi ý</span>}
+                </label>
+                <input
+                  type="number"
+                  min="50" max="100"
+                  value={form.conditionPercentage ?? 100}
+                  onChange={e => setForm(p => ({ ...p, conditionPercentage: Number(e.target.value) }))}
+                  className={aiSuggested.condition ? 'ai-filled' : ''}
+                />
+              </div>
+
+              {/* Defects */}
+              <div className="apf-field">
+                <label>
+                  Tình trạng lỗi
+                  {aiSuggested.condition && <span className="apf-ai-tag">✦ AI Gợi ý</span>}
+                </label>
+                <div className="apf-chips">
+                  {[
+                    { value: 'MINT', label: 'Không lỗi' },
+                    { value: 'MINOR_FLAW', label: 'Sờn nhẹ' },
+                    { value: 'STAINED', label: 'Bẩn/Ố vàng' },
+                    { value: 'MISSING_BUTTON', label: 'Mất cúc' },
+                    { value: 'TORN', label: 'Rách nhỏ' },
+                    { value: 'FADED', label: 'Phai màu' }
+                  ].map((defect) => (
+                    <label 
+                      key={defect.value}
+                      className={`apf-chip ${form.defects?.includes(defect.value) || (!form.defects?.length && defect.value === 'MINT') ? 'apf-chip--selected' : ''}`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={form.defects?.includes(defect.value) || (!form.defects?.length && defect.value === 'MINT')}
+                        onChange={(e) => {
+                          if (defect.value === 'MINT') {
+                            setForm(p => ({ ...p, defects: [] }));
+                          } else {
+                            if (e.target.checked) {
+                              setForm(p => ({ ...p, defects: [...(p.defects || []).filter(d => d !== 'MINT'), defect.value] }));
+                            } else {
+                              setForm(p => ({ ...p, defects: (p.defects || []).filter(d => d !== defect.value) }));
+                            }
+                          }
+                        }}
+                      />
+                      <span>{defect.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="apf-field-row">
+              {/* Size */}
+              <div className="apf-field">
+                <label>Size (phân cách bằng dấu phẩy) <span className="text-red-500">*</span></label>
+                <input
+                  required
+                  type="text"
+                  value={sizes}
+                  onChange={e => setSizes(e.target.value)}
+                  placeholder="S, M, L, XL"
+                />
+              </div>
+
+              {/* Trạng thái đăng bán */}
               <div className="apf-field">
                 <label>Trạng thái đăng bán</label>
                 <select value={form.status ?? 'ACTIVE'} onChange={e => setForm(p => ({ ...p, status: e.target.value }))}>
@@ -528,19 +656,30 @@ export default function AdminProductFormPage() {
                   <option value="DRAFT">Nháp</option>
                 </select>
               </div>
-
-              {/* Size */}
-              <div className="apf-field">
-                <label>Size (phân cách bằng dấu phẩy)</label>
-                <input
-                  type="text"
-                  value={sizes}
-                  onChange={e => setSizes(e.target.value)}
-                  placeholder="S, M, L, XL"
-                />
-              </div>
             </div>
 
+            {/* Số đo chi tiết */}
+            <div className="apf-field">
+              <label>Số đo chi tiết (tuỳ chọn - tính bằng cm)</label>
+              <div className="apf-field-row" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
+                <div>
+                  <label style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px', display: 'block' }}>Dài</label>
+                  <input type="number" value={form.length ?? ''} onChange={e => setForm(p => ({ ...p, length: Number(e.target.value) || null }))} placeholder="Ví dụ: 124" />
+                </div>
+                <div>
+                  <label style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px', display: 'block' }}>Vai</label>
+                  <input type="number" value={form.shoulder ?? ''} onChange={e => setForm(p => ({ ...p, shoulder: Number(e.target.value) || null }))} placeholder="Ví dụ: 53" />
+                </div>
+                <div>
+                  <label style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px', display: 'block' }}>Ngực</label>
+                  <input type="number" value={form.chest ?? ''} onChange={e => setForm(p => ({ ...p, chest: Number(e.target.value) || null }))} placeholder="Ví dụ: 116" />
+                </div>
+                <div>
+                  <label style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px', display: 'block' }}>Eo</label>
+                  <input type="number" value={form.waist ?? ''} onChange={e => setForm(p => ({ ...p, waist: Number(e.target.value) || null }))} placeholder="Ví dụ: 116" />
+                </div>
+              </div>
+            </div>
             {/* Mô tả */}
             <div className="apf-field">
               <label>
@@ -561,7 +700,7 @@ export default function AdminProductFormPage() {
 
             {/* Màu sắc */}
             <div className="apf-field">
-              <label>Màu sắc {aiSuggested.color && <span className="apf-ai-tag" style={{marginLeft: 8}}>✦ AI Gợi ý</span>}</label>
+              <label>Màu sắc <span className="text-red-500">*</span> {aiSuggested.color && <span className="apf-ai-tag" style={{marginLeft: 8}}>✦ AI Gợi ý</span>}</label>
               <div className="apf-chips">
                 {colors.map(color => (
                   <label key={color.id} className={`apf-chip ${colorIds.includes(color.id) ? 'apf-chip--selected' : ''}`}>
@@ -585,13 +724,12 @@ export default function AdminProductFormPage() {
               </div>
             )}
 
-            {/* Submit */}
-            <div className="apf-submit-row">
-              <button type="button" className="apf-btn-secondary" onClick={() => navigate(PATHS.adminProducts)}>
+            <div className="flex justify-end gap-3 pt-6 border-t border-gray-100 mt-6">
+              <button type="button" className="px-6 py-2.5 rounded-lg border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors" onClick={() => navigate(PATHS.adminProducts)}>
                 Hủy bỏ
               </button>
-              <button type="submit" className="apf-btn-primary" disabled={mutation.isPending || isUploading}>
-                {mutation.isPending || isUploading ? 'Đang lưu...' : <><span>Đăng bán ngay</span> <ArrowRight size={16} /></>}
+              <button type="submit" className="px-6 py-2.5 rounded-lg bg-emerald-600 text-white font-medium hover:bg-emerald-700 transition-colors disabled:opacity-70" disabled={mutation.isPending || isUploading}>
+                {mutation.isPending || isUploading ? 'Đang lưu...' : 'Lưu thay đổi'}
               </button>
             </div>
           </div>

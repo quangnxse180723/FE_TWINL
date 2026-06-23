@@ -1,12 +1,14 @@
 import { NavLink } from 'react-router-dom'
 import { PATHS } from '../../routes/paths'
+import { LayoutDashboard, BarChart3, Package, Layers, Users, ShoppingCart } from 'lucide-react'
 
 const links = [
-  { to: PATHS.admin, label: 'Tổng quan', icon: '⧉' },
-  { to: PATHS.adminTraffic, label: 'Thống kê Truy cập', icon: '📊' },
-  { to: PATHS.adminProducts, label: 'Sản phẩm', icon: '▢' },
-  { to: PATHS.adminUsers, label: 'Tài khoản', icon: '◉' },
-  { to: PATHS.adminOrders, label: 'Đơn hàng', icon: '▤' },
+  { to: PATHS.admin, label: 'Tổng quan', icon: <LayoutDashboard size={20} /> },
+  { to: PATHS.adminTraffic, label: 'Thống kê Truy cập', icon: <BarChart3 size={20} /> },
+  { to: PATHS.adminProducts, label: 'Sản phẩm', icon: <Package size={20} /> },
+  { to: PATHS.adminCategories, label: 'Danh mục', icon: <Layers size={20} /> },
+  { to: PATHS.adminUsers, label: 'Tài khoản', icon: <Users size={20} /> },
+  { to: PATHS.adminOrders, label: 'Đơn hàng', icon: <ShoppingCart size={20} /> },
 ]
 
 export default function AdminSidebar({ isSidebarOpen = true }: { isSidebarOpen?: boolean }) {

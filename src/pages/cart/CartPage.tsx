@@ -6,13 +6,13 @@ import sepayApi from '../../api/payment/sepayApi'
 import { PATHS } from '../../routes/paths'
 import type { CartResponse } from '../../types/cart'
 import type { RootState } from '../../store'
-import { useTranslation } from 'react-i18next'
+
 import '../../styles/pages/cart.css'
 
 const formatPrice = (value: number) => `${new Intl.NumberFormat('vi-VN').format(value)} VND`
 
 export default function CartPage() {
-  const { t } = useTranslation()
+  
   const user = useSelector((state: RootState) => state.auth.user)
   const navigate = useNavigate()
   const [cart, setCart] = useState<CartResponse | null>(null)
@@ -129,9 +129,9 @@ export default function CartPage() {
     return (
       <section className="cart">
         <div className="cart__empty-state">
-          <h1>{t('cart.title')}</h1>
-          <p>{t('product.login_required')}</p>
-          <Link className="cart__primary" to={PATHS.login}>{t('auth.login_now')}</Link>
+          <h1>{'Giỏ hàng của bạn'}</h1>
+          <p>{'Vui lòng đăng nhập để xem giỏ hàng và mua sắm.'}</p>
+          <Link className="cart__primary" to={PATHS.login}>{'Đăng nhập ngay'}</Link>
         </div>
       </section>
     )
@@ -140,9 +140,9 @@ export default function CartPage() {
   return (
     <section className="cart">
       <div className="cart__header">
-        <h1>{t('cart.title')}</h1>
+        <h1>{'Giỏ hàng của bạn'}</h1>
         {cart?.items?.length ? (
-          <button type="button" className="cart__clear" onClick={handleClearCart}>{t('cart.remove')} All</button>
+          <button type="button" className="cart__clear" onClick={handleClearCart}>{'Xóa'} All</button>
         ) : null}
       </div>
 
@@ -156,10 +156,10 @@ export default function CartPage() {
             {actionError ? <div className="cart__action-error">{actionError}</div> : null}
             <div className="cart__table">
               <div className="cart__row cart__row--head">
-                <span>{t('cart.product')}</span>
-                <span>{t('cart.price')}</span>
-                <span>{t('cart.quantity')}</span>
-                <span>{t('cart.subtotal')}</span>
+                <span>{'Sản phẩm'}</span>
+                <span>{'Đơn giá'}</span>
+                <span>{'Số lượng'}</span>
+                <span>{'Tạm tính'}</span>
               </div>
               {cart.items.map((item) => {
                 const maxStock = item.availableStock ?? item.quantity
@@ -208,23 +208,23 @@ export default function CartPage() {
               <div className="cart__feature">
                 <div className="cart__feature-icon">?</div>
                 <div>
-                  <strong>{t('cart.questions')}</strong>
-                  <p>{t('cart.support_desc')}</p>
-                  <Link to={PATHS.contact}>{t('cart.contact_now')}</Link>
+                  <strong>{'Bạn có câu hỏi?'}</strong>
+                  <p>{'Đội ngũ hỗ trợ khách hàng của chúng tôi luôn sẵn sàng 24/7.'}</p>
+                  <Link to={PATHS.contact}>{'Liên hệ ngay'}</Link>
                 </div>
               </div>
               <div className="cart__feature">
                 <div className="cart__feature-icon">LOCK</div>
                 <div>
-                  <strong>{t('home.trust_1_title')}</strong>
-                  <p>{t('home.how_step_2_desc')}</p>
+                  <strong>{'Ký quỹ an toàn'}</strong>
+                  <p>{'Tiền được giữ bởi TWINL cho đến khi giao dịch hoàn tất'}</p>
                 </div>
               </div>
               <div className="cart__feature">
                 <div className="cart__feature-icon">OK</div>
                 <div>
-                  <strong>{t('home.trust_2_title')}</strong>
-                  <p>{t('home.trust_2_desc')}</p>
+                  <strong>{'Hoàn tiền 48h'}</strong>
+                  <p>{'Không vừa ý? Đổi trả ngay lập tức'}</p>
                 </div>
               </div>
             </div>
@@ -232,45 +232,45 @@ export default function CartPage() {
 
           <aside className="cart__summary">
             <div className="cart__summary-card">
-              <h3>{t('cart.summary')}:</h3>
+              <h3>{'Tóm tắt đơn hàng'}:</h3>
               <div className="cart__summary-row">
-                <span>{t('cart.display_name')}</span>
-                <span>{user.displayName || t('cart.not_updated')}</span>
+                <span>{'Tên người nhận'}</span>
+                <span>{user.displayName || 'Chưa cập nhật'}</span>
               </div>
               <div className="cart__summary-row">
-                <span>{t('cart.phone')}</span>
-                <span>{user.phone || t('cart.not_updated')}</span>
+                <span>{'Số điện thoại'}</span>
+                <span>{user.phone || 'Chưa cập nhật'}</span>
               </div>
               <div className="cart__summary-row">
-                <span>{t('cart.address')}</span>
-                <span>{user.address || t('cart.not_updated')}</span>
+                <span>{'Địa chỉ nhận hàng'}</span>
+                <span>{user.address || 'Chưa cập nhật'}</span>
               </div>
 
               {!hasShippingInfo ? (
                 <div className="cart__summary-alert">
-                  {t('cart.update_info')}
-                  <button type="button" onClick={() => navigate(PATHS.profile)}>{t('cart.update_btn')}</button>
+                  {'Vui lòng cập nhật thông tin giao hàng.'}
+                  <button type="button" onClick={() => navigate(PATHS.profile)}>{'Cập nhật ngay'}</button>
                 </div>
               ) : null}
               <div className="cart__summary-row">
-                <span>{t('cart.subtotal')}</span>
+                <span>{'Tạm tính'}</span>
                 <span>{formatPrice(totals.subtotal)}</span>
               </div>
               <div className="cart__summary-row">
-                <span>{t('cart.shipping_fee')}</span>
-                <span>{totals.shipping === 0 ? t('cart.free') : formatPrice(totals.shipping)}</span>
+                <span>{'Phí vận chuyển'}</span>
+                <span>{totals.shipping === 0 ? 'Miễn phí' : formatPrice(totals.shipping)}</span>
               </div>
               <div className="cart__summary-total">
-                <span>{t('cart.total')}</span>
+                <span>{'Tổng cộng'}</span>
                 <strong>{formatPrice(totals.total)}</strong>
               </div>
               {/* ── Chọn phương thức thanh toán ── */}
               <div className="cart__payment-method">
-                <h4>{t('cart.payment_method')}</h4>
+                <h4>{'Phương thức thanh toán'}</h4>
                 <div className="cart__payment-option cart__payment-option--active" style={{ cursor: 'default' }}>
                   <span className="cart__payment-option-icon">🏦</span>
                   <span>
-                    <strong>{t('cart.bank_transfer')}</strong>
+                    <strong>{'Chuyển khoản VietQR'}</strong>
                   </span>
                 </div>
               </div>
@@ -282,8 +282,8 @@ export default function CartPage() {
                   disabled={checkoutLoading}
                 >
                   {checkoutLoading
-                    ? t('cart.checkout_loading')
-                    : t('cart.checkout')}
+                    ? 'Đang xử lý...'
+                    : 'Thanh toán ngay'}
                 </button>
               <div className="cart__coupon" style={{ display: 'none' }}>
                 <input type="text" placeholder="Mã giảm giá" />
@@ -292,7 +292,7 @@ export default function CartPage() {
             </div>
 
             <div className="cart__summary-card cart__summary-card--info">
-              <h4>{t('cart.payment_method')}</h4>
+              <h4>{'Phương thức thanh toán'}</h4>
               <div className="cart__payments">
                 <span>Visa</span>
                 <span>MasterCard</span>
@@ -302,19 +302,19 @@ export default function CartPage() {
                 <span>ZaloPay</span>
               </div>
               <div className="cart__policy">
-                <h5>{t('home.trust_2_title')}</h5>
-                <p>{t('home.how_step_3_desc')}</p>
-                <h5>{t('home.trust_1_title')}</h5>
-                <p>{t('home.trust_1_desc')}</p>
+                <h5>{'Hoàn tiền 48h'}</h5>
+                <p>{'Kiểm tra kỹ trong 48h, nếu không hài lòng hoàn tiền ngay'}</p>
+                <h5>{'Ký quỹ an toàn'}</h5>
+                <p>{'Tiền được giữ cho đến khi bạn hài lòng'}</p>
               </div>
             </div>
           </aside>
         </div>
       ) : (
         <div className="cart__empty">
-          <h2>{t('cart.empty')}</h2>
-          <p>{t('cart.empty_desc')}</p>
-          <Link className="cart__primary" to={PATHS.home}>{t('cart.continue_shopping')}</Link>
+          <h2>{'Giỏ hàng trống'}</h2>
+          <p>{'Khám phá các sản phẩm mới nhất của TWINL.'}</p>
+          <Link className="cart__primary" to={PATHS.home}>{'Tiếp tục mua sắm'}</Link>
         </div>
       )}
     </section>

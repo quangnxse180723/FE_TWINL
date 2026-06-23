@@ -6,6 +6,7 @@ import { logout } from '../../store/slices/authSlice'
 import { clearAuth } from '../../utils/authStorage'
 import type { RootState } from '../../store'
 import { Menu } from 'lucide-react'
+import NotificationBell from '../../components/shared/NotificationBell'
 
 export default function AdminTopbar({ toggleSidebar }: { toggleSidebar?: () => void }) {
   const dispatch = useDispatch()
@@ -30,7 +31,9 @@ export default function AdminTopbar({ toggleSidebar }: { toggleSidebar?: () => v
         </button>
       </div>
       <div className="admin__topbar-actions">
-        <button type="button" className="admin__icon-button">🔔</button>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <NotificationBell />
+        </div>
         <button type="button" className="admin__icon-button">⚙️</button>
         <button type="button" className="admin__logout" onClick={handleLogout}>
           Đăng xuất

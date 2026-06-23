@@ -1,21 +1,21 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { toast } from 'react-toastify'
-import { useTranslation } from 'react-i18next'
+
 import { ArrowRight, ShieldCheck, RefreshCcw, Star, Users, TrendingUp, Sparkles } from 'lucide-react'
 import type { RootState } from '../../store'
 import { PATHS } from '../../routes/paths'
 import '../../styles/pages/home.css'
 
 export default function HomePage() {
-  const { t } = useTranslation()
+  
   const user = useSelector((state: RootState) => state.auth.user)
   const navigate = useNavigate()
 
   const handleSellClick = (e: React.MouseEvent) => {
     e.preventDefault()
     if (!user) {
-      toast.info(t('home.sell_prompt'))
+      toast.info('Vui lòng đăng nhập để bán đồ')
       navigate(PATHS.login)
     } else {
       navigate(PATHS.sellerDashboard)
@@ -30,34 +30,34 @@ export default function HomePage() {
         <div className="hp-hero__bg" aria-hidden="true" />
         <div className="hp-hero__content">
           <span className="hp-hero__eyebrow">
-            <Sparkles size={14} /> {t('home.hero_eyebrow')}
+            <Sparkles size={14} /> {'Thời trang bền vững'}
           </span>
           <h1 className="hp-hero__title">
-            <span style={{ whiteSpace: 'nowrap' }}>{t('home.hero_title_1')}</span><br />
-            <em>{t('home.hero_title_2')}</em>
+            <span style={{ whiteSpace: 'nowrap' }}>{'Thời trang đẳng cấp,'}</span><br />
+            <em>{'giá trị trường tồn'}</em>
           </h1>
           <p className="hp-hero__sub">
-            {t('home.hero_sub')}
+            {'Khám phá hàng nghìn món đồ cao cấp đã qua sử dụng — được xác thực, giao dịch an toàn qua hệ thống ký quỹ độc quyền của TWINL.'}
           </p>
           <div className="hp-hero__actions">
             <Link to={PATHS.women} className="hp-btn hp-btn--primary">
-              {t('home.hero_explore')} <ArrowRight size={16} />
+              {'Khám phá ngay'} <ArrowRight size={16} />
             </Link>
             <button type="button" onClick={handleSellClick} className="hp-btn hp-btn--ghost">
-              {t('home.hero_sell')}
+              {'Bán đồ của bạn'}
             </button>
           </div>
           <div className="hp-hero__stats">
             <div className="hp-hero__stat">
-              <strong>10K+</strong><span>{t('home.hero_stat_1')}</span>
+              <strong>10K+</strong><span>{'Sản phẩm'}</span>
             </div>
             <div className="hp-hero__stat-divider" />
             <div className="hp-hero__stat">
-              <strong>98%</strong><span>{t('home.hero_stat_2')}</span>
+              <strong>98%</strong><span>{'Hài lòng'}</span>
             </div>
             <div className="hp-hero__stat-divider" />
             <div className="hp-hero__stat">
-              <strong>5★</strong><span>{t('home.hero_stat_3')}</span>
+              <strong>5★</strong><span>{'Đánh giá'}</span>
             </div>
           </div>
         </div>
@@ -76,15 +76,15 @@ export default function HomePage() {
               />
               <div className="hp-hero__img-tag">
                 <ShieldCheck size={14} />
-                <span>{t('home.hero_auth')}</span>
+                <span>{'Đã xác thực'}</span>
               </div>
             </div>
           </div>
           <div className="hp-hero__floating-card">
             <Star size={14} fill="#f59e0b" color="#f59e0b" />
             <div>
-              <p>{t('home.hero_success_title')}</p>
-              <span>{t('home.hero_success_desc')}</span>
+              <p>{'Giao dịch thành công!'}</p>
+              <span>{'Đơn hàng #TW2026 đã hoàn tất'}</span>
             </div>
           </div>
         </div>
@@ -96,32 +96,32 @@ export default function HomePage() {
           <div className="hp-trust__item">
             <ShieldCheck size={24} className="hp-trust__icon" />
             <div>
-              <h4>{t('home.trust_1_title')}</h4>
-              <p>{t('home.trust_1_desc')}</p>
+              <h4>{'Ký quỹ an toàn'}</h4>
+              <p>{'Tiền được giữ cho đến khi bạn hài lòng'}</p>
             </div>
           </div>
           <div className="hp-trust__sep" />
           <div className="hp-trust__item">
             <RefreshCcw size={24} className="hp-trust__icon" />
             <div>
-              <h4>{t('home.trust_2_title')}</h4>
-              <p>{t('home.trust_2_desc')}</p>
+              <h4>{'Hoàn tiền 48h'}</h4>
+              <p>{'Không vừa ý? Đổi trả ngay lập tức'}</p>
             </div>
           </div>
           <div className="hp-trust__sep" />
           <div className="hp-trust__item">
             <Star size={24} className="hp-trust__icon" />
             <div>
-              <h4>{t('home.trust_3_title')}</h4>
-              <p>{t('home.trust_3_desc')}</p>
+              <h4>{'AI xác thực hàng'}</h4>
+              <p>{'Mỗi sản phẩm được kiểm tra bởi AI'}</p>
             </div>
           </div>
           <div className="hp-trust__sep" />
           <div className="hp-trust__item">
             <Users size={24} className="hp-trust__icon" />
             <div>
-              <h4>{t('home.trust_4_title')}</h4>
-              <p>{t('home.trust_4_desc')}</p>
+              <h4>{'Cộng đồng tin cậy'}</h4>
+              <p>{'Hơn 10,000 thành viên đang giao dịch'}</p>
             </div>
           </div>
         </div>
@@ -133,27 +133,27 @@ export default function HomePage() {
           <Link to={PATHS.women} className="hp-cat-card hp-cat-card--women">
             <div className="hp-cat-card__bg" />
             <div className="hp-cat-card__body">
-              <span className="hp-cat-card__tag">{t('home.cat_tag_new')}</span>
-              <h2>{t('home.cat_women')}</h2>
-              <p>{t('home.cat_women_desc')}</p>
-              <span className="hp-cat-card__cta">{t('home.cat_view')} <ArrowRight size={14} /></span>
+              <span className="hp-cat-card__tag">{'New arrivals'}</span>
+              <h2>{'Thời trang Nữ'}</h2>
+              <p>{'Hàng trăm thiết kế độc đáo'}</p>
+              <span className="hp-cat-card__cta">{'Xem ngay'} <ArrowRight size={14} /></span>
             </div>
           </Link>
           <div className="hp-cat-card-col">
             <Link to={PATHS.men} className="hp-cat-card hp-cat-card--men">
               <div className="hp-cat-card__bg" />
               <div className="hp-cat-card__body">
-                <span className="hp-cat-card__tag">{t('home.cat_tag_trend')}</span>
-                <h2>{t('home.cat_men')}</h2>
-                <span className="hp-cat-card__cta">{t('home.cat_view')} <ArrowRight size={14} /></span>
+                <span className="hp-cat-card__tag">{'Trending'}</span>
+                <h2>{'Thời trang Nam'}</h2>
+                <span className="hp-cat-card__cta">{'Xem ngay'} <ArrowRight size={14} /></span>
               </div>
             </Link>
-            <Link to={PATHS.kids} className="hp-cat-card hp-cat-card--kids">
+            <Link to={PATHS.sport} className="hp-cat-card hp-cat-card--sport">
               <div className="hp-cat-card__bg" />
               <div className="hp-cat-card__body">
-                <span className="hp-cat-card__tag">{t('home.cat_tag_cute')}</span>
-                <h2>{t('home.cat_kids')}</h2>
-                <span className="hp-cat-card__cta">{t('home.cat_view')} <ArrowRight size={14} /></span>
+                <span className="hp-cat-card__tag">{'Active & Fit'}</span>
+                <h2>{'Thể thao'}</h2>
+                <span className="hp-cat-card__cta">{'Xem ngay'} <ArrowRight size={14} /></span>
               </div>
             </Link>
           </div>
@@ -164,21 +164,21 @@ export default function HomePage() {
       <section className="hp-how">
         <div className="hp-how__inner">
           <div className="hp-how__left">
-            <p className="hp-section__eyebrow">{t('home.how_eyebrow')}</p>
-            <h2>{t('home.how_title')}</h2>
+            <p className="hp-section__eyebrow">{'Quy trình'}</p>
+            <h2>{'Mua sắm thông minh, giao dịch an tâm'}</h2>
             <p className="hp-how__desc">
-              {t('home.how_desc')}
+              {'TWINL sử dụng hệ thống ký quỹ tiên tiến giúp cả người mua và người bán hoàn toàn yên tâm trong mỗi giao dịch.'}
             </p>
             <Link to={PATHS.women} className="hp-btn hp-btn--primary" style={{ display: 'inline-flex', marginTop: '24px' }}>
-              {t('home.how_start')} <ArrowRight size={16} />
+              {'Bắt đầu mua sắm'} <ArrowRight size={16} />
             </Link>
           </div>
           <div className="hp-how__steps">
             {[
-              { num: '01', title: t('home.how_step_1_title'), desc: t('home.how_step_1_desc') },
-              { num: '02', title: t('home.how_step_2_title'), desc: t('home.how_step_2_desc') },
-              { num: '03', title: t('home.how_step_3_title'), desc: t('home.how_step_3_desc') },
-              { num: '04', title: t('home.how_step_4_title'), desc: t('home.how_step_4_desc') },
+              { num: '01', title: 'Chọn sản phẩm', desc: 'Duyệt qua hàng nghìn món đồ đã được AI kiểm tra chất lượng' },
+              { num: '02', title: 'Thanh toán an toàn', desc: 'Tiền được giữ bởi TWINL cho đến khi giao dịch hoàn tất' },
+              { num: '03', title: 'Nhận hàng & xác nhận', desc: 'Kiểm tra kỹ trong 48h, nếu không hài lòng hoàn tiền ngay' },
+              { num: '04', title: 'Giao dịch thành công', desc: 'Người bán nhận tiền, bạn nhận hàng — cả hai cùng vui' },
             ].map((step) => (
               <div key={step.num} className="hp-how__step">
                 <span className="hp-how__step-num">{step.num}</span>
@@ -197,16 +197,16 @@ export default function HomePage() {
         <div className="hp-sell-cta__inner">
           <div className="hp-sell-cta__text">
             <TrendingUp size={32} className="hp-sell-cta__icon" />
-            <h2>{t('home.cta_title')}</h2>
+            <h2>{'Biến tủ quần áo thành thu nhập'}</h2>
             <p>
-              {t('home.cta_desc')}
+              {'Đăng bán miễn phí. Tiếp cận hàng chục nghìn khách hàng tiềm năng. Nhận tiền nhanh chóng và an toàn qua hệ thống TWINL.'}
             </p>
             <div className="hp-sell-cta__actions">
               <button type="button" onClick={handleSellClick} className="hp-btn hp-btn--white">
-                {t('home.cta_btn_1')} <ArrowRight size={16} />
+                {'Đăng bán ngay'} <ArrowRight size={16} />
               </button>
               <Link to={PATHS.contact} className="hp-btn hp-btn--outline-white">
-                {t('home.cta_btn_2')}
+                {'Tìm hiểu thêm'}
               </Link>
             </div>
           </div>
@@ -215,7 +215,7 @@ export default function HomePage() {
             <div className="hp-sell-cta__circle hp-sell-cta__circle--2" />
             <div className="hp-sell-cta__stat-card">
               <strong>+2,400</strong>
-              <span>{t('home.cta_stat_title')}</span>
+              <span>{'Người bán mới tháng này'}</span>
             </div>
           </div>
         </div>

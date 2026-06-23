@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import productsApi, { type Product } from '../../api/products/productsApi'
 import { PATHS } from '../../routes/paths'
 import '../../styles/pages/category.css'
@@ -11,7 +11,6 @@ export default function BrandsCategoryPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [selectedBrand, setSelectedBrand] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState('')
   const [selectedStyle, setSelectedStyle] = useState('')
   const [selectedSize, setSelectedSize] = useState('')
   const [sortBy, setSortBy] = useState('')
@@ -19,6 +18,19 @@ export default function BrandsCategoryPage() {
   const [selectedDefects, setSelectedDefects] = useState<string>('')
   const [page, setPage] = useState(0)
   const navigate = useNavigate()
+  const location = useLocation()
+  
+  // Read category from URL initially
+  const queryParams = new URLSearchParams(location.search)
+  const initialCategory = queryParams.get('category') || ''
+  
+  const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory)
+
+  // Update selectedCategory if URL changes
+  useEffect(() => {
+    const currentParam = new URLSearchParams(location.search).get('category') || ''
+    setSelectedCategory(currentParam)
+  }, [location.search])
 
   useEffect(() => {
     fetchProducts()
@@ -32,8 +44,8 @@ export default function BrandsCategoryPage() {
         page,
         sizePage: 8,
       }
-      if (selectedBrand) params.brand = selectedBrand
       if (selectedCategory) params.category = selectedCategory
+      if (selectedBrand) params.brand = selectedBrand
       if (selectedStyle) params.style = selectedStyle
       if (selectedSize) params.size = selectedSize
       if (conditionRange > 50) params.minCondition = conditionRange
@@ -72,7 +84,7 @@ export default function BrandsCategoryPage() {
       </div>
 
       <div className="category__container">
-                <aside className="category__filters category__filters--stacked">
+        <aside className="category__filters category__filters--stacked">
           <h3 className="category__sidebar-title">BỘ LỌC</h3>
 
           <h3 className="category__sidebar-title">THƯƠNG HIỆU</h3>
@@ -85,19 +97,7 @@ export default function BrandsCategoryPage() {
             </select>
           </div>
 
-          <h3 className="category__sidebar-title">DANH MỤC</h3>
-          <div className="category__search-wrapper" style={{marginBottom: 16}}>
-            <select style={{width: '100%', padding: '10px', border: '1px solid #dcdcdc', borderRadius: '4px', fontSize: '13px', background: '#f9f9f9', outline: 'none'}} value={selectedCategory} onChange={(e) => { setSelectedCategory(e.target.value); setPage(0) }}>
-              <option value="">Tất cả</option>
-              <option value="Áo khoác">Áo khoác</option>
-              <option value="Áo">Áo</option>
-              <option value="Quần">Quần</option>
-              <option value="Giày">Giày</option>
-              <option value="Phụ kiện">Phụ kiện</option>
-            </select>
-          </div>
-
-          <h3 className="category__sidebar-title">PHONG CÁCH</h3>
+          <h3 className="category__sidebar-title mt-6">KHOẢNG GIÁ (VNĐ)</h3>
           <div className="category__search-wrapper" style={{marginBottom: 24}}>
             <select style={{width: '100%', padding: '10px', border: '1px solid #dcdcdc', borderRadius: '4px', fontSize: '13px', background: '#f9f9f9', outline: 'none'}} value={selectedStyle} onChange={(e) => { setSelectedStyle(e.target.value); setPage(0) }}>
               <option value="">Tất cả</option>
@@ -161,8 +161,8 @@ export default function BrandsCategoryPage() {
               setSelectedCategory('')
               setSelectedStyle('')
               setSelectedSize('')
-              setSortBy('')
-              setPage(0)
+              setSortBy('');
+              setPage(0);
             }}
           >
             ĐẶT LẠI BỘ LỌC

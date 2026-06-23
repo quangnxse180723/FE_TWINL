@@ -185,6 +185,91 @@ function InfoItem({ label, value }: { label: string; value: string }) {
   )
 }
 
+// ─── Order Details Modal ───────────────────────────────────────────────────
+
+function OrderDetailsModal({ order, onClose }: { order: AdminOrder; onClose: () => void }) {
+  return (
+    <div style={overlayStyle} onClick={onClose}>
+      <div style={{ ...modalStyle, maxWidth: 650 }} onClick={(e) => e.stopPropagation()}>
+        <div style={modalHeaderStyle}>
+          <div>
+            <h2 style={{ margin: 0, fontSize: '1.15rem', color: '#1e293b' }}>Chi tiết Đơn hàng</h2>
+            <p style={{ margin: '0.25rem 0 0', fontSize: '0.8rem', color: '#64748b' }}>
+              Mã đơn: <strong>{order.code}</strong> - {formatDateTime(order.createdAt)}
+            </p>
+          </div>
+          <button type="button" style={closeButtonStyle} onClick={onClose}>✕</button>
+        </div>
+
+        <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+            <div>
+              <h3 style={{ fontSize: '0.9rem', color: '#1e293b', marginBottom: '0.75rem' }}>Khách hàng & Giao hàng</h3>
+              <InfoItem label="Tên khách hàng" value={order.customerName} />
+              <InfoItem label="Email" value={order.customerEmail} />
+              <InfoItem label="SĐT" value={order.customerPhone ?? '—'} />
+              <InfoItem label="Địa chỉ" value={order.shippingAddress ?? '—'} />
+              <InfoItem label="Ghi chú" value={order.note ?? '—'} />
+            </div>
+            <div>
+              <h3 style={{ fontSize: '0.9rem', color: '#1e293b', marginBottom: '0.75rem' }}>Thông tin thanh toán & Trạng thái</h3>
+              <InfoItem label="Trạng thái đơn" value={STATUS_LABELS[order.status] ?? order.status} />
+              <InfoItem label="Thanh toán" value={order.paymentMethod === 'VNPAY' ? 'Chuyển khoản (VNPAY)' : (order.paymentMethod || 'Chuyển khoản')} />
+              <InfoItem label="Trạng thái TT" value={order.paymentStatus === 'PAID' ? 'Đã thanh toán' : 'Chưa thanh toán'} />
+              <InfoItem label="Shipper" value={order.shipperName ?? '—'} />
+              <InfoItem label="Ngày giao" value={order.deliveredAt ? formatDateTime(order.deliveredAt) : '—'} />
+            </div>
+          </div>
+
+          <div>
+            <h3 style={{ fontSize: '0.9rem', color: '#1e293b', marginBottom: '0.75rem' }}>Danh sách Sản phẩm</h3>
+            <div style={{ border: '1px solid #e2e8f0', borderRadius: 8, overflow: 'hidden' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.85rem' }}>
+                <thead style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+                  <tr>
+                    <th style={{ padding: '0.75rem 1rem', color: '#475569', fontWeight: 600 }}>Sản phẩm</th>
+                    <th style={{ padding: '0.75rem 1rem', color: '#475569', fontWeight: 600 }}>SL</th>
+                    <th style={{ padding: '0.75rem 1rem', color: '#475569', fontWeight: 600 }}>Đơn giá</th>
+                    <th style={{ padding: '0.75rem 1rem', color: '#475569', fontWeight: 600 }}>Thành tiền</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {order.items?.map((item, idx) => (
+                    <tr key={idx} style={{ borderBottom: '1px solid #e2e8f0' }}>
+                      <td style={{ padding: '0.75rem 1rem', fontWeight: 500, color: '#1e293b' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                          {item.imageUrl ? (
+                            <img src={item.imageUrl} alt={item.productName || 'Product'} style={{ width: 40, height: 40, objectFit: 'cover', borderRadius: 6, border: '1px solid #e2e8f0' }} />
+                          ) : (
+                            <div style={{ width: 40, height: 40, background: '#f1f5f9', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #e2e8f0', color: '#94a3b8', fontSize: '0.7rem' }}>N/A</div>
+                          )}
+                          <span>{item.productName || 'Sản phẩm đã xóa'}</span>
+                        </div>
+                      </td>
+                      <td style={{ padding: '0.75rem 1rem', color: '#64748b' }}>{item.quantity}</td>
+                      <td style={{ padding: '0.75rem 1rem', color: '#64748b' }}>{formatPrice(item.unitPrice)}</td>
+                      <td style={{ padding: '0.75rem 1rem', fontWeight: 600, color: '#3b82f6' }}>{formatPrice(item.lineTotal)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem' }}>
+              <div style={{ fontSize: '1.1rem', fontWeight: 600, color: '#ef4444' }}>
+                Tổng cộng: {formatPrice(order.totalAmount)}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style={modalFooterStyle}>
+          <button type="button" style={cancelButtonStyle} onClick={onClose}>Đóng</button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ─── Main Page ─────────────────────────────────────────────────────────────
 
 export default function AdminOrdersPage() {
@@ -192,6 +277,7 @@ export default function AdminOrdersPage() {
   const [page, setPage] = useState(0)
   const [sizePage] = useState(12)
   const [assignTarget, setAssignTarget] = useState<AdminOrder | null>(null)
+  const [viewTarget, setViewTarget] = useState<AdminOrder | null>(null)
   const [successMsg, setSuccessMsg] = useState('')
 
   const { data, isLoading, isError } = useQuery({
@@ -246,7 +332,13 @@ export default function AdminOrdersPage() {
               </tr>
             ) : data?.content?.length ? (
               data.content.map((order) => (
-                <tr key={order.id}>
+                <tr 
+                  key={order.id}
+                  onClick={() => setViewTarget(order)}
+                  style={{ cursor: 'pointer', transition: 'background 0.2s' }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = ''}
+                >
                   <td>
                     <span style={codeStyle}>{order.code}</span>
                   </td>
@@ -281,15 +373,32 @@ export default function AdminOrdersPage() {
                   </td>
                   <td>
                     {order.status === 'PENDING' ? (
+                      order.paymentStatus === 'SUCCESS' ? (
+                        <button
+                          type="button"
+                          style={assignButtonStyle}
+                          onClick={(e) => { e.stopPropagation(); setAssignTarget(order); }}
+                        >
+                          🚀 Gán Shipper
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          style={{ ...assignButtonStyle, background: '#e2e8f0', color: '#94a3b8', cursor: 'not-allowed' }}
+                          onClick={(e) => e.stopPropagation()}
+                          title="Đơn hàng chưa được thanh toán"
+                        >
+                          ⏳ Chờ thanh toán
+                        </button>
+                      )
+                    ) : (
                       <button
                         type="button"
-                        style={assignButtonStyle}
-                        onClick={() => setAssignTarget(order)}
+                        style={{ ...assignButtonStyle, background: '#e2e8f0', color: '#475569' }}
+                        onClick={(e) => { e.stopPropagation(); setViewTarget(order); }}
                       >
-                        🚀 Gán Shipper
+                        👁 Chi tiết
                       </button>
-                    ) : (
-                      <span style={{ color: '#cbd5e1', fontSize: '0.82rem' }}>—</span>
                     )}
                   </td>
                 </tr>
@@ -330,6 +439,13 @@ export default function AdminOrdersPage() {
           order={assignTarget}
           onClose={() => setAssignTarget(null)}
           onSuccess={handleAssignSuccess}
+        />
+      )}
+
+      {viewTarget && (
+        <OrderDetailsModal
+          order={viewTarget}
+          onClose={() => setViewTarget(null)}
         />
       )}
     </section>

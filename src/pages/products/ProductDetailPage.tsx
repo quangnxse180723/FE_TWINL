@@ -9,14 +9,14 @@ import { Shield, CheckCircle2, Truck, ShieldCheck } from 'lucide-react'
 import AiScannerModal from '../../components/shared/AiScannerModal'
 import LegitCheckModal from '../../components/shared/LegitCheckModal'
 import { toast } from 'react-toastify'
-import { useTranslation } from 'react-i18next'
+
 import '../../styles/pages/productDetail.css'
 
 const formatPrice = (value: number) =>
   new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value).replace('₫', 'đ')
 
 export default function ProductDetailPage() {
-  const { t } = useTranslation()
+  
   const { id } = useParams()
   const [product, setProduct] = useState<Product | null>(null)
   const [mainImage, setMainImage] = useState('')
@@ -34,7 +34,6 @@ export default function ProductDetailPage() {
     if (!product?.category) return PATHS.home
     if (product.category === 'Nữ') return PATHS.women
     if (product.category === 'Nam') return PATHS.men
-    if (product.category === 'Trẻ em') return PATHS.kids
     if (product.category === 'Thể thao') return PATHS.sport
     return PATHS.home
   }, [product?.category])
@@ -87,6 +86,21 @@ export default function ProductDetailPage() {
     if (!product) return
     setAdding(true)
     try {
+      // Lấy giỏ hàng trước để kiểm tra tồn kho, tránh tạo ra lỗi 400 Bad Request ở Console
+      const cartRes = await cartApi.getCart();
+      const inCartItem = cartRes.data.items.find((item: any) => item.productId === product.id);
+      const currentQtyInCart = inCartItem ? inCartItem.quantity : 0;
+      
+      if (currentQtyInCart + quantity > (product.stock || 0)) {
+        if (currentQtyInCart > 0) {
+          // Nếu đã có sẵn ở mức tối đa rồi thì chuyển luôn qua giỏ hàng
+          navigate(PATHS.cart);
+        } else {
+          toast.error('Vượt quá số lượng tồn kho');
+        }
+        return;
+      }
+
       await cartApi.addItem({ productId: product.id, quantity: quantity })
       window.dispatchEvent(new Event('cart-updated'))
       navigate(PATHS.cart)
@@ -106,6 +120,16 @@ export default function ProductDetailPage() {
     if (!product) return
     setAdding(true)
     try {
+      // Lấy giỏ hàng trước để kiểm tra tồn kho
+      const cartRes = await cartApi.getCart();
+      const inCartItem = cartRes.data.items.find((item: any) => item.productId === product.id);
+      const currentQtyInCart = inCartItem ? inCartItem.quantity : 0;
+      
+      if (currentQtyInCart + quantity > (product.stock || 0)) {
+        toast.error('Sản phẩm trong giỏ hàng đã đạt giới hạn tồn kho');
+        return;
+      }
+
       await cartApi.addItem({ productId: product.id, quantity: quantity })
       window.dispatchEvent(new Event('cart-updated'))
       toast.success('Đã thêm vào giỏ hàng thành công')
@@ -255,7 +279,7 @@ export default function ProductDetailPage() {
               onClick={handleBuyNow}
               disabled={adding || product.stock === 0}
             >
-              {product.stock === 0 ? t('product.out_of_stock') : (adding ? 'Đang xử lý...' : 'Mua Ngay')}
+              {product.stock === 0 ? 'Hết hàng' : (adding ? 'Đang xử lý...' : 'Mua Ngay')}
             </button>
             <button
               type="button"
@@ -263,7 +287,7 @@ export default function ProductDetailPage() {
               onClick={handleAddToCart}
               disabled={adding || product.stock === 0}
             >
-              {product.stock === 0 ? t('product.out_of_stock') : (adding ? t('product.adding') : 'Thêm Vào Giỏ Hàng')}
+              {product.stock === 0 ? 'Hết hàng' : (adding ? 'Đang thêm...' : 'Thêm Vào Giỏ Hàng')}
             </button>
           </div>
 

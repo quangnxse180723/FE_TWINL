@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux'
 import contactApi from '../../api/contact/contactApi'
 import type { ContactRequest } from '../../types/contact'
 import type { RootState } from '../../store'
-import { useTranslation } from 'react-i18next'
+
 import '../../styles/pages/contact.css'
 
 const emptyForm: ContactRequest = {
@@ -14,7 +14,7 @@ const emptyForm: ContactRequest = {
 }
 
 export default function ContactPage() {
-  const { t } = useTranslation()
+  
   const user = useSelector((state: RootState) => state.auth.user)
   const [form, setForm] = useState<ContactRequest>(emptyForm)
   const [submitting, setSubmitting] = useState(false)
@@ -42,10 +42,10 @@ export default function ContactPage() {
     setSubmitting(true)
     try {
       await contactApi.create(form)
-      setSuccess(t('contact.success'))
+      setSuccess('Gửi tin nhắn thành công!')
       setForm((prev) => ({ ...prev, message: '' }))
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('contact.failed'))
+      setError(err instanceof Error ? err.message : 'Gửi tin nhắn thất bại, vui lòng thử lại')
     } finally {
       setSubmitting(false)
     }
@@ -54,95 +54,95 @@ export default function ContactPage() {
   return (
     <section className="contact">
       <div className="contact__hero">
-        <h1>{t('contact.title')}</h1>
-        <p>{t('contact.desc')}</p>
+        <h1>{'Liên hệ TWINL'}</h1>
+        <p>{'Chúng tôi luôn ở đây để lắng nghe và hỗ trợ bạn'}</p>
       </div>
 
       <div className="contact__layout">
         <div className="contact__form">
-          <h2>{t('contact.send_msg')}</h2>
+          <h2>{'Gửi lời nhắn cho chúng tôi'}</h2>
           <form onSubmit={handleSubmit}>
             <label>
-              {t('contact.name')}
+              {'Họ và tên'}
               <input
                 type="text"
                 value={form.name}
                 onChange={handleChange('name')}
-                placeholder={t('contact.name_ph')}
+                placeholder={'Nhập họ tên của bạn'}
                 required
               />
             </label>
             <label>
-              {t('contact.email')}
+              {'Email'}
               <input
                 type="email"
                 value={form.email}
                 onChange={handleChange('email')}
-                placeholder={t('contact.email_ph')}
+                placeholder={'Nhập địa chỉ email'}
                 required
               />
             </label>
             <label>
-              {t('contact.phone')}
+              {'Số điện thoại'}
               <input
                 type="text"
                 value={form.phone ?? ''}
                 onChange={handleChange('phone')}
-                placeholder={t('contact.phone_ph')}
+                placeholder={'Nhập số điện thoại (tùy chọn)'}
               />
             </label>
             <label>
-              {t('contact.message')}
+              {'Nội dung tin nhắn'}
               <textarea
                 rows={6}
                 value={form.message}
                 onChange={handleChange('message')}
-                placeholder={t('contact.message_ph')}
+                placeholder={'Bạn cần hỗ trợ điều gì?'}
                 required
               />
             </label>
             {error ? <div className="contact__error">{error}</div> : null}
             {success ? <div className="contact__success">{success}</div> : null}
             <button type="submit" disabled={submitting}>
-              {submitting ? '...' : t('contact.send_btn')}
+              {submitting ? '...' : 'Gửi Tin Nhắn'}
             </button>
           </form>
         </div>
 
         <aside className="contact__info">
           <div className="contact__card">
-            <h3>{t('contact.info')}</h3>
+            <h3>{'Thông Tin Liên Hệ'}</h3>
             <div className="contact__line">
-              <span>{t('contact.support_email')}</span>
+              <span>{'Email Hỗ Trợ'}</span>
               <strong>twinl2hand@gmail.com</strong>
             </div>
             <div className="contact__line">
-              <span>{t('contact.hotline')}</span>
+              <span>{'Hotline'}</span>
               <strong>0853443242</strong>
             </div>
             <div className="contact__line">
-              <span>{t('contact.address')}</span>
+              <span>{'Địa chỉ'}</span>
               <strong>Vinhomes Grandpark</strong>
             </div>
           </div>
 
           <div className="contact__card">
-            <h3>{t('contact.faq')}</h3>
+            <h3>{'Câu Hỏi Thường Gặp'}</h3>
             <details open>
-              <summary>{t('contact.faq_q1')}</summary>
-              <p>{t('contact.faq_a1')}</p>
+              <summary>{'Sản phẩm có chính hãng không?'}</summary>
+              <p>{'Tất cả sản phẩm đều được kiểm định AI và chuyên gia 100%.'}</p>
             </details>
             <details>
-              <summary>{t('contact.faq_q2')}</summary>
-              <p>{t('contact.faq_a2')}</p>
+              <summary>{'Tôi có thể trả hàng không?'}</summary>
+              <p>{'Có, trong vòng 7 ngày nếu lỗi từ nhà sản xuất.'}</p>
             </details>
             <details>
-              <summary>{t('contact.faq_q3')}</summary>
-              <p>{t('contact.faq_a3')}</p>
+              <summary>{'Phí ship như thế nào?'}</summary>
+              <p>{'Miễn phí cho đơn hàng trên 500k.'}</p>
             </details>
             <details>
-              <summary>{t('contact.faq_q4')}</summary>
-              <p>{t('contact.faq_a4')}</p>
+              <summary>{'Tôi có thể đến cửa hàng xem trực tiếp không?'}</summary>
+              <p>{'Rất tiếc hiện tại chúng tôi chỉ bán online.'}</p>
             </details>
           </div>
         </aside>
@@ -150,17 +150,17 @@ export default function ContactPage() {
 
       <div className="contact__about">
         <div>
-          <h3>{t('contact.about_title')}</h3>
-          <p>{t('contact.about_desc')}</p>
+          <h3>{'Về TWINL'}</h3>
+          <p>{'Nền tảng mua bán đồ secondhand đồ hiệu được kiểm định bằng AI.'}</p>
         </div>
         <div>
-          <h4>{t('contact.guarantee')}</h4>
+          <h4>{'Cam Kết'}</h4>
           <ul>
-            <li>{t('contact.g1')}</li>
-            <li>{t('contact.g2')}</li>
-            <li>{t('contact.g3')}</li>
-            <li>{t('contact.g4')}</li>
-            <li>{t('contact.g5')}</li>
+            <li>{'100% Chính hãng'}</li>
+            <li>{'Bảo mật thông tin'}</li>
+            <li>{'Thanh toán an toàn'}</li>
+            <li>{'Hỗ trợ 24/7'}</li>
+            <li>{'Giao hàng nhanh'}</li>
           </ul>
         </div>
       </div>

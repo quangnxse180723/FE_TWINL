@@ -7,7 +7,7 @@ import { useRegisterMutation, useGoogleLoginMutation, useSendOtpMutation } from 
 import { useGoogleLogin } from '@react-oauth/google'
 import { getApiErrorMessage } from '../../utils/apiError'
 import { toast } from 'react-toastify'
-import { useTranslation } from 'react-i18next'
+
 import type { RootState } from '../../store'
 import logo from '../../assets/images/logo-removebg.png'
 import '../../styles/pages/auth.css'
@@ -15,7 +15,7 @@ import '../../styles/pages/auth.css'
 const OTP_LENGTH = 6
 
 export default function RegisterPage() {
-  const { t } = useTranslation()
+  
   const registerMutation    = useRegisterMutation()
   const googleLoginMutation = useGoogleLoginMutation()
   const sendOtpMutation     = useSendOtpMutation()
@@ -69,7 +69,7 @@ export default function RegisterPage() {
         setShowOtpModal(true)
         setTimeLeft(300)
         setOtpDigits(Array(OTP_LENGTH).fill(''))
-        toast.success(`${t('auth.otp_sent')} ${email}`)
+        toast.success(`${'Mã OTP đã được gửi đến'} ${email}`)
       },
     })
   }
@@ -92,13 +92,13 @@ export default function RegisterPage() {
   const handleVerifyOtp = () => {
     const otp = otpDigits.join('')
     registerMutation.mutate({ displayName, email, password, otp }, {
-      onSuccess: () => toast.success(t('auth.register_success')),
+      onSuccess: () => toast.success('Đăng ký thành công!'),
     })
   }
 
   const handleResendOtp = () => {
     sendOtpMutation.mutate(email, {
-      onSuccess: () => { setTimeLeft(300); toast.success(t('auth.otp_sent')) },
+      onSuccess: () => { setTimeLeft(300); toast.success('Mã OTP đã được gửi đến') },
     })
   }
 
@@ -108,18 +108,18 @@ export default function RegisterPage() {
       <div className="auth-left">
         <div className="auth-manifesto">
           <h1 className="auth-manifesto__headline">
-            <span className="auth-manifesto__line">{t('auth.manifesto_l1')}</span>
-            <span className="auth-manifesto__line auth-manifesto__line--indent">{t('auth.manifesto_l2')}</span>
-            <span className="auth-manifesto__line">{t('auth.manifesto_l3')}</span>
+            <span className="auth-manifesto__line">{'WEAR'}</span>
+            <span className="auth-manifesto__line auth-manifesto__line--indent">{'THE'}</span>
+            <span className="auth-manifesto__line">{'STORY.'}</span>
           </h1>
           <hr className="auth-manifesto__rule" />
           <p className="auth-manifesto__sub" style={{ whiteSpace: 'pre-line' }}>
-            {t('auth.manifesto_sub')}
+            {'TRUST\nTHE PROCESS.'}
           </p>
         </div>
         <div className="auth-footnotes">
-          <p className="auth-footnote"><sup>1</sup> {t('auth.footnote_1')}</p>
-          <p className="auth-footnote"><sup>2</sup> {t('auth.footnote_2')}</p>
+          <p className="auth-footnote"><sup>1</sup> {'1 AI Legit Check — mỗi sản phẩm đều được kiểm định bằng trí tuệ nhân tạo'}</p>
+          <p className="auth-footnote"><sup>2</sup> {'2 48h Secure Escrow — tiền của bạn được bảo vệ cho đến khi xác nhận nhận hàng'}</p>
         </div>
       </div>
 
@@ -129,12 +129,12 @@ export default function RegisterPage() {
           <img src={logo} alt="TWINL" className="auth-logo-img" />
         </Link>
         <div style={{ textAlign: 'left' }}>
-          <span className="auth-heading-badge">{t('auth.register')}</span>
+          <span className="auth-heading-badge">{'Tạo tài khoản'}</span>
         </div>
 
         <form className="auth-form" onSubmit={handleSubmit} noValidate>
           <div className="auth-field">
-            <label className="auth-field__label" htmlFor="reg-name">{t('auth.fullname')}</label>
+            <label className="auth-field__label" htmlFor="reg-name">{'Họ và tên'}</label>
             <input
               id="reg-name"
               type="text"
@@ -145,7 +145,7 @@ export default function RegisterPage() {
           </div>
 
           <div className="auth-field">
-            <label className="auth-field__label" htmlFor="reg-email">{t('auth.email')}</label>
+            <label className="auth-field__label" htmlFor="reg-email">{'Email'}</label>
             <input
               id="reg-email"
               type="email"
@@ -157,7 +157,7 @@ export default function RegisterPage() {
           </div>
 
           <div className="auth-field">
-            <label className="auth-field__label" htmlFor="reg-pwd">{t('auth.password')}</label>
+            <label className="auth-field__label" htmlFor="reg-pwd">{'Mật khẩu'}</label>
             <div className="auth-field__pw-wrap">
               <input
                 id="reg-pwd"
@@ -174,7 +174,7 @@ export default function RegisterPage() {
           </div>
 
           <div className="auth-field">
-            <label className="auth-field__label" htmlFor="reg-confirm">{t('auth.confirm_pwd')}</label>
+            <label className="auth-field__label" htmlFor="reg-confirm">{'Xác nhận mật khẩu'}</label>
             <div className="auth-field__pw-wrap">
               <input
                 id="reg-confirm"
@@ -191,7 +191,7 @@ export default function RegisterPage() {
           </div>
 
           {confirmPassword && confirmPassword !== password && (
-            <p className="auth-error">{t('auth.pwd_mismatch')}</p>
+            <p className="auth-error">{'Mật khẩu xác nhận không khớp'}</p>
           )}
           {registerMutation.isError && (
             <p className="auth-error">{getApiErrorMessage(registerMutation.error)}</p>
@@ -205,11 +205,11 @@ export default function RegisterPage() {
             className="auth-btn auth-btn--primary"
             disabled={sendOtpMutation.isPending || !email || !password || !displayName || (!!confirmPassword && confirmPassword !== password)}
           >
-            {sendOtpMutation.isPending ? '...' : t('auth.register_btn')}
+            {sendOtpMutation.isPending ? '...' : 'Đăng ký'}
           </button>
         </form>
 
-        <div className="auth-divider">{t('auth.or', 'hoặc')}</div>
+        <div className="auth-divider">{'Hoặc'}</div>
 
         {googleLoginMutation.isError && (
           <p className="auth-error" style={{ marginBottom: 12 }}>{getApiErrorMessage(googleLoginMutation.error)}</p>
@@ -227,11 +227,11 @@ export default function RegisterPage() {
             <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
             <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
           </svg>
-          {googleLoginMutation.isPending ? '...' : t('auth.google_login')}
+          {googleLoginMutation.isPending ? '...' : 'Đăng nhập với Google'}
         </button>
 
         <div className="auth-footer">
-          {t('auth.have_account')} <Link to={PATHS.login}>{t('auth.login_now')}</Link>
+          {'Đã có tài khoản?'} <Link to={PATHS.login}>{'Đăng nhập ngay'}</Link>
         </div>
       </div>
 

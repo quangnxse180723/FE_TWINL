@@ -5,14 +5,14 @@ import { PATHS } from '../../routes/paths'
 import { useSendForgotPasswordOtpMutation, useResetPasswordMutation } from '../../hooks/useAuth'
 import { getApiErrorMessage } from '../../utils/apiError'
 import { toast } from 'react-toastify'
-import { useTranslation } from 'react-i18next'
+
 import logo from '../../assets/images/logo-removebg.png'
 import '../../styles/pages/auth.css'
 
 const OTP_LENGTH = 6
 
 export default function ForgotPasswordPage() {
-  const { t } = useTranslation()
+  
   const sendOtpMutation      = useSendForgotPasswordOtpMutation()
   const resetPasswordMutation = useResetPasswordMutation()
   const navigate = useNavigate()
@@ -42,7 +42,7 @@ export default function ForgotPasswordPage() {
         setStep(2)
         setTimeLeft(300)
         setOtpDigits(Array(OTP_LENGTH).fill(''))
-        toast.success(`${t('auth.otp_sent')} ${email}`)
+        toast.success(`${'Mã OTP đã được gửi đến'} ${email}`)
       },
     })
   }
@@ -66,10 +66,10 @@ export default function ForgotPasswordPage() {
 
   const handleReset = (e: React.FormEvent) => {
     e.preventDefault()
-    if (newPassword !== confirmPassword) { toast.error(t('auth.pwd_mismatch')); return }
+    if (newPassword !== confirmPassword) { toast.error('Mật khẩu xác nhận không khớp'); return }
     resetPasswordMutation.mutate(
       { email, otp: otpDigits.join(''), newPassword },
-      { onSuccess: () => { toast.success(t('auth.reset_success')); navigate(PATHS.login) } }
+      { onSuccess: () => { toast.success('Đặt lại mật khẩu thành công!'); navigate(PATHS.login) } }
     )
   }
 
@@ -81,18 +81,18 @@ export default function ForgotPasswordPage() {
       <div className="auth-left">
         <div className="auth-manifesto">
           <h1 className="auth-manifesto__headline">
-            <span className="auth-manifesto__line">{t('auth.manifesto_l1')}</span>
-            <span className="auth-manifesto__line auth-manifesto__line--indent">{t('auth.manifesto_l2')}</span>
-            <span className="auth-manifesto__line">{t('auth.manifesto_l3')}</span>
+            <span className="auth-manifesto__line">{'WEAR'}</span>
+            <span className="auth-manifesto__line auth-manifesto__line--indent">{'THE'}</span>
+            <span className="auth-manifesto__line">{'STORY.'}</span>
           </h1>
           <hr className="auth-manifesto__rule" />
           <p className="auth-manifesto__sub" style={{ whiteSpace: 'pre-line' }}>
-            {t('auth.manifesto_sub')}
+            {'TRUST\nTHE PROCESS.'}
           </p>
         </div>
         <div className="auth-footnotes">
-          <p className="auth-footnote"><sup>1</sup> {t('auth.footnote_1')}</p>
-          <p className="auth-footnote"><sup>2</sup> {t('auth.footnote_2')}</p>
+          <p className="auth-footnote"><sup>1</sup> {'1 AI Legit Check — mỗi sản phẩm đều được kiểm định bằng trí tuệ nhân tạo'}</p>
+          <p className="auth-footnote"><sup>2</sup> {'2 48h Secure Escrow — tiền của bạn được bảo vệ cho đến khi xác nhận nhận hàng'}</p>
         </div>
       </div>
 
@@ -102,7 +102,7 @@ export default function ForgotPasswordPage() {
           <img src={logo} alt="TWINL" className="auth-logo-img" />
         </Link>
         <div style={{ textAlign: 'left' }}>
-          <span className="auth-heading-badge">{t('auth.forgot_title')}</span>
+          <span className="auth-heading-badge">{'Quên mật khẩu'}</span>
         </div>
 
         {/* Step progress indicator */}
@@ -119,9 +119,9 @@ export default function ForgotPasswordPage() {
         {/* STEP 1: Email */}
         {step === 1 && (
           <form className="auth-form" onSubmit={handleSendOtp}>
-            <p style={{ fontSize: 14, color: '#888', marginBottom: 4 }}>{t('auth.forgot_desc')}</p>
+            <p style={{ fontSize: 14, color: '#888', marginBottom: 4 }}>{'Nhập email của bạn để nhận mã xác minh đổi mật khẩu.'}</p>
             <div className="auth-field">
-              <label className="auth-field__label" htmlFor="forgot-email">{t('auth.email')}</label>
+              <label className="auth-field__label" htmlFor="forgot-email">{'Email'}</label>
               <input
                 id="forgot-email"
                 type="email"
@@ -136,7 +136,7 @@ export default function ForgotPasswordPage() {
               <p className="auth-error">{getApiErrorMessage(sendOtpMutation.error)}</p>
             )}
             <button type="submit" className="auth-btn auth-btn--primary" disabled={!email || sendOtpMutation.isPending}>
-              {sendOtpMutation.isPending ? '...' : t('auth.send_otp')}
+              {sendOtpMutation.isPending ? '...' : 'Gửi mã OTP'}
             </button>
           </form>
         )}
@@ -193,7 +193,7 @@ export default function ForgotPasswordPage() {
         {step === 3 && (
           <form className="auth-form" onSubmit={handleReset}>
             <div className="auth-field">
-              <label className="auth-field__label" htmlFor="new-pwd">{t('auth.new_pwd')}</label>
+              <label className="auth-field__label" htmlFor="new-pwd">{'Mật khẩu mới'}</label>
               <div className="auth-field__pw-wrap">
                 <input
                   id="new-pwd"
@@ -210,7 +210,7 @@ export default function ForgotPasswordPage() {
             </div>
 
             <div className="auth-field">
-              <label className="auth-field__label" htmlFor="confirm-pwd">{t('auth.confirm_pwd')}</label>
+              <label className="auth-field__label" htmlFor="confirm-pwd">{'Xác nhận mật khẩu'}</label>
               <div className="auth-field__pw-wrap">
                 <input
                   id="confirm-pwd"
@@ -226,7 +226,7 @@ export default function ForgotPasswordPage() {
             </div>
 
             {confirmPassword && confirmPassword !== newPassword && (
-              <p className="auth-error">{t('auth.pwd_mismatch')}</p>
+              <p className="auth-error">{'Mật khẩu xác nhận không khớp'}</p>
             )}
             {resetPasswordMutation.isError && (
               <p className="auth-error">{getApiErrorMessage(resetPasswordMutation.error)}</p>
@@ -241,7 +241,7 @@ export default function ForgotPasswordPage() {
                 newPassword !== confirmPassword
               }
             >
-              {resetPasswordMutation.isPending ? '...' : t('auth.reset_pwd')}
+              {resetPasswordMutation.isPending ? '...' : 'Đặt lại mật khẩu'}
             </button>
           </form>
         )}
