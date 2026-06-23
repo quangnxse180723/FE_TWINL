@@ -42,7 +42,7 @@ export default function SportCategoryPage() {
     setError('')
     try {
       const params: Record<string, unknown> = {
-        gender: 'Thể thao',
+        category: 'Thể thao',
         page,
         sizePage: 8,
       }

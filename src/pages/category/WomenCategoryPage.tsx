@@ -41,7 +41,7 @@ export default function WomenCategoryPage() {
     setError('')
     try {
       const params: Record<string, unknown> = {
-        gender: 'Nữ',
+        category: 'Nữ',
         page,
         sizePage: 8,
       }
