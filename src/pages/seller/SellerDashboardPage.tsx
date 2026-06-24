@@ -23,6 +23,7 @@ interface AiAutoFillResult {
   color?: string; conditionPercentage?: number; defects?: string[];
   category?: string; categoryId?: number;
   colorIds?: number[]; colorNames?: string[];
+  sizes?: string[]; length?: number; shoulder?: number; chest?: number; waist?: number;
 }
 
 // Typewriter effect hook
@@ -212,6 +213,10 @@ export default function SellerDashboardPage() {
         }
       }
 
+      if (data.sizes && data.sizes.length > 0) {
+        setSizes(data.sizes.join(', '));
+      }
+
       setFormData(prev => ({
         ...prev,
         categoryId: detectedCategoryId,
@@ -219,7 +224,11 @@ export default function SellerDashboardPage() {
         style: data.style ?? prev.style,
         gender: data.gender ?? prev.gender,
         price: data.estimatedPrice ? String(Number(data.estimatedPrice.replace(/\D/g, ''))) || prev.price : prev.price,
-        conditionPercentage: data.conditionPercentage ? String(data.conditionPercentage) : prev.conditionPercentage
+        conditionPercentage: data.conditionPercentage ? String(data.conditionPercentage) : prev.conditionPercentage,
+        length: data.length ? String(data.length) : prev.length,
+        shoulder: data.shoulder ? String(data.shoulder) : prev.shoulder,
+        chest: data.chest ? String(data.chest) : prev.chest,
+        waist: data.waist ? String(data.waist) : prev.waist
       }));
       
       if (data.defects && data.defects.length > 0) {

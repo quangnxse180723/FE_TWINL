@@ -25,14 +25,21 @@ export interface AiAutoFillResult {
   brand?: string
   style?: string
   price?: number
+  estimatedPrice?: string
   condition?: string
   material?: string
   color?: string
   colorIds?: number[]
   colorNames?: string[]
   category?: string
+  categoryId?: number
   conditionPercentage?: number
   defects?: string[]
+  sizes?: string[]
+  length?: number
+  shoulder?: number
+  chest?: number
+  waist?: number
 }
 
 // ── Legit Check 6-slot state ─────────────────
@@ -205,7 +212,16 @@ export default function AdminProductFormPage() {
       if (data.description) setTwDesc(data.description)
 
       let detectedCategoryId = form.categoryId;
-      if (data.category) {
+      if (data.categoryId && data.category) {
+        const numId = data.categoryId;
+        const exists = categories.some(cat => cat.id === numId || cat.children?.some(c => c.id === numId));
+        if (!exists) {
+          queryClient.setQueryData(['categories'], (prev: any) => {
+            return [...(prev || []), { id: numId, name: data.category, children: [] }];
+          });
+        }
+        detectedCategoryId = numId;
+      } else if (data.category) {
         for (const cat of categories) {
           if (cat.name.toLowerCase() === data.category.toLowerCase()) {
             detectedCategoryId = cat.id;
@@ -229,9 +245,14 @@ export default function AdminProductFormPage() {
         brand: data.brand ?? prev.brand,
         style: data.style ?? prev.style,
         gender: data.category ?? prev.gender,
-        price: data.estimatedPrice ?? prev.price,
+        price: data.estimatedPrice ? Number(data.estimatedPrice.toString().replace(/\D/g, '')) || prev.price : prev.price,
         conditionPercentage: data.conditionPercentage ?? prev.conditionPercentage,
-        defects: data.defects && data.defects.length > 0 ? data.defects : prev.defects
+        defects: data.defects && data.defects.length > 0 ? data.defects : prev.defects,
+        sizes: data.sizes && data.sizes.length > 0 ? data.sizes : prev.sizes,
+        length: data.length ?? prev.length,
+        shoulder: data.shoulder ?? prev.shoulder,
+        chest: data.chest ?? prev.chest,
+        waist: data.waist ?? prev.waist
       }))
       
       let colorDetected = false

@@ -23,7 +23,7 @@ export default function ReportBugPage() {
       const severityLabel = severity === 'Nghiêm trọng' ? '🔴' : severity === 'Trung bình' ? '🟡' : '🟢';
       await contactApi.create({
         name: name || 'Người dùng ẩn danh',
-        email: email || 'no-reply@twinl.vn',
+        email: email || 'noreply@twinl2hand.com',
         phone: phone || null,
         message: `[BÁO CÁO LỖI] ${severityLabel} Mức độ: ${severity}\n\nTiêu đề: ${title}\n\nMô tả chi tiết:\n${description}`,
       });
