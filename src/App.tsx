@@ -7,17 +7,15 @@ import type { RootState } from './store'
 import { logout } from './store/slices/authSlice'
 import { clearAuth } from './utils/authStorage'
 import { authApi } from './api/auth/authApi'
-import { adminAnalyticsApi } from './admin/api/adminAnalyticsApi'
+import { useActiveTimer } from './hooks/useActiveTimer'
 
 function App() {
   const dispatch = useDispatch()
   const user = useSelector((state: RootState) => state.auth.user)
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  useEffect(() => {
-    // Track visit once per session load
-    adminAnalyticsApi.trackVisit().catch(() => {})
-  }, [])
+  // Track visit and active time
+  useActiveTimer()
 
   useEffect(() => {
     // Chỉ kích hoạt chức năng auto-logout khi người dùng đã đăng nhập

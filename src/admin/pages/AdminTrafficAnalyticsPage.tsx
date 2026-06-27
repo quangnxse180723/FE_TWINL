@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { adminAnalyticsApi } from '../api/adminAnalyticsApi'
-import { Eye, Users, MousePointerClick, UserPlus } from 'lucide-react'
+import { Eye, Users, MousePointerClick, UserPlus, Timer } from 'lucide-react'
 import {
   LineChart,
   Line,
@@ -105,7 +105,7 @@ export default function AdminTrafficAnalyticsPage() {
         </div>
       </div>
 
-      <div className="admin-analytics-cards" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '24px', marginBottom: '32px' }}>
+      <div className="admin-analytics-cards" style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '24px', marginBottom: '32px' }}>
         {/* Total Visits */}
         <div className="admin-card">
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -144,6 +144,17 @@ export default function AdminTrafficAnalyticsPage() {
           </div>
           <div className="admin-card__meta" style={{ marginTop: '16px', color: '#64748b', textTransform: 'uppercase', fontSize: 11, fontWeight: 600, letterSpacing: '0.05em' }}>Đăng ký mới</div>
           <div className="admin-card__value" style={{ fontSize: '28px' }}>{isOverviewLoading ? '--' : overview?.data.newSignups.toLocaleString('vi-VN')}</div>
+        </div>
+        {/* Avg Session Time */}
+        <div className="admin-card">
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <div className="admin-card__icon" style={{ background: '#fdf4ff', color: '#c026d3', padding: '12px', borderRadius: '8px' }}><Timer size={20} /></div>
+            <div className="admin-card__trend" style={{ color: '#16a34a', fontWeight: 600 }}>↗ Tốt</div>
+          </div>
+          <div className="admin-card__meta" style={{ marginTop: '16px', color: '#64748b', textTransform: 'uppercase', fontSize: 11, fontWeight: 600, letterSpacing: '0.05em' }}>T/gian Trung Bình</div>
+          <div className="admin-card__value" style={{ fontSize: '28px' }}>
+            {isOverviewLoading ? '--' : `${Math.floor((overview?.data.avgSessionTime || 0) / 60)}m ${(overview?.data.avgSessionTime || 0) % 60}s`}
+          </div>
         </div>
       </div>
 
@@ -217,13 +228,14 @@ export default function AdminTrafficAnalyticsPage() {
                 <th style={{ textAlign: 'left', padding: '16px 24px', fontSize: '12px', color: '#64748b', fontWeight: 600, letterSpacing: '0.05em' }}>VAI TRÒ</th>
                 <th style={{ textAlign: 'left', padding: '16px 24px', fontSize: '12px', color: '#64748b', fontWeight: 600, letterSpacing: '0.05em' }}>VỊ TRÍ</th>
                 <th style={{ textAlign: 'left', padding: '16px 24px', fontSize: '12px', color: '#64748b', fontWeight: 600, letterSpacing: '0.05em' }}>THIẾT BỊ</th>
+                <th style={{ textAlign: 'left', padding: '16px 24px', fontSize: '12px', color: '#64748b', fontWeight: 600, letterSpacing: '0.05em' }}>THỜI LƯỢNG</th>
                 <th style={{ textAlign: 'left', padding: '16px 24px', fontSize: '12px', color: '#64748b', fontWeight: 600, letterSpacing: '0.05em' }}>TRẠNG THÁI</th>
               </tr>
             </thead>
             <tbody>
               {isLogsLoading ? (
                 <tr>
-                  <td colSpan={7} style={{ padding: '24px', textAlign: 'center' }}>Đang tải dữ liệu...</td>
+                  <td colSpan={8} style={{ padding: '24px', textAlign: 'center' }}>Đang tải dữ liệu...</td>
                 </tr>
               ) : paginatedLogs.length ? (
                 paginatedLogs.map((log) => (
@@ -245,6 +257,7 @@ export default function AdminTrafficAnalyticsPage() {
                     </td>
                     <td style={{ padding: '16px 24px', fontSize: '14px', color: '#334155' }}>📍 {log.location || 'Chưa rõ'}</td>
                     <td style={{ padding: '16px 24px', fontSize: '14px', color: '#334155' }}>{log.device}</td>
+                    <td style={{ padding: '16px 24px', fontSize: '14px', color: '#334155', fontWeight: 600 }}>{log.durationSeconds ? `${Math.floor(log.durationSeconds / 60)}m ${log.durationSeconds % 60}s` : '0s'}</td>
                     <td style={{ padding: '16px 24px' }}>
                       <span style={{ 
                         padding: '4px 8px', 
@@ -261,7 +274,7 @@ export default function AdminTrafficAnalyticsPage() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={7} style={{ padding: '24px', textAlign: 'center' }}>Chưa có log truy cập.</td>
+                  <td colSpan={8} style={{ padding: '24px', textAlign: 'center' }}>Chưa có log truy cập.</td>
                 </tr>
               )}
             </tbody>

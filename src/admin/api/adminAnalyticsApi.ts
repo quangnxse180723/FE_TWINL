@@ -10,6 +10,7 @@ export interface AccessLog {
   userId: number | null
   userName: string
   userRole: string
+  durationSeconds?: number
   createdAt: string
 }
 
@@ -18,6 +19,7 @@ export interface AnalyticsOverview {
   activeUsers: number
   bounceRate: string
   newSignups: number
+  avgSessionTime?: number
 }
 
 export const adminAnalyticsApi = {
@@ -34,7 +36,10 @@ export const adminAnalyticsApi = {
     return axiosClient.get<AccessLog[]>('/api/v1/analytics/access-logs', { params: { startDate, endDate, userType } })
   },
   trackVisit: () => {
-    return axiosClient.post('/api/v1/analytics/track')
+    return axiosClient.post<{id: number}>('/api/v1/analytics/track')
+  },
+  pingActiveTime: (logId: number) => {
+    return axiosClient.post(`/api/v1/analytics/ping/${logId}`)
   },
   getOnlineUsers: () => {
     return axiosClient.get<{ onlineUsers: number }>('/api/v1/business-analytics/online-users')
