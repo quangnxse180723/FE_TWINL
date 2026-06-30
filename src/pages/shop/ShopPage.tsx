@@ -60,6 +60,19 @@ export default function ShopPage() {
 
   const fetchProfile = async () => {
     if (!sellerId) return
+    if (sellerId === 'official') {
+      setProfile({
+        id: 0,
+        displayName: 'TWINL Official',
+        avatarUrl: '', // Will use 'T'
+        productCount: 0, // Updated later
+        soldCount: 999, // Dummy
+        averageRating: 5.0,
+        reviewCount: 999
+      })
+      setLoadingProfile(false)
+      return
+    }
     try {
       const res = await axiosClient.get<SellerProfile>(`/api/products/sellers/${sellerId}/profile`)
       setProfile(res.data)
@@ -80,10 +93,16 @@ export default function ShopPage() {
     const fetchProducts = async () => {
       setLoadingProducts(true)
       try {
-        const res = await productsApi.getProducts({ page, sizePage: 12 })
-        const all = res.data.content.filter((p: Product) => p.sellerId === Number(sellerId))
+        const res = await productsApi.getProducts({ page, sizePage: 50 })
+        const all = res.data.content.filter((p: Product) => {
+          if (sellerId === 'official') return !p.sellerId || !p.sellerName
+          return p.sellerId === Number(sellerId)
+        })
         setProducts(all)
-        setTotalPages(res.data.totalPages)
+        setTotalPages(Math.ceil(all.length / 12) || 1)
+        if (sellerId === 'official') {
+          setProfile(prev => prev ? { ...prev, productCount: all.length } : null)
+        }
       } catch {
         setProducts([])
       } finally {
@@ -95,6 +114,11 @@ export default function ShopPage() {
 
   useEffect(() => {
     if (!sellerId || activeTab !== 'reviews') return
+    if (sellerId === 'official') {
+      setReviews([]) // Official store has no regular reviews yet
+      setLoadingReviews(false)
+      return
+    }
     const fetchReviews = async () => {
       setLoadingReviews(true)
       try {
@@ -112,6 +136,10 @@ export default function ShopPage() {
 
   const submitReview = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (sellerId === 'official') {
+      toast.info('Tính năng đánh giá hệ thống đang được cập nhật.')
+      return
+    }
     if (!reviewComment.trim()) {
       toast.error('Vui lòng nhập nội dung đánh giá')
       return

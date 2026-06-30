@@ -269,7 +269,7 @@ export default function ProductDetailPage() {
                   <span className="product-detail__official-badge">✓ Chính hãng</span>
                 </div>
               </div>
-              <Link to={PATHS.home} className="product-detail__seller-btn product-detail__seller-btn--official">
+              <Link to={PATHS.shop.replace(':sellerId', 'official')} className="product-detail__seller-btn product-detail__seller-btn--official">
                 Xem Kho
               </Link>
             </div>
