@@ -178,25 +178,31 @@ export default function Header() {
                         padding: '12px 16px',
                         boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
                         minWidth: '160px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '8px',
                         zIndex: 100
                       }}>
                         <div style={{ position: 'absolute', top: '-6px', left: '50%', transform: 'translateX(-50%)', width: '12px', height: '12px', background: '#fff', rotate: '45deg' }} />
                         <div style={{ position: 'absolute', top: '-10px', left: 0, right: 0, height: '10px', background: 'transparent' }} />
                         
-                        {activeCategory.children.map(child => (
-                          <Link 
-                            key={child.id}
-                            to={`${to}?category=${encodeURIComponent(child.name)}`}
-                            className="fh__dropdown-link"
-                            style={{ fontSize: '13px', fontWeight: 500, color: '#333', textDecoration: 'none', padding: '4px 0' }}
-                            onClick={() => setHoveredNav(null)}
-                          >
-                            {child.name}
-                          </Link>
-                        ))}
+                        <div style={{ 
+                          maxHeight: '130px', 
+                          overflowY: 'auto', 
+                          display: 'flex', 
+                          flexDirection: 'column', 
+                          gap: '8px',
+                          paddingRight: '4px'
+                        }} className="fh__dropdown-scroll">
+                          {activeCategory.children.map(child => (
+                            <Link 
+                              key={child.id}
+                              to={`${to}?category=${encodeURIComponent(child.name)}`}
+                              className="fh__dropdown-link"
+                              style={{ fontSize: '13px', fontWeight: 500, color: '#333', textDecoration: 'none', padding: '4px 0' }}
+                              onClick={() => setHoveredNav(null)}
+                            >
+                              {child.name}
+                            </Link>
+                          ))}
+                        </div>
                       </div>
                     );
                   })()}

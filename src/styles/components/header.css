@@ -460,9 +460,206 @@ body {
   background: rgba(255,255,255,0.12);
   color: #fff;
 }
+height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.fh__avatar-initial {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #c9a84c, #a8893e);
+  color: #1a1200;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+/* ── SEPARATOR LINE between icons ────────────────────────── */
+.fh__action-pill > .fh__action-btn + .fh__action-btn,
+.fh__action-pill > span + .fh__action-btn {
+  /* subtle divider effect via spacing only */
+}
+
+/* ── HAMBURGER (mobile only) ─────────────────────────────── */
+.fh__hamburger {
+  display: none;
+  pointer-events: all;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  border: 1px solid var(--fh-pill-border);
+  background: var(--fh-pill-bg);
+  backdrop-filter: var(--fh-blur);
+  -webkit-backdrop-filter: var(--fh-blur);
+  color: var(--fh-text);
+  cursor: pointer;
+  transition: all var(--fh-transition);
+}
+
+.fh__hamburger:hover {
+  background: rgba(0,0,0,0.08);
+}
+
+/* ── MOBILE DRAWER ───────────────────────────────────────── */
+.fh__mobile-drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9998;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  padding: 90px 28px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  overflow-y: auto;
+  animation: fh-drawer-in 0.3s ease;
+}
+
+@keyframes fh-drawer-in {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.fh__mobile-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fh__mobile-link {
+  display: block;
+  padding: 14px 20px;
+  border-radius: 14px;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--fh-text);
+  text-decoration: none;
+  letter-spacing: -0.2px;
+  transition: all var(--fh-transition);
+}
+
+.fh__mobile-link:hover {
+  background: rgba(0,0,0,0.04);
+  padding-left: 26px;
+}
+
+.fh__mobile-link--active {
+  background: rgba(201, 168, 76, 0.12);
+  color: #9a7c2a;
+}
+
+.fh__mobile-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 24px;
+}
+
+.fh__mobile-action-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 20px;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--fh-muted);
+  text-decoration: none;
+  border: none;
+  background: none;
+  cursor: pointer;
+
+  text-align: left;
+  transition: all var(--fh-transition);
+  width: 100%;
+}
+
+.fh__mobile-action-item:hover {
+  background: rgba(0,0,0,0.04);
+  color: var(--fh-text);
+}
+
+/* ── BODY OFFSET so content clears the floating header ───── */
+body {
+  padding-top: 0;
+}
+
+/* ── RESPONSIVE ──────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .fh__nav-pill {
+    display: none;
+  }
+
+  .fh__action-pill {
+    display: none;
+  }
+
+  .fh__hamburger {
+    display: flex;
+  }
+
+  .fh {
+    padding: 12px 16px;
+  }
+}
+
+@media (min-width: 901px) and (max-width: 1100px) {
+  .fh {
+    padding: 14px 20px;
+  }
+
+  .fh__nav-link {
+    padding: 9px 13px;
+    font-size: 12px;
+  }
+}
+
+/* ── DARK HERO OVERRIDE: make pills darker on dark backgrounds ── */
+/* When header overlaps the dark hero, add class .fh--dark on hero pages */
+.fh--on-dark .fh__nav-pill,
+.fh--on-dark .fh__action-pill {
+  background: rgba(15, 20, 15, 0.55);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.fh--on-dark .fh__nav-link {
+  color: rgba(255,255,255,0.85);
+}
+
+.fh--on-dark .fh__nav-link:hover {
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+}
+
+.fh--on-dark .fh__nav-link--active {
+  background: rgba(201,168,76,0.2);
+  color: #e8c97a;
+}
+
+.fh--on-dark .fh__action-btn {
+  color: rgba(255,255,255,0.8);
+}
+
+.fh--on-dark .fh__action-btn:hover {
+  background: rgba(255,255,255,0.12);
+  color: #fff;
+}
 
 .fh--on-dark .fh__lang-label {
   color: rgba(255,255,255,0.7);
 }
 
-
+.fh__dropdown-scroll::-webkit-scrollbar { width: 4px; }
+.fh__dropdown-scroll::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 4px; }
+.fh__dropdown-scroll::-webkit-scrollbar-thumb:hover { background: #d1d5db; }
