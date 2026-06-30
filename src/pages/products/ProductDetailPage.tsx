@@ -292,7 +292,33 @@ export default function ProductDetailPage() {
           </div>
 
           <div className="product-detail__divider" />
-          
+
+          {/* ── SELLER INFO CARD ───────────────────────── */}
+          {product.sellerName && (
+            <div className="product-detail__seller-card">
+              <div className="product-detail__seller-avatar">
+                {product.sellerAvatarUrl ? (
+                  <img src={product.sellerAvatarUrl} alt={product.sellerName} />
+                ) : (
+                  <span>{product.sellerName.charAt(0).toUpperCase()}</span>
+                )}
+              </div>
+              <div className="product-detail__seller-info">
+                <div className="product-detail__seller-label">Người bán</div>
+                <div className="product-detail__seller-name">{product.sellerName}</div>
+              </div>
+              <Link
+                to={`/category/women?seller=${product.sellerId}`}
+                className="product-detail__seller-btn"
+                onClick={(e) => e.stopPropagation()}
+              >
+                Xem Shop
+              </Link>
+            </div>
+          )}
+
+          <div className="product-detail__divider" />
+
           <div className="product-detail__section">
             <h3>MÔ TẢ SẢN PHẨM</h3>
             <p>{product.description || 'Sản phẩm thời trang secondhand được tuyển chọn kỹ lưỡng, mang đến phong cách độc đáo và chất lượng vượt trội.'}</p>

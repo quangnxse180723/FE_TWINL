@@ -2,6 +2,9 @@ import { axiosClient } from '../axiosClient';
 
 export interface Product {
   id: number;
+  sellerId?: number;
+  sellerName?: string;
+  sellerAvatarUrl?: string;
   name: string;
   description: string;
   price: number;
