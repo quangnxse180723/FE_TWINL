@@ -607,6 +607,28 @@
   color: #fff;
 }
 
+.product-detail__seller-stats {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  font-size: 11px;
+  color: #64748b;
+}
+
+.product-detail__seller-stats span {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.product-detail__seller-stats-dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #cbd5e1;
+}
+
 /* ── TWINL OFFICIAL variant ──────────────────────── */
 .product-detail__seller-card--official {
   background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);

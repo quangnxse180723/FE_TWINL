@@ -3,14 +3,23 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import productsApi, { type Product } from '../../api/products/productsApi'
 import cartApi from '../../api/cart/cartApi'
+import { axiosClient } from '../../api/axiosClient'
 import { PATHS } from '../../routes/paths'
 import type { RootState } from '../../store'
-import { Shield, CheckCircle2, Truck, ShieldCheck } from 'lucide-react'
+import { Shield, CheckCircle2, Truck, ShieldCheck, Package, ShoppingBag } from 'lucide-react'
 import AiScannerModal from '../../components/shared/AiScannerModal'
 import LegitCheckModal from '../../components/shared/LegitCheckModal'
 import { toast } from 'react-toastify'
 
 import '../../styles/pages/productDetail.css'
+
+interface SellerProfile {
+  id: number
+  displayName: string
+  avatarUrl?: string
+  productCount: number
+  soldCount: number
+}
 
 const formatPrice = (value: number) =>
   new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value).replace('₫', 'đ')
@@ -27,6 +36,7 @@ export default function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1)
   const [isAiModalOpen, setIsAiModalOpen] = useState(false)
   const [isLegitModalOpen, setIsLegitModalOpen] = useState(false)
+  const [sellerProfile, setSellerProfile] = useState<SellerProfile | null>(null)
   const navigate = useNavigate()
   const user = useSelector((state: RootState) => state.auth.user)
 
@@ -69,6 +79,14 @@ export default function ProductDetailPage() {
 
     fetchProduct()
   }, [id])
+
+  // Fetch seller profile stats when product is loaded
+  useEffect(() => {
+    if (!product?.sellerId) return
+    axiosClient.get<SellerProfile>(`/api/sellers/${product.sellerId}/profile`)
+      .then(res => setSellerProfile(res.data))
+      .catch(() => setSellerProfile(null))
+  }, [product?.sellerId])
 
   if (loading) {
     return <section className="product-detail">Đang tải sản phẩm...</section>
@@ -216,9 +234,16 @@ export default function ProductDetailPage() {
               <div className="product-detail__seller-info">
                 <div className="product-detail__seller-label">Người bán</div>
                 <div className="product-detail__seller-name">{product.sellerName}</div>
+                {sellerProfile && (
+                  <div className="product-detail__seller-stats">
+                    <span><Package size={11} /> {sellerProfile.productCount} sản phẩm</span>
+                    <span className="product-detail__seller-stats-dot" />
+                    <span><ShoppingBag size={11} /> Đã bán {sellerProfile.soldCount}</span>
+                  </div>
+                )}
               </div>
               <Link
-                to={`/category/women?seller=${product.sellerId}`}
+                to={PATHS.shop.replace(':sellerId', String(product.sellerId))}
                 className="product-detail__seller-btn"
                 onClick={(e) => e.stopPropagation()}
               >

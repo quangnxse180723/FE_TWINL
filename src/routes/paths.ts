@@ -34,4 +34,5 @@ export const PATHS = {
   shipper: '/shipper',
   shipperOrders: '/shipper/orders',
   sellerDashboard: '/seller/dashboard',
+  shop: '/shop/:sellerId',
 }
