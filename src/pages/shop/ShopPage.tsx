@@ -5,7 +5,7 @@ import { axiosClient } from '../../api/axiosClient'
 import productsApi, { type Product } from '../../api/products/productsApi'
 import { PATHS } from '../../routes/paths'
 import type { RootState } from '../../store'
-import { Package, ShoppingBag, Store, Star, MessageSquare, X } from 'lucide-react'
+import { Package, ShoppingBag, Store, Star, MessageSquare, X, ChevronLeft, ChevronRight } from 'lucide-react'
 import { toast } from 'react-toastify'
 
 import './ShopPage.css'
@@ -126,7 +126,6 @@ export default function ShopPage() {
       setIsReviewModalOpen(false)
       setReviewComment('')
       setReviewRating(5)
-      // Refresh
       fetchProfile()
       if (reviewsPage === 0) {
         const res = await axiosClient.get(`/api/products/sellers/${sellerId}/reviews?page=0&size=10`)
@@ -144,7 +143,7 @@ export default function ShopPage() {
 
   if (loadingProfile) {
     return (
-      <div className="shop-page">
+      <div className="shop-page-premium">
         <div className="shop-page__loading">Đang tải thông tin shop...</div>
       </div>
     )
@@ -152,236 +151,291 @@ export default function ShopPage() {
 
   if (!profile) {
     return (
-      <div className="shop-page">
+      <div className="shop-page-premium">
         <div className="shop-page__error">Không tìm thấy shop này.</div>
       </div>
     )
   }
 
   return (
-    <div className="shop-page">
-      {/* ── SHOP HEADER ──────────────────────────────── */}
-      <div className="shop-page__header">
-        <div className="shop-page__header-inner">
-          <div className="shop-page__avatar">
-            {profile.avatarUrl ? (
-              <img src={profile.avatarUrl} alt={profile.displayName} />
-            ) : (
-              <span>{profile.displayName.charAt(0).toUpperCase()}</span>
-            )}
-          </div>
-          <div className="shop-page__header-info">
-            <h1 className="shop-page__name">{profile.displayName}</h1>
-            <div className="shop-page__stats">
-              <div className="shop-page__stat">
-                <Package size={16} />
-                <span><strong>{profile.productCount}</strong> sản phẩm</span>
-              </div>
-              <div className="shop-page__stat-divider" />
-              <div className="shop-page__stat">
-                <ShoppingBag size={16} />
-                <span>Đã bán <strong>{profile.soldCount}</strong></span>
-              </div>
-              <div className="shop-page__stat-divider" />
-              <div className="shop-page__stat">
-                <Star size={16} fill="#fcd34d" color="#fcd34d" />
-                <span><strong>{profile.averageRating > 0 ? profile.averageRating.toFixed(1) : 'Chưa có'}</strong> ({profile.reviewCount} đánh giá)</span>
-              </div>
-            </div>
-          </div>
+    <div className="shop-page-premium">
+      {/* ── PREMIUM HERO BANNER ──────────────────────────────── */}
+      <div className="shop-premium__hero">
+        <div className="shop-premium__hero-bg">
+          {/* Decorative blurred blobs for modern feel */}
+          <div className="blob blob-1"></div>
+          <div className="blob blob-2"></div>
         </div>
       </div>
 
-      {/* ── TABS ─────────────────────────────── */}
-      <div className="shop-page__tabs">
-        <div className="shop-page__tabs-inner">
-          <button 
-            className={`shop-page__tab ${activeTab === 'products' ? 'active' : ''}`}
-            onClick={() => setActiveTab('products')}
-          >
-            <Store size={18} />
-            Sản phẩm
-          </button>
-          <button 
-            className={`shop-page__tab ${activeTab === 'reviews' ? 'active' : ''}`}
-            onClick={() => setActiveTab('reviews')}
-          >
-            <MessageSquare size={18} />
-            Đánh giá
-          </button>
-        </div>
-      </div>
-
-      <div className="shop-page__body">
-        {activeTab === 'products' ? (
-          <>
-            {loadingProducts ? (
-              <div className="shop-page__loading">Đang tải sản phẩm...</div>
-            ) : products.length === 0 ? (
-              <div className="shop-page__empty">Shop chưa có sản phẩm nào.</div>
-            ) : (
-              <>
-                <div className="shop-page__grid">
-                  {products.map(product => (
-                    <Link
-                      key={product.id}
-                      to={PATHS.productDetail.replace(':id', String(product.id))}
-                      className="shop-page__card"
-                    >
-                      <div className="shop-page__card-img">
-                        {product.imageUrls?.[0] ? (
-                          <>
-                            <img src={product.imageUrls[0]} alt={product.name} className="primary" />
-                            {product.imageUrls[1] && (
-                              <img src={product.imageUrls[1]} alt={product.name} className="secondary" />
-                            )}
-                          </>
-                        ) : (
-                          <div className="shop-page__card-placeholder">
-                            <Package size={32} />
-                          </div>
-                        )}
-                        {product.conditionPercentage && (
-                          <span className="shop-page__card-badge">{product.conditionPercentage}%</span>
-                        )}
-                      </div>
-                      <div className="shop-page__card-body">
-                        <h4 className="shop-page__card-name">{product.name}</h4>
-                        <span className="shop-page__card-price">{formatPrice(product.price)}</span>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-
-                {/* Pagination */}
-                {totalPages > 1 && (
-                  <div className="shop-page__pagination">
-                    <button
-                      className="shop-page__page-btn"
-                      disabled={page === 0}
-                      onClick={() => setPage(p => p - 1)}
-                    >
-                      ← Trước
-                    </button>
-                    <span className="shop-page__page-info">Trang {page + 1} / {totalPages}</span>
-                    <button
-                      className="shop-page__page-btn"
-                      disabled={page >= totalPages - 1}
-                      onClick={() => setPage(p => p + 1)}
-                    >
-                      Tiếp →
-                    </button>
-                  </div>
-                )}
-              </>
-            )}
-          </>
-        ) : (
-          <div className="shop-page__reviews-section">
-            <div className="shop-page__reviews-header">
-              <h3>Đánh giá từ người mua</h3>
-              {user && user.id !== Number(sellerId) && (
-                <button className="shop-page__write-review-btn" onClick={() => setIsReviewModalOpen(true)}>
-                  Viết đánh giá
-                </button>
+      <div className="shop-premium__container">
+        {/* ── GLASSMORPHISM PROFILE CARD ──────────────────────── */}
+        <div className="shop-premium__profile-card">
+          <div className="shop-premium__avatar-wrapper">
+            <div className="shop-premium__avatar">
+              {profile.avatarUrl ? (
+                <img src={profile.avatarUrl} alt={profile.displayName} />
+              ) : (
+                <span>{profile.displayName.charAt(0).toUpperCase()}</span>
               )}
             </div>
+          </div>
+          
+          <div className="shop-premium__profile-info">
+            <h1 className="shop-premium__name">{profile.displayName}</h1>
+            
+            <div className="shop-premium__stats-row">
+              <div className="shop-premium__stat-item">
+                <div className="stat-icon"><Package size={16} /></div>
+                <div className="stat-data">
+                  <span className="stat-val">{profile.productCount}</span>
+                  <span className="stat-label">Sản phẩm</span>
+                </div>
+              </div>
+              <div className="stat-divider"></div>
+              
+              <div className="shop-premium__stat-item">
+                <div className="stat-icon"><ShoppingBag size={16} /></div>
+                <div className="stat-data">
+                  <span className="stat-val">{profile.soldCount}</span>
+                  <span className="stat-label">Đã bán</span>
+                </div>
+              </div>
+              <div className="stat-divider"></div>
+              
+              <div className="shop-premium__stat-item">
+                <div className="stat-icon rating-icon"><Star size={16} fill="currentColor" /></div>
+                <div className="stat-data">
+                  <span className="stat-val rating-val">
+                    {profile.averageRating > 0 ? profile.averageRating.toFixed(1) : 'Mới'}
+                  </span>
+                  <span className="stat-label">{profile.reviewCount} đánh giá</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
-            {loadingReviews ? (
-              <div className="shop-page__loading">Đang tải đánh giá...</div>
-            ) : reviews.length === 0 ? (
-              <div className="shop-page__empty">Chưa có đánh giá nào cho shop này.</div>
-            ) : (
-              <div className="shop-page__review-list">
-                {reviews.map(review => (
-                  <div key={review.id} className="shop-page__review-item">
-                    <div className="shop-page__review-avatar">
-                      {review.reviewerAvatarUrl ? (
-                        <img src={review.reviewerAvatarUrl} alt={review.reviewerName} />
-                      ) : (
-                        <span>{review.reviewerName.charAt(0).toUpperCase()}</span>
-                      )}
-                    </div>
-                    <div className="shop-page__review-content">
-                      <div className="shop-page__review-meta">
-                        <strong>{review.reviewerName}</strong>
-                        <span className="shop-page__review-date">{new Date(review.createdAt).toLocaleDateString('vi-VN')}</span>
-                      </div>
-                      <div className="shop-page__review-stars">
-                        {[1, 2, 3, 4, 5].map(star => (
-                          <Star key={star} size={14} fill={star <= review.rating ? '#fcd34d' : 'transparent'} color={star <= review.rating ? '#fcd34d' : '#cbd5e1'} />
-                        ))}
-                      </div>
-                      <p className="shop-page__review-text">{review.comment}</p>
-                    </div>
-                  </div>
-                ))}
+        {/* ── PREMIUM TABS ─────────────────────────────── */}
+        <div className="shop-premium__tabs-wrapper">
+          <div className="shop-premium__tabs">
+            <button 
+              className={`shop-premium__tab ${activeTab === 'products' ? 'active' : ''}`}
+              onClick={() => setActiveTab('products')}
+            >
+              <Store size={18} />
+              <span>Sản phẩm</span>
+              {activeTab === 'products' && <div className="tab-indicator" />}
+            </button>
+            <button 
+              className={`shop-premium__tab ${activeTab === 'reviews' ? 'active' : ''}`}
+              onClick={() => setActiveTab('reviews')}
+            >
+              <MessageSquare size={18} />
+              <span>Đánh giá</span>
+              {activeTab === 'reviews' && <div className="tab-indicator" />}
+            </button>
+          </div>
+        </div>
 
-                {reviewsTotalPages > 1 && (
-                  <div className="shop-page__pagination">
-                    <button
-                      className="shop-page__page-btn"
-                      disabled={reviewsPage === 0}
-                      onClick={() => setReviewsPage(p => p - 1)}
-                    >
-                      ← Trước
-                    </button>
-                    <span className="shop-page__page-info">Trang {reviewsPage + 1} / {reviewsTotalPages}</span>
-                    <button
-                      className="shop-page__page-btn"
-                      disabled={reviewsPage >= reviewsTotalPages - 1}
-                      onClick={() => setReviewsPage(p => p + 1)}
-                    >
-                      Tiếp →
-                    </button>
+        {/* ── CONTENT AREA ─────────────────────────────── */}
+        <div className="shop-premium__content">
+          {activeTab === 'products' ? (
+            <div className="shop-premium__products-section fade-in">
+              {loadingProducts ? (
+                <div className="shop-premium__loading">
+                  <div className="spinner"></div>
+                  <p>Đang tải sản phẩm...</p>
+                </div>
+              ) : products.length === 0 ? (
+                <div className="shop-premium__empty">
+                  <Package size={48} opacity={0.2} />
+                  <p>Shop chưa có sản phẩm nào.</p>
+                </div>
+              ) : (
+                <>
+                  <div className="shop-premium__grid">
+                    {products.map(product => (
+                      <Link
+                        key={product.id}
+                        to={PATHS.productDetail.replace(':id', String(product.id))}
+                        className="shop-premium__card group"
+                      >
+                        <div className="shop-premium__card-image-wrap">
+                          {product.imageUrls?.[0] ? (
+                            <>
+                              <img src={product.imageUrls[0]} alt={product.name} className="primary-img" />
+                              {product.imageUrls[1] && (
+                                <img src={product.imageUrls[1]} alt={product.name} className="secondary-img" />
+                              )}
+                            </>
+                          ) : (
+                            <div className="img-placeholder"><Package size={32} /></div>
+                          )}
+                          {product.conditionPercentage && (
+                            <div className="condition-badge">
+                              {product.conditionPercentage}% MỚI
+                            </div>
+                          )}
+                        </div>
+                        <div className="shop-premium__card-info">
+                          <h4 className="product-title">{product.name}</h4>
+                          <div className="product-price">{formatPrice(product.price)}</div>
+                        </div>
+                      </Link>
+                    ))}
                   </div>
+
+                  {/* Modern Pagination */}
+                  {totalPages > 1 && (
+                    <div className="shop-premium__pagination">
+                      <button
+                        className="btn-page"
+                        disabled={page === 0}
+                        onClick={() => setPage(p => p - 1)}
+                      >
+                        <ChevronLeft size={20} />
+                      </button>
+                      <span className="page-indicator">Trang {page + 1} / {totalPages}</span>
+                      <button
+                        className="btn-page"
+                        disabled={page >= totalPages - 1}
+                        onClick={() => setPage(p => p + 1)}
+                      >
+                        <ChevronRight size={20} />
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          ) : (
+            <div className="shop-premium__reviews-section fade-in">
+              <div className="reviews-header">
+                <h2>Khách hàng nói gì về shop</h2>
+                {user && user.id !== Number(sellerId) && (
+                  <button className="btn-write-review" onClick={() => setIsReviewModalOpen(true)}>
+                    <MessageSquare size={16} />
+                    <span>Viết đánh giá</span>
+                  </button>
                 )}
               </div>
-            )}
-          </div>
-        )}
+
+              {loadingReviews ? (
+                <div className="shop-premium__loading">
+                  <div className="spinner"></div>
+                  <p>Đang tải đánh giá...</p>
+                </div>
+              ) : reviews.length === 0 ? (
+                <div className="shop-premium__empty">
+                  <MessageSquare size={48} opacity={0.2} />
+                  <p>Chưa có đánh giá nào cho shop này.</p>
+                </div>
+              ) : (
+                <div className="shop-premium__review-list">
+                  {reviews.map(review => (
+                    <div key={review.id} className="review-card">
+                      <div className="review-avatar">
+                        {review.reviewerAvatarUrl ? (
+                          <img src={review.reviewerAvatarUrl} alt={review.reviewerName} />
+                        ) : (
+                          <span>{review.reviewerName.charAt(0).toUpperCase()}</span>
+                        )}
+                      </div>
+                      <div className="review-body">
+                        <div className="review-meta">
+                          <strong className="reviewer-name">{review.reviewerName}</strong>
+                          <span className="review-date">{new Date(review.createdAt).toLocaleDateString('vi-VN')}</span>
+                        </div>
+                        <div className="review-stars">
+                          {[1, 2, 3, 4, 5].map(star => (
+                            <Star 
+                              key={star} 
+                              size={14} 
+                              fill={star <= review.rating ? '#f59e0b' : 'transparent'} 
+                              color={star <= review.rating ? '#f59e0b' : '#e2e8f0'} 
+                            />
+                          ))}
+                        </div>
+                        <p className="review-text">{review.comment}</p>
+                      </div>
+                    </div>
+                  ))}
+
+                  {reviewsTotalPages > 1 && (
+                    <div className="shop-premium__pagination">
+                      <button
+                        className="btn-page"
+                        disabled={reviewsPage === 0}
+                        onClick={() => setReviewsPage(p => p - 1)}
+                      >
+                        <ChevronLeft size={20} />
+                      </button>
+                      <span className="page-indicator">Trang {reviewsPage + 1} / {reviewsTotalPages}</span>
+                      <button
+                        className="btn-page"
+                        disabled={reviewsPage >= reviewsTotalPages - 1}
+                        onClick={() => setReviewsPage(p => p + 1)}
+                      >
+                        <ChevronRight size={20} />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Review Modal */}
+      {/* ── PREMIUM REVIEW MODAL ──────────────────────────────── */}
       {isReviewModalOpen && (
-        <div className="shop-page__modal-overlay" onClick={() => setIsReviewModalOpen(false)}>
-          <div className="shop-page__modal" onClick={e => e.stopPropagation()}>
-            <button className="shop-page__modal-close" onClick={() => setIsReviewModalOpen(false)}>
+        <div className="shop-premium__modal-overlay fade-in" onClick={() => setIsReviewModalOpen(false)}>
+          <div className="shop-premium__modal scale-up" onClick={e => e.stopPropagation()}>
+            <button className="modal-close" onClick={() => setIsReviewModalOpen(false)}>
               <X size={20} />
             </button>
-            <h3 className="shop-page__modal-title">Đánh giá Shop</h3>
-            <form onSubmit={submitReview}>
-              <div className="shop-page__rating-input">
-                <label>Chất lượng shop:</label>
-                <div className="shop-page__stars-selector">
+            <div className="modal-header">
+              <h3>Đánh giá Shop</h3>
+              <p>Trải nghiệm mua hàng của bạn như thế nào?</p>
+            </div>
+            
+            <form onSubmit={submitReview} className="modal-form">
+              <div className="form-group">
+                <label>Chất lượng dịch vụ</label>
+                <div className="stars-selector">
                   {[1, 2, 3, 4, 5].map(star => (
                     <Star 
                       key={star} 
-                      size={28} 
-                      fill={star <= reviewRating ? '#fcd34d' : 'transparent'} 
-                      color={star <= reviewRating ? '#fcd34d' : '#cbd5e1'} 
+                      size={32} 
+                      fill={star <= reviewRating ? '#f59e0b' : 'transparent'} 
+                      color={star <= reviewRating ? '#f59e0b' : '#cbd5e1'} 
                       onClick={() => setReviewRating(star)}
-                      style={{ cursor: 'pointer' }}
+                      className="star-interactive"
                     />
                   ))}
                 </div>
               </div>
-              <div className="shop-page__comment-input">
-                <label>Bình luận của bạn:</label>
+              <div className="form-group">
+                <label>Nhận xét chi tiết</label>
                 <textarea 
                   value={reviewComment}
                   onChange={e => setReviewComment(e.target.value)}
-                  placeholder="Chia sẻ trải nghiệm của bạn khi mua hàng từ shop này..."
+                  placeholder="Hãy chia sẻ thêm về trải nghiệm mua hàng của bạn..."
                   rows={4}
                   required
                 />
               </div>
               <button 
                 type="submit" 
-                className="shop-page__submit-review-btn" 
+                className="btn-submit-review" 
                 disabled={submittingReview}
               >
-                {submittingReview ? 'Đang gửi...' : 'Gửi Đánh Giá'}
+                {submittingReview ? (
+                  <><span className="spinner-small"></span> Đang gửi...</>
+                ) : (
+                  'Gửi Đánh Giá'
+                )}
               </button>
             </form>
           </div>
