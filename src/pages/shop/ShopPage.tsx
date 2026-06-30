@@ -65,10 +65,10 @@ export default function ShopPage() {
         id: 0,
         displayName: 'TWINL Official',
         avatarUrl: '', // Will use 'T'
-        productCount: 0, // Updated later
-        soldCount: 999, // Dummy
-        averageRating: 5.0,
-        reviewCount: 999
+        productCount: 0,
+        soldCount: 0,
+        averageRating: 0,
+        reviewCount: 0
       })
       setLoadingProfile(false)
       return
