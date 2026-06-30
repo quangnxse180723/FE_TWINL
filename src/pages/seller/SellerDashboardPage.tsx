@@ -194,7 +194,7 @@ export default function SellerDashboardPage() {
         const strId = data.categoryId.toString();
         const exists = categories.some(cat => cat.id.toString() === strId || cat.children?.some(c => c.id.toString() === strId));
         if (!exists) {
-          setCategories(prev => [...prev, { id: data.categoryId!, name: data.category!, children: [] }]);
+          setCategories(prev => [...prev, { id: data.categoryId!, name: data.category!, parentId: null, children: [] }]);
         }
         detectedCategoryId = strId;
       } else if (data.category) {

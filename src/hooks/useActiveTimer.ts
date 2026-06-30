@@ -5,7 +5,7 @@ export function useActiveTimer() {
   const logIdRef = useRef<number | null>(null)
   const isTrackingRef = useRef(false)
   const lastActiveRef = useRef<number>(Date.now())
-  const intervalRef = useRef<NodeJS.Timeout | null>(null)
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   useEffect(() => {
     // 1. Initial track visit when app loads

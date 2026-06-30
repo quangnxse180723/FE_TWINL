@@ -8,7 +8,7 @@ import { PATHS } from '../../routes/paths'
 import type { AdminProductPayload } from '../types'
 import { API_BASE_URL } from '../../config/constants'
 import { toast } from 'react-toastify'
-import { Sparkles, CheckCircle2, AlertTriangle, Loader2, ArrowRight, Shield, Camera, RotateCcw } from 'lucide-react'
+import { Sparkles, CheckCircle2, AlertTriangle, Loader2, Shield, Camera, RotateCcw } from 'lucide-react'
 import { compressImage } from '../../utils/imageCompressor'
 import '../../styles/pages/adminProductForm.css'
 
@@ -24,6 +24,7 @@ export interface AiAutoFillResult {
   description?: string
   brand?: string
   style?: string
+  gender?: string
   price?: number
   estimatedPrice?: string
   condition?: string
@@ -239,12 +240,12 @@ export default function AdminProductFormPage() {
 
       setForm(prev => ({
         ...prev,
-        name: twNameEffect.displayed ? prev.name : data.name,
+        name: twNameEffect.displayed ? prev.name : (data.name || prev.name),
         description: twDescEffect.displayed ? prev.description : (data.description || prev.description),
         categoryId: detectedCategoryId,
-        brand: data.brand ?? prev.brand,
-        style: data.style ?? prev.style,
-        gender: data.category ?? prev.gender,
+        brand: data.brand || prev.brand,
+        style: data.style || prev.style,
+        gender: data.gender || prev.gender,
         price: data.estimatedPrice ? Number(data.estimatedPrice.toString().replace(/\D/g, '')) || prev.price : prev.price,
         conditionPercentage: data.conditionPercentage ?? prev.conditionPercentage,
         defects: data.defects && data.defects.length > 0 ? data.defects : prev.defects,
