@@ -159,47 +159,73 @@ export default function ProductDetailPage() {
       </nav>
 
       <div className="product-detail__content">
-        <div className="product-detail__gallery">
-          <div className="product-detail__thumbs">
-            {(product.imageUrls ?? []).map((url) => (
-              <button
-                key={url}
-                type="button"
-                className={`product-detail__thumb${mainImage === url ? ' is-active' : ''}`}
-                onClick={() => setMainImage(url)}
-              >
-                <img src={url} alt={product.name} />
-              </button>
-            ))}
+        <div className="product-detail__gallery-col">
+          <div className="product-detail__gallery">
+            <div className="product-detail__thumbs">
+              {(product.imageUrls ?? []).map((url) => (
+                <button
+                  key={url}
+                  type="button"
+                  className={`product-detail__thumb${mainImage === url ? ' is-active' : ''}`}
+                  onClick={() => setMainImage(url)}
+                >
+                  <img src={url} alt={product.name} />
+                </button>
+              ))}
+            </div>
+            <div 
+              className="product-detail__main zoom-container"
+              onMouseMove={handleMouseMove}
+            >
+              {mainImage ? <img src={mainImage} alt={product.name} className="zoom-image" /> : null}
+              {mainImage && (
+                <div className="product-detail__ai-actions">
+                  <button 
+                    type="button" 
+                    className="ai-scan-direct-btn"
+                    onClick={() => setIsAiModalOpen(true)}
+                    title="Phân tích ảnh này bằng AI"
+                  >
+                    <CheckCircle2 size={16} />
+                    <span>Quét AI</span>
+                  </button>
+                  <button 
+                    type="button" 
+                    className="ai-legit-btn"
+                    onClick={() => setIsLegitModalOpen(true)}
+                    title="Kiểm định chính hãng bằng AI"
+                  >
+                    <Shield size={16} />
+                    <span>Kiểm định AI</span>
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
-          <div 
-            className="product-detail__main zoom-container"
-            onMouseMove={handleMouseMove}
-          >
-            {mainImage ? <img src={mainImage} alt={product.name} className="zoom-image" /> : null}
-            {mainImage && (
-              <div className="product-detail__ai-actions">
-                <button 
-                  type="button" 
-                  className="ai-scan-direct-btn"
-                  onClick={() => setIsAiModalOpen(true)}
-                  title="Phân tích ảnh này bằng AI"
-                >
-                  <CheckCircle2 size={16} />
-                  <span>Quét AI</span>
-                </button>
-                <button 
-                  type="button" 
-                  className="ai-legit-btn"
-                  onClick={() => setIsLegitModalOpen(true)}
-                  title="Kiểm định chính hãng bằng AI"
-                >
-                  <Shield size={16} />
-                  <span>Kiểm định AI</span>
-                </button>
+
+          {/* ── SELLER INFO CARD – below main image ──── */}
+          {product.sellerName && (
+            <div className="product-detail__seller-card">
+              <div className="product-detail__seller-avatar">
+                {product.sellerAvatarUrl ? (
+                  <img src={product.sellerAvatarUrl} alt={product.sellerName} />
+                ) : (
+                  <span>{product.sellerName.charAt(0).toUpperCase()}</span>
+                )}
               </div>
-            )}
-          </div>
+              <div className="product-detail__seller-info">
+                <div className="product-detail__seller-label">Người bán</div>
+                <div className="product-detail__seller-name">{product.sellerName}</div>
+              </div>
+              <Link
+                to={`/category/women?seller=${product.sellerId}`}
+                className="product-detail__seller-btn"
+                onClick={(e) => e.stopPropagation()}
+              >
+                Xem Shop
+              </Link>
+            </div>
+          )}
         </div>
 
         <aside className="product-detail__info">
@@ -290,32 +316,6 @@ export default function ProductDetailPage() {
               {product.stock === 0 ? 'Hết hàng' : (adding ? 'Đang thêm...' : 'Thêm Vào Giỏ Hàng')}
             </button>
           </div>
-
-          <div className="product-detail__divider" />
-
-          {/* ── SELLER INFO CARD ───────────────────────── */}
-          {product.sellerName && (
-            <div className="product-detail__seller-card">
-              <div className="product-detail__seller-avatar">
-                {product.sellerAvatarUrl ? (
-                  <img src={product.sellerAvatarUrl} alt={product.sellerName} />
-                ) : (
-                  <span>{product.sellerName.charAt(0).toUpperCase()}</span>
-                )}
-              </div>
-              <div className="product-detail__seller-info">
-                <div className="product-detail__seller-label">Người bán</div>
-                <div className="product-detail__seller-name">{product.sellerName}</div>
-              </div>
-              <Link
-                to={`/category/women?seller=${product.sellerId}`}
-                className="product-detail__seller-btn"
-                onClick={(e) => e.stopPropagation()}
-              >
-                Xem Shop
-              </Link>
-            </div>
-          )}
 
           <div className="product-detail__divider" />
 

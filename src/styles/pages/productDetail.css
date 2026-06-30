@@ -32,6 +32,13 @@
   align-items: start;
 }
 
+/* Left column: gallery + seller card stacked */
+.product-detail__gallery-col {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
 .product-detail__gallery {
   display: flex;
   gap: 20px;
