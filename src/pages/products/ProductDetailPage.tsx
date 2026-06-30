@@ -19,6 +19,8 @@ interface SellerProfile {
   avatarUrl?: string
   productCount: number
   soldCount: number
+  averageRating: number
+  reviewCount: number
 }
 
 const formatPrice = (value: number) =>
@@ -236,9 +238,14 @@ export default function ProductDetailPage() {
                 <div className="product-detail__seller-name">{product.sellerName}</div>
                 {sellerProfile && (
                   <div className="product-detail__seller-stats">
-                    <span><Package size={11} /> {sellerProfile.productCount} sản phẩm</span>
+                    <span><Package size={11} /> {sellerProfile.productCount} SP</span>
                     <span className="product-detail__seller-stats-dot" />
                     <span><ShoppingBag size={11} /> Đã bán {sellerProfile.soldCount}</span>
+                    <span className="product-detail__seller-stats-dot" />
+                    <span>
+                      ★ {sellerProfile.averageRating > 0 ? sellerProfile.averageRating.toFixed(1) : 'Chưa có'} 
+                      ({sellerProfile.reviewCount})
+                    </span>
                   </div>
                 )}
               </div>
