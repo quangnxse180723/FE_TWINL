@@ -5,7 +5,7 @@ import { axiosClient } from '../../api/axiosClient'
 import productsApi, { type Product } from '../../api/products/productsApi'
 import { PATHS } from '../../routes/paths'
 import type { RootState } from '../../store'
-import { Star, X, ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react'
+import { Package, ShoppingBag, Star, Store, X, ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react'
 import { toast } from 'react-toastify'
 
 import './ShopPage.css'
@@ -142,103 +142,90 @@ export default function ShopPage() {
   }
 
   if (loadingProfile) {
-    return (
-      <div className="shop-page-minimal">
-        <div className="shop-min__loading">Đang tải thông tin...</div>
-      </div>
-    )
+    return <div className="shop-page__loading">Đang tải thông tin...</div>
   }
 
   if (!profile) {
-    return (
-      <div className="shop-page-minimal">
-        <div className="shop-min__error">Không tìm thấy thông tin.</div>
-      </div>
-    )
+    return <div className="shop-page__error">Không tìm thấy thông tin.</div>
   }
 
   return (
-    <div className="shop-page-minimal">
-      {/* ── MINIMALIST EDITORIAL HEADER ──────────────────────────────── */}
-      <header className="shop-min__header">
-        <div className="shop-min__container">
-          <div className="shop-min__header-inner">
-            <div className="shop-min__avatar-wrapper">
-              <div className="shop-min__avatar">
-                {profile.avatarUrl ? (
-                  <img src={profile.avatarUrl} alt={profile.displayName} />
-                ) : (
-                  <span>{profile.displayName.charAt(0).toUpperCase()}</span>
-                )}
+    <div className="shop-page">
+      <div className="shop-page__container">
+        
+        {/* ── HEADER BÁN HÀNG THEO YÊU CẦU ──────────────────────────────── */}
+        <div className="shop-page__seller-card">
+          <div className="shop-page__seller-avatar">
+            {profile.avatarUrl ? (
+              <img src={profile.avatarUrl} alt={profile.displayName} />
+            ) : (
+              <span>{profile.displayName.charAt(0).toUpperCase()}</span>
+            )}
+          </div>
+          
+          <div className="shop-page__seller-info">
+            <h1 className="shop-page__seller-name">{profile.displayName}</h1>
+            
+            <div className="shop-page__seller-stats">
+              <div className="shop-page__seller-stat">
+                <Package size={12} />
+                <span>{profile.productCount} SẢN PHẨM</span>
               </div>
-            </div>
-
-            <div className="shop-min__profile-info">
-              <p className="shop-min__subtitle">OFFICIAL CURATOR</p>
-              <h1 className="shop-min__name">{profile.displayName}</h1>
-              
-              <div className="shop-min__stats-row">
-                <div className="shop-min__stat">
-                  <span className="stat-val">{profile.productCount}</span>
-                  <span className="stat-label">SẢN PHẨM</span>
-                </div>
-                <div className="stat-divider"></div>
-                <div className="shop-min__stat">
-                  <span className="stat-val">{profile.soldCount}</span>
-                  <span className="stat-label">ĐÃ BÁN</span>
-                </div>
-                <div className="stat-divider"></div>
-                <div className="shop-min__stat">
-                  <span className="stat-val">
-                    {profile.averageRating > 0 ? profile.averageRating.toFixed(1) : '—'}
-                  </span>
-                  <span className="stat-label">{profile.reviewCount} ĐÁNH GIÁ</span>
-                </div>
+              <span className="shop-page__seller-stats-dot" />
+              <div className="shop-page__seller-stat">
+                <ShoppingBag size={12} />
+                <span>ĐÃ BÁN {profile.soldCount}</span>
+              </div>
+              <span className="shop-page__seller-stats-dot" />
+              <div className="shop-page__seller-stat">
+                <Star size={12} fill={profile.averageRating > 0 ? "currentColor" : "none"} />
+                <span>
+                  {profile.averageRating > 0 ? `${profile.averageRating.toFixed(1)} ĐÁNH GIÁ` : 'CHƯA CÓ (ĐÁNH GIÁ)'}
+                </span>
               </div>
             </div>
           </div>
         </div>
-      </header>
 
-      {/* ── EDITORIAL TABS ─────────────────────────────── */}
-      <div className="shop-min__tabs-container">
-        <div className="shop-min__container">
-          <div className="shop-min__tabs">
-            <button 
-              className={`shop-min__tab ${activeTab === 'products' ? 'active' : ''}`}
-              onClick={() => setActiveTab('products')}
-            >
-              ARCHIVE
-            </button>
-            <button 
-              className={`shop-min__tab ${activeTab === 'reviews' ? 'active' : ''}`}
-              onClick={() => setActiveTab('reviews')}
-            >
-              REVIEWS
-            </button>
-          </div>
+        {/* ── SECTION: SẢN PHẨM CỦA SHOP ──────────────────────────────── */}
+        <div className="shop-page__section-header">
+          <Store size={18} />
+          <h2>Sản phẩm của shop</h2>
         </div>
-      </div>
 
-      {/* ── CONTENT AREA ─────────────────────────────── */}
-      <main className="shop-min__main">
-        <div className="shop-min__container">
+        <div className="shop-page__tabs">
+          <button 
+            className={`shop-page__tab ${activeTab === 'products' ? 'active' : ''}`}
+            onClick={() => setActiveTab('products')}
+          >
+            Sản phẩm
+          </button>
+          <button 
+            className={`shop-page__tab ${activeTab === 'reviews' ? 'active' : ''}`}
+            onClick={() => setActiveTab('reviews')}
+          >
+            Đánh giá
+          </button>
+        </div>
+
+        {/* ── MAIN CONTENT ─────────────────────────────── */}
+        <div className="shop-page__main">
           {activeTab === 'products' ? (
-            <div className="shop-min__fade-in">
+            <div className="shop-page__fade-in">
               {loadingProducts ? (
-                <div className="shop-min__loading">LOADING ARCHIVE...</div>
+                <div className="shop-page__loading">Đang tải sản phẩm...</div>
               ) : products.length === 0 ? (
-                <div className="shop-min__empty">No items available.</div>
+                <div className="shop-page__empty">Chưa có sản phẩm nào.</div>
               ) : (
                 <>
-                  <div className="shop-min__grid">
+                  <div className="shop-page__grid">
                     {products.map(product => (
                       <Link
                         key={product.id}
                         to={PATHS.productDetail.replace(':id', String(product.id))}
-                        className="shop-min__card group"
+                        className="shop-page__card"
                       >
-                        <div className="shop-min__card-image-wrap">
+                        <div className="shop-page__card-image-wrap">
                           {product.imageUrls?.[0] ? (
                             <>
                               <img src={product.imageUrls[0]} alt={product.name} className="primary-img" />
@@ -251,11 +238,11 @@ export default function ShopPage() {
                           )}
                           {product.conditionPercentage && (
                             <div className="condition-badge">
-                              {product.conditionPercentage}%
+                              {product.conditionPercentage}% MỚI
                             </div>
                           )}
                         </div>
-                        <div className="shop-min__card-info">
+                        <div className="shop-page__card-info">
                           <h4 className="product-title">{product.name}</h4>
                           <div className="product-price">{formatPrice(product.price)}</div>
                         </div>
@@ -264,13 +251,13 @@ export default function ShopPage() {
                   </div>
 
                   {totalPages > 1 && (
-                    <div className="shop-min__pagination">
+                    <div className="shop-page__pagination">
                       <button
                         className="btn-page"
                         disabled={page === 0}
                         onClick={() => setPage(p => p - 1)}
                       >
-                        <ChevronLeft size={18} strokeWidth={1.5} />
+                        <ChevronLeft size={18} />
                       </button>
                       <span className="page-indicator">{page + 1} / {totalPages}</span>
                       <button
@@ -278,7 +265,7 @@ export default function ShopPage() {
                         disabled={page >= totalPages - 1}
                         onClick={() => setPage(p => p + 1)}
                       >
-                        <ChevronRight size={18} strokeWidth={1.5} />
+                        <ChevronRight size={18} />
                       </button>
                     </div>
                   )}
@@ -286,23 +273,23 @@ export default function ShopPage() {
               )}
             </div>
           ) : (
-            <div className="shop-min__fade-in">
+            <div className="shop-page__fade-in">
               <div className="reviews-header">
-                <h2 className="reviews-title">CLIENT FEEDBACK</h2>
+                <h2>Đánh giá từ khách hàng</h2>
                 {user && user.id !== Number(sellerId) && (
                   <button className="btn-editorial" onClick={() => setIsReviewModalOpen(true)}>
                     <span>VIẾT ĐÁNH GIÁ</span>
-                    <ArrowRight size={16} strokeWidth={1.5} />
+                    <ArrowRight size={16} />
                   </button>
                 )}
               </div>
 
               {loadingReviews ? (
-                <div className="shop-min__loading">LOADING REVIEWS...</div>
+                <div className="shop-page__loading">Đang tải đánh giá...</div>
               ) : reviews.length === 0 ? (
-                <div className="shop-min__empty">Chưa có đánh giá nào.</div>
+                <div className="shop-page__empty">Chưa có đánh giá nào.</div>
               ) : (
-                <div className="shop-min__review-list">
+                <div className="shop-page__review-list">
                   {reviews.map(review => (
                     <div key={review.id} className="review-card">
                       <div className="review-meta">
@@ -322,9 +309,8 @@ export default function ShopPage() {
                             <Star 
                               key={star} 
                               size={12} 
-                              fill={star <= review.rating ? '#0a0a0a' : 'transparent'} 
-                              color="#0a0a0a" 
-                              strokeWidth={1.5}
+                              fill={star <= review.rating ? '#f59e0b' : 'transparent'} 
+                              color={star <= review.rating ? '#f59e0b' : '#cbd5e1'} 
                             />
                           ))}
                         </div>
@@ -334,13 +320,13 @@ export default function ShopPage() {
                   ))}
 
                   {reviewsTotalPages > 1 && (
-                    <div className="shop-min__pagination">
+                    <div className="shop-page__pagination">
                       <button
                         className="btn-page"
                         disabled={reviewsPage === 0}
                         onClick={() => setReviewsPage(p => p - 1)}
                       >
-                        <ChevronLeft size={18} strokeWidth={1.5} />
+                        <ChevronLeft size={18} />
                       </button>
                       <span className="page-indicator">{reviewsPage + 1} / {reviewsTotalPages}</span>
                       <button
@@ -348,7 +334,7 @@ export default function ShopPage() {
                         disabled={reviewsPage >= reviewsTotalPages - 1}
                         onClick={() => setReviewsPage(p => p + 1)}
                       >
-                        <ChevronRight size={18} strokeWidth={1.5} />
+                        <ChevronRight size={18} />
                       </button>
                     </div>
                   )}
@@ -357,14 +343,14 @@ export default function ShopPage() {
             </div>
           )}
         </div>
-      </main>
+      </div>
 
-      {/* ── EDITORIAL REVIEW MODAL ──────────────────────────────── */}
+      {/* ── REVIEW MODAL ──────────────────────────────── */}
       {isReviewModalOpen && (
-        <div className="shop-min__modal-overlay fade-in" onClick={() => setIsReviewModalOpen(false)}>
-          <div className="shop-min__modal scale-up" onClick={e => e.stopPropagation()}>
+        <div className="shop-page__modal-overlay" onClick={() => setIsReviewModalOpen(false)}>
+          <div className="shop-page__modal" onClick={e => e.stopPropagation()}>
             <button className="modal-close" onClick={() => setIsReviewModalOpen(false)}>
-              <X size={24} strokeWidth={1} />
+              <X size={24} />
             </button>
             <div className="modal-header">
               <h3>Đánh giá Dịch vụ</h3>
@@ -377,9 +363,8 @@ export default function ShopPage() {
                     <Star 
                       key={star} 
                       size={28} 
-                      fill={star <= reviewRating ? '#0a0a0a' : 'transparent'} 
-                      color="#0a0a0a" 
-                      strokeWidth={1}
+                      fill={star <= reviewRating ? '#f59e0b' : 'transparent'} 
+                      color={star <= reviewRating ? '#f59e0b' : '#cbd5e1'} 
                       onClick={() => setReviewRating(star)}
                       className="star-interactive"
                     />
@@ -397,7 +382,7 @@ export default function ShopPage() {
               </div>
               <button 
                 type="submit" 
-                className="btn-submit-editorial" 
+                className="btn-submit" 
                 disabled={submittingReview}
               >
                 {submittingReview ? 'ĐANG GỬI...' : 'GỬI ĐÁNH GIÁ'}
