@@ -83,7 +83,7 @@ export default function ProductDetailPage() {
   // Fetch seller profile stats when product is loaded
   useEffect(() => {
     if (!product?.sellerId) return
-    axiosClient.get<SellerProfile>(`/api/sellers/${product.sellerId}/profile`)
+    axiosClient.get<SellerProfile>(`/api/products/sellers/${product.sellerId}/profile`)
       .then(res => setSellerProfile(res.data))
       .catch(() => setSellerProfile(null))
   }, [product?.sellerId])

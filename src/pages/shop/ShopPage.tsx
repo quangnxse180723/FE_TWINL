@@ -32,7 +32,7 @@ export default function ShopPage() {
     const fetchProfile = async () => {
       setLoadingProfile(true)
       try {
-        const res = await axiosClient.get<SellerProfile>(`/api/sellers/${sellerId}/profile`)
+        const res = await axiosClient.get<SellerProfile>(`/api/products/sellers/${sellerId}/profile`)
         setProfile(res.data)
       } catch {
         setProfile(null)
