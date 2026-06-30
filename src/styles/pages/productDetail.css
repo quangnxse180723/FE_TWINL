@@ -607,3 +607,38 @@
   color: #fff;
 }
 
+/* ── TWINL OFFICIAL variant ──────────────────────── */
+.product-detail__seller-card--official {
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border-color: #fcd34d;
+}
+
+.product-detail__seller-avatar--official {
+  background: linear-gradient(135deg, #c9a84c, #a8893e);
+  border-color: #fef3c7;
+  box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.2);
+}
+
+.product-detail__seller-btn--official {
+  border-color: #c9a84c;
+  color: #92640a;
+}
+
+.product-detail__seller-btn--official:hover {
+  background: #c9a84c;
+  color: #fff;
+}
+
+.product-detail__official-badge {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 8px;
+  padding: 2px 8px;
+  background: #c9a84c;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 999px;
+  letter-spacing: 0.04em;
+  vertical-align: middle;
+}

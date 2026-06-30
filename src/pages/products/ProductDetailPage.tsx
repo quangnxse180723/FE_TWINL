@@ -204,7 +204,7 @@ export default function ProductDetailPage() {
           </div>
 
           {/* ── SELLER INFO CARD – below main image ──── */}
-          {product.sellerName && (
+          {product.sellerName ? (
             <div className="product-detail__seller-card">
               <div className="product-detail__seller-avatar">
                 {product.sellerAvatarUrl ? (
@@ -223,6 +223,22 @@ export default function ProductDetailPage() {
                 onClick={(e) => e.stopPropagation()}
               >
                 Xem Shop
+              </Link>
+            </div>
+          ) : (
+            <div className="product-detail__seller-card product-detail__seller-card--official">
+              <div className="product-detail__seller-avatar product-detail__seller-avatar--official">
+                <span>T</span>
+              </div>
+              <div className="product-detail__seller-info">
+                <div className="product-detail__seller-label">Đơn vị cung cấp</div>
+                <div className="product-detail__seller-name">
+                  TWINL Official
+                  <span className="product-detail__official-badge">✓ Chính hãng</span>
+                </div>
+              </div>
+              <Link to={PATHS.home} className="product-detail__seller-btn product-detail__seller-btn--official">
+                Xem Kho
               </Link>
             </div>
           )}
