@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Copy, Check } from 'lucide-react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { PATHS } from '../../routes/paths'
@@ -39,19 +39,33 @@ export default function SepayCheckoutPage() {
     return () => clearInterval(timer)
   }, [timeLeft, isSuccess])
 
-  // Listen to SSE events emitted from NotificationBell for robust real-time update
+  // Ref để navigate không bị stale closure
+  const navigateRef = useRef(navigate)
+  const orderCodeRef = useRef(orderCode)
+  useEffect(() => { navigateRef.current = navigate }, [navigate])
+  useEffect(() => { orderCodeRef.current = orderCode }, [orderCode])
+
+  // Hàm trigger success: hiện popup rồi sau 5 giây navigate
+  const triggerSuccess = () => {
+    setIsSuccess(true)
+  }
+
+  // Listen to SSE events emitted from NotificationBell
   useEffect(() => {
     const handlePaymentSuccess = (e: Event) => {
       const customEvent = e as CustomEvent;
-      if (customEvent.detail === orderCode) {
-        setIsSuccess(true);
+      console.log('[SepayCheckout] payment-success event received, detail:', customEvent.detail, 'orderCode:', orderCodeRef.current)
+      // Nếu detail khớp với orderCode HOẶC không có detail cụ thể
+      if (!customEvent.detail || customEvent.detail === orderCodeRef.current) {
+        triggerSuccess();
       }
     };
 
     window.addEventListener('payment-success', handlePaymentSuccess);
     return () => window.removeEventListener('payment-success', handlePaymentSuccess);
-  }, [orderCode]);
+  }, []);
 
+  // Polling fallback mỗi 3 giây
   useEffect(() => {
     if (!orderCode || isSuccess || timeLeft === 0) return
 
@@ -59,30 +73,35 @@ export default function SepayCheckoutPage() {
       try {
         const response = await orderApi.getByCode(orderCode, true)
         const paymentStatus = response.data.paymentStatus
+        console.log('[SepayCheckout] polling paymentStatus:', paymentStatus)
         if (paymentStatus === 'SUCCESS') {
-          setIsSuccess(true)
+          triggerSuccess()
         }
       } catch (err) {
         console.error('Failed to check order status', err)
       }
     }
 
-    // Kiểm tra mỗi 3 giây
     const intervalId = setInterval(checkOrderStatus, 3000)
     return () => clearInterval(intervalId)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orderCode, isSuccess, timeLeft])
 
   // Tự động đếm ngược và chuyển hướng sau khi thành công
   useEffect(() => {
-    if (isSuccess && successCountdown > 0) {
-      const timer = setInterval(() => {
-        setSuccessCountdown(prev => prev - 1)
-      }, 1000)
-      return () => clearInterval(timer)
-    } else if (isSuccess && successCountdown === 0) {
-      navigate(PATHS.orders)
-    }
-  }, [isSuccess, successCountdown, navigate])
+    if (!isSuccess) return
+    const timer = setInterval(() => {
+      setSuccessCountdown(prev => {
+        if (prev <= 1) {
+          clearInterval(timer)
+          navigateRef.current(PATHS.orders)
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [isSuccess])
 
   const urlObj = qrUrl ? new URL(qrUrl) : null
   const bank = urlObj?.searchParams.get('bank') || 'MBBank'
