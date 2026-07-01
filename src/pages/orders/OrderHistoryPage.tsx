@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
-import { ShoppingBag, User, KeyRound, Store, Package, CheckCircle2, Truck, Clock, XCircle, AlertCircle, ChevronLeft, ChevronRight, RotateCcw } from 'lucide-react'
+import { ShoppingBag, User, KeyRound, Store, Package, CheckCircle2, Truck, Clock, XCircle, AlertCircle, ChevronLeft, ChevronRight, RotateCcw, Star, X } from 'lucide-react'
 import orderApi from '../../api/orders/orderApi'
 import { PATHS } from '../../routes/paths'
 import { API_BASE_URL } from '../../config/constants'
@@ -61,6 +61,8 @@ export default function OrderHistoryPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [activeTab, setActiveTab] = useState<TabKey>('ALL')
+  const [confirmOrder, setConfirmOrder] = useState<number | null>(null)
+  const [reviewOrder, setReviewOrder] = useState<any | null>(null)
 
   const avatarSrc = (() => {
     const url = user?.avatarUrl
@@ -85,13 +87,19 @@ export default function OrderHistoryPage() {
     fetch()
   }, [page, sizePage])
 
-  const handleConfirmReceipt = async (id: number) => {
-    if (!window.confirm('Bạn có chắc chắn đã nhận được hàng?')) return
+  const executeConfirmReceipt = async () => {
+    if (!confirmOrder) return
     try {
-      await orderApi.confirmReceipt(id)
-      window.location.reload()
+      await orderApi.confirmReceipt(confirmOrder)
+      const targetOrder = data?.content?.find(o => o.id === confirmOrder)
+      setConfirmOrder(null)
+      if (targetOrder) setReviewOrder(targetOrder)
+      // Reload order data
+      const response = await orderApi.list(page, sizePage)
+      setData(response.data)
     } catch {
       alert('Có lỗi xảy ra, vui lòng thử lại.')
+      setConfirmOrder(null)
     }
   }
 
@@ -118,6 +126,51 @@ export default function OrderHistoryPage() {
 
   return (
     <div className="orders-page">
+      {/* ── Confirm Receipt Modal ── */}
+      {confirmOrder && (
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+          <div style={{ background: '#fff', padding: '24px', borderRadius: '16px', width: '90%', maxWidth: '400px', textAlign: 'center' }}>
+            <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: '#dcfce7', color: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+              <Package size={32} />
+            </div>
+            <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '8px' }}>Xác nhận nhận hàng</h3>
+            <p style={{ color: '#4b5563', marginBottom: '24px', fontSize: '14px' }}>Bạn có chắc chắn đã nhận được đơn hàng này và sản phẩm không có vấn đề gì?</p>
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button onClick={() => setConfirmOrder(null)} style={{ flex: 1, padding: '10px', background: '#f3f4f6', color: '#374151', border: 'none', borderRadius: '8px', fontWeight: 500, cursor: 'pointer' }}>Huỷ</button>
+              <button onClick={executeConfirmReceipt} style={{ flex: 1, padding: '10px', background: '#16a34a', color: '#fff', border: 'none', borderRadius: '8px', fontWeight: 500, cursor: 'pointer' }}>Đã nhận hàng</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Review Shop Modal ── */}
+      {reviewOrder && (
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+          <div style={{ background: '#fff', padding: '24px', borderRadius: '16px', width: '90%', maxWidth: '400px', textAlign: 'center', position: 'relative' }}>
+            <button onClick={() => setReviewOrder(null)} style={{ position: 'absolute', top: '16px', right: '16px', background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280' }}><X size={20} /></button>
+            <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: '#fef3c7', color: '#d97706', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+              <Star size={32} fill="currentColor" />
+            </div>
+            <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '8px' }}>Đánh giá Shop</h3>
+            <p style={{ color: '#4b5563', marginBottom: '24px', fontSize: '14px' }}>Cảm ơn bạn đã mua sắm! Hãy để lại đánh giá về chất lượng sản phẩm và dịch vụ của shop nhé.</p>
+            <button 
+              onClick={() => {
+                const sellerId = reviewOrder.items?.[0]?.sellerId;
+                if (sellerId) navigate(PATHS.shop.replace(':sellerId', sellerId.toString()) + '?tab=reviews');
+                else alert('Không tìm thấy thông tin shop.');
+                setReviewOrder(null);
+              }} 
+              style={{ width: '100%', padding: '12px', background: '#111827', color: '#fff', border: 'none', borderRadius: '8px', fontWeight: 600, cursor: 'pointer' }}
+            >
+              Đánh giá ngay
+            </button>
+            <button onClick={() => setReviewOrder(null)} style={{ width: '100%', padding: '12px', background: 'transparent', color: '#6b7280', border: 'none', fontWeight: 500, cursor: 'pointer', marginTop: '8px' }}>
+              Để sau
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="orders-layout">
 
         {/* ── SIDEBAR ──────────────────────────── */}
@@ -248,7 +301,7 @@ export default function OrderHistoryPage() {
                               <button
                                 type="button"
                                 className="order-btn order-btn--success"
-                                onClick={() => handleConfirmReceipt(order.id)}
+                                onClick={() => setConfirmOrder(order.id)}
                               >
                                 <CheckCircle2 size={14} /> Đã nhận hàng
                               </button>

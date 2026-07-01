@@ -12,6 +12,7 @@ export interface OrderItem {
   productId: number | null
   productName: string | null
   imageUrl?: string | null
+  sellerId?: number | null
   quantity: number
   unitPrice: number
   lineTotal: number
