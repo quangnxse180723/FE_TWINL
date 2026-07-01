@@ -6,7 +6,6 @@ import { API_BASE_URL } from '../../config/constants'
 import '../../styles/pages/payment-return.css'
 
 const POLL_INTERVAL_MS = 3000
-const SUCCESS_REDIRECT_DELAY_MS = 5000
 
 export default function SepayCheckoutPage() {
   const location = useLocation()
