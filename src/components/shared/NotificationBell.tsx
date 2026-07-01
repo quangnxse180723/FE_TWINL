@@ -108,6 +108,13 @@ export default function NotificationBell() {
       navigate(PATHS.adminProducts);
     } else if (notification.type === 'NEW_ORDER_PAID') {
       navigate(PATHS.adminOrders);
+    } else if (notification.type === 'ORDER_STATUS') {
+      const match = notification.title.match(/TWINL\d+/);
+      if (match) {
+        navigate(PATHS.orderTracking.replace(':code', match[0]));
+      } else {
+        navigate(PATHS.orders);
+      }
     }
   };
 

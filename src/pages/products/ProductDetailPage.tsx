@@ -238,7 +238,7 @@ export default function ProductDetailPage() {
                 <div className="product-detail__seller-name">{product.sellerName}</div>
                 {sellerProfile && (
                   <div className="product-detail__seller-stats">
-                    <span><Package size={11} /> {sellerProfile.productCount} SP</span>
+                    <span><Package size={11} /> {sellerProfile.productCount} Sản Phẩm</span>
                     <span className="product-detail__seller-stats-dot" />
                     <span><ShoppingBag size={11} /> Đã bán {sellerProfile.soldCount}</span>
                     <span className="product-detail__seller-stats-dot" />
@@ -307,7 +307,7 @@ export default function ProductDetailPage() {
             )}
             {product.defects && product.defects.includes('MINT') && (
               <span className="product-detail__badge product-detail__badge--mint">
-                Không lỗi (MINT)
+                Không lỗi
               </span>
             )}
           </div>
