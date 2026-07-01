@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { Bell } from 'lucide-react';
+import { Bell, Check } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { notificationApi } from '../../api/notifications/notificationApi';
 import type { NotificationResponse } from '../../types/notification';
@@ -189,11 +189,23 @@ export default function NotificationBell() {
                   }`}
                 >
                   <div className="flex justify-between items-start mb-1">
-                    <h4 className={`text-sm font-medium ${notification.isRead ? 'text-gray-700' : 'text-blue-900'}`}>
+                    <h4 className={`text-sm font-medium pr-2 ${notification.isRead ? 'text-gray-700' : 'text-blue-900'}`}>
                       {notification.title}
                     </h4>
                     {!notification.isRead && (
-                      <span className="w-2 h-2 bg-blue-500 rounded-full mt-1.5 flex-shrink-0"></span>
+                      <div className="flex items-center gap-2 flex-shrink-0 mt-0.5">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleMarkAsRead(notification.id, notification.isRead);
+                          }}
+                          className="text-gray-400 hover:text-blue-600 transition-colors p-1 hover:bg-blue-100 rounded-full"
+                          title="Đánh dấu đã đọc"
+                        >
+                          <Check size={14} />
+                        </button>
+                        <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                      </div>
                     )}
                   </div>
                   <p className="text-sm text-gray-600 line-clamp-2">

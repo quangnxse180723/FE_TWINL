@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { Bell } from 'lucide-react';
+import { Bell, Check } from 'lucide-react';
 import { notificationApi } from '../../api/notifications/notificationApi';
 import type { NotificationResponse } from '../../types/notification';
 import type { RootState } from '../../store';
@@ -138,7 +138,19 @@ export default function NotificationsPage() {
                   </p>
                 </div>
                 {!notification.isRead && (
-                  <div className="w-2.5 h-2.5 bg-blue-600 rounded-full flex-shrink-0 mt-2"></div>
+                  <div className="flex items-center gap-2 flex-shrink-0 mt-2">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleMarkAsRead(notification.id, notification.isRead);
+                      }}
+                      className="text-gray-400 hover:text-blue-600 transition-colors p-1 hover:bg-blue-100 rounded-full"
+                      title="Đánh dấu đã đọc"
+                    >
+                      <Check size={16} />
+                    </button>
+                    <div className="w-2.5 h-2.5 bg-blue-600 rounded-full"></div>
+                  </div>
                 )}
               </div>
             ))}
