@@ -65,13 +65,13 @@ export default function SepayCheckoutPage() {
     return () => window.removeEventListener('payment-success', handlePaymentSuccess);
   }, []);
 
-  // Polling fallback mỗi 3 giây
+  // Polling fallback mỗi 3 giây – dùng public endpoint không cần JWT
   useEffect(() => {
     if (!orderCode || isSuccess || timeLeft === 0) return
 
     const checkOrderStatus = async () => {
       try {
-        const response = await orderApi.getByCode(orderCode, true)
+        const response = await orderApi.getPaymentStatus(orderCode)
         const paymentStatus = response.data.paymentStatus
         console.log('[SepayCheckout] polling paymentStatus:', paymentStatus)
         if (paymentStatus === 'SUCCESS') {
@@ -82,6 +82,8 @@ export default function SepayCheckoutPage() {
       }
     }
 
+    // Gọi ngay lần đầu
+    checkOrderStatus()
     const intervalId = setInterval(checkOrderStatus, 3000)
     return () => clearInterval(intervalId)
   // eslint-disable-next-line react-hooks/exhaustive-deps

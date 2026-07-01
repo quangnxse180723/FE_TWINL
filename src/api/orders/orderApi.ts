@@ -1,4 +1,6 @@
 import { axiosClient } from '../axiosClient'
+import axios from 'axios'
+import { API_BASE_URL } from '../../config/constants'
 import type { Order, OrderPage } from '../../types/order'
 
 const orderApi = {
@@ -8,6 +10,9 @@ const orderApi = {
     axiosClient.get<Order>(`/api/orders/${code}`, bypassCache ? { params: { _t: new Date().getTime() } } : undefined),
   confirmReceipt: (id: number) => axiosClient.post<Order>(`/api/orders/${id}/confirm-receipt`),
   reportMissing: (id: number, reason?: string) => axiosClient.post<Order>(`/api/orders/${id}/report-missing`, { reason }),
+  /** Public - không cần auth token, dùng để polling trạng thái thanh toán */
+  getPaymentStatus: (code: string) =>
+    axios.get<{ paymentStatus: string }>(`${API_BASE_URL}/api/payments/status/${code}`),
 }
 
 export default orderApi
