@@ -35,4 +35,5 @@ export const PATHS = {
   shipperOrders: '/shipper/orders',
   sellerDashboard: '/seller/dashboard',
   shop: '/shop/:sellerId',
+  notifications: '/notifications',
 }

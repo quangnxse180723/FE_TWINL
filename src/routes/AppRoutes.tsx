@@ -28,6 +28,7 @@ import ForgotPasswordPage from '../pages/auth/ForgotPasswordPage'
 import ProfilePage from '../pages/profile/ProfilePage'
 import SellerDashboardPage from '../pages/seller/SellerDashboardPage'
 import ShopPage from '../pages/shop/ShopPage'
+import NotificationsPage from '../pages/notifications/NotificationsPage'
 import AdminGuard from '../admin/components/AdminGuard'
 import AdminLayout from '../admin/layout/AdminLayout'
 import AdminTrafficAnalyticsPage from '../admin/pages/AdminTrafficAnalyticsPage'
@@ -76,6 +77,7 @@ export default function AppRoutes() {
         <Route path={PATHS.profile} element={<ProfilePage />} />
         <Route path={PATHS.sellerDashboard} element={<SellerDashboardPage />} />
         <Route path={PATHS.shop} element={<ShopPage />} />
+        <Route path={PATHS.notifications} element={<NotificationsPage />} />
       </Route>
       <Route element={<AuthLayout />}>
         <Route path={PATHS.login} element={<LoginPage />} />

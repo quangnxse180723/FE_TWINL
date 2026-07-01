@@ -100,6 +100,17 @@ export default function NotificationBell() {
     }
   };
 
+  const handleMarkAllAsRead = async () => {
+    if (unreadCount === 0) return;
+    try {
+      await notificationApi.markAllAsRead();
+      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+      setUnreadCount(0);
+    } catch (error) {
+      console.error('Lỗi khi đánh dấu tất cả đã đọc:', error);
+    }
+  };
+
   const handleNotificationClick = async (notification: NotificationResponse) => {
     await handleMarkAsRead(notification.id, notification.isRead);
     setIsOpen(false);
@@ -150,11 +161,21 @@ export default function NotificationBell() {
         <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-100 z-50 overflow-hidden text-left">
           <div className="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
             <h3 className="font-semibold text-gray-800 m-0 text-base">Thông báo</h3>
-            {unreadCount > 0 && (
-              <span className="text-xs font-medium bg-blue-100 text-blue-600 px-2 py-1 rounded-full">
-                {unreadCount} mới
-              </span>
-            )}
+            <div className="flex items-center gap-3">
+              {unreadCount > 0 && (
+                <button 
+                  onClick={handleMarkAllAsRead}
+                  className="text-xs text-blue-600 hover:text-blue-800 hover:underline transition-colors focus:outline-none"
+                >
+                  Đánh dấu tất cả đã đọc
+                </button>
+              )}
+              {unreadCount > 0 && (
+                <span className="text-xs font-medium bg-blue-100 text-blue-600 px-2 py-1 rounded-full">
+                  {unreadCount} mới
+                </span>
+              )}
+            </div>
           </div>
           
           <div className="max-h-[400px] overflow-y-auto">
@@ -191,7 +212,13 @@ export default function NotificationBell() {
             )}
           </div>
           
-          <div className="p-3 text-center border-t border-gray-100 bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors">
+          <div 
+            onClick={() => {
+              setIsOpen(false);
+              navigate(PATHS.notifications);
+            }}
+            className="p-3 text-center border-t border-gray-100 bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors"
+          >
             <span className="text-sm font-medium text-blue-600">Xem tất cả</span>
           </div>
         </div>
