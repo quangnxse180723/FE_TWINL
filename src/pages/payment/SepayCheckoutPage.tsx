@@ -66,10 +66,15 @@ export default function SepayCheckoutPage() {
   }, []);
 
   // Polling fallback mỗi 3 giây – dùng public endpoint không cần JWT
+  // QUAN TRỌNG: không đưa timeLeft vào deps vì nó thay đổi mỗi giây sẽ restart interval liên tục
+  const isSuccessRef = useRef(false)
+  useEffect(() => { isSuccessRef.current = isSuccess }, [isSuccess])
+
   useEffect(() => {
-    if (!orderCode || isSuccess || timeLeft === 0) return
+    if (!orderCode) return
 
     const checkOrderStatus = async () => {
+      if (isSuccessRef.current) return // đã thành công rồi thì bỏ qua
       try {
         const response = await orderApi.getPaymentStatus(orderCode)
         const paymentStatus = response.data.paymentStatus
@@ -87,7 +92,7 @@ export default function SepayCheckoutPage() {
     const intervalId = setInterval(checkOrderStatus, 3000)
     return () => clearInterval(intervalId)
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [orderCode, isSuccess, timeLeft])
+  }, [orderCode]) // CHỈ orderCode – không có timeLeft hay isSuccess
 
   // Tự động đếm ngược và chuyển hướng sau khi thành công
   useEffect(() => {
