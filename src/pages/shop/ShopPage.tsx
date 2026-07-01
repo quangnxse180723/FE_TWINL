@@ -122,7 +122,7 @@ export default function ShopPage() {
     const fetchReviews = async () => {
       setLoadingReviews(true)
       try {
-        const res = await axiosClient.get(`/api/products/sellers/${sellerId}/reviews?page=${reviewsPage}&size=10`)
+        const res = await axiosClient.get(`/api/sellers/${sellerId}/reviews?page=${reviewsPage}&size=10`)
         setReviews(res.data.content)
         setReviewsTotalPages(res.data.totalPages)
       } catch {
@@ -146,7 +146,7 @@ export default function ShopPage() {
     }
     setSubmittingReview(true)
     try {
-      await axiosClient.post(`/api/products/sellers/${sellerId}/reviews`, {
+      await axiosClient.post(`/api/sellers/${sellerId}/reviews`, {
         rating: reviewRating,
         comment: reviewComment
       })
@@ -156,7 +156,7 @@ export default function ShopPage() {
       setReviewRating(5)
       fetchProfile()
       if (reviewsPage === 0) {
-        const res = await axiosClient.get(`/api/products/sellers/${sellerId}/reviews?page=0&size=10`)
+        const res = await axiosClient.get(`/api/sellers/${sellerId}/reviews?page=0&size=10`)
         setReviews(res.data.content)
         setReviewsTotalPages(res.data.totalPages)
       } else {
