@@ -346,24 +346,37 @@ export default function ProductDetailPage() {
             <span>{product.stock || 1} sản phẩm có sẵn</span>
           </div>
 
-          <div className="product-detail__actions">
-            <button
-              type="button"
-              className="product-detail__buy"
-              onClick={handleBuyNow}
-              disabled={adding || product.stock === 0}
-            >
-              {product.stock === 0 ? 'Hết hàng' : (adding ? 'Đang xử lý...' : 'Mua Ngay')}
-            </button>
-            <button
-              type="button"
-              className="product-detail__cart"
-              onClick={handleAddToCart}
-              disabled={adding || product.stock === 0}
-            >
-              {product.stock === 0 ? 'Hết hàng' : (adding ? 'Đang thêm...' : 'Thêm Vào Giỏ Hàng')}
-            </button>
-          </div>
+          {user && user.id === product.sellerId ? (
+            <div className="product-detail__actions">
+              <button
+                type="button"
+                className="product-detail__buy"
+                disabled
+                style={{ width: '100%', background: '#f3f4f6', color: '#9ca3af', border: 'none', cursor: 'not-allowed' }}
+              >
+                Sản phẩm của bạn
+              </button>
+            </div>
+          ) : (
+            <div className="product-detail__actions">
+              <button
+                type="button"
+                className="product-detail__buy"
+                onClick={handleBuyNow}
+                disabled={adding || product.stock === 0}
+              >
+                {product.stock === 0 ? 'Hết hàng' : (adding ? 'Đang xử lý...' : 'Mua Ngay')}
+              </button>
+              <button
+                type="button"
+                className="product-detail__cart"
+                onClick={handleAddToCart}
+                disabled={adding || product.stock === 0}
+              >
+                {product.stock === 0 ? 'Hết hàng' : (adding ? 'Đang thêm...' : 'Thêm Vào Giỏ Hàng')}
+              </button>
+            </div>
+          )}
 
           <div className="product-detail__divider" />
 
