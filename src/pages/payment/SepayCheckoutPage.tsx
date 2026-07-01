@@ -44,7 +44,7 @@ export default function SepayCheckoutPage() {
 
     const checkOrderStatus = async () => {
       try {
-        const response = await orderApi.getByCode(orderCode)
+        const response = await orderApi.getByCode(orderCode, true)
         const paymentStatus = response.data.paymentStatus
         if (paymentStatus === 'SUCCESS') {
           setIsSuccess(true)
