@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useSelector } from 'react-redux'
-import { ShoppingBag, User, KeyRound, Store, ArrowLeft, MapPin, Clock, Package, Truck, CheckCircle2, Circle } from 'lucide-react'
+import { ShoppingBag, User, KeyRound, Store, ArrowLeft, MapPin, Clock, Package, Truck, CheckCircle2, Circle, Star } from 'lucide-react'
 import orderApi from '../../api/orders/orderApi'
 import { PATHS } from '../../routes/paths'
 import { API_BASE_URL } from '../../config/constants'
@@ -250,6 +250,25 @@ export default function OrderTrackingPage() {
                     <div style={{ marginTop: '16px', padding: '12px 16px', background: '#fefce8', borderRadius: '10px', border: '1px solid #fef08a' }}>
                       <div style={{ fontSize: '12px', color: '#713f12', fontWeight: 600, marginBottom: '4px' }}>Ghi chú</div>
                       <div style={{ fontSize: '13px', color: '#854d0e' }}>{order.note}</div>
+                    </div>
+                  )}
+
+                  {order.status === 'COMPLETED' && (
+                    <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'flex-end', paddingTop: '24px', borderTop: '1px solid #e5e7eb' }}>
+                      <button
+                        onClick={() => {
+                          const sellerId = order.items?.[0]?.sellerId;
+                          if (sellerId) navigate(PATHS.shop.replace(':sellerId', sellerId.toString()) + '?tab=reviews');
+                          else alert('Không tìm thấy thông tin shop.');
+                        }}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 24px',
+                          background: '#111827', color: '#fff', border: 'none', borderRadius: '8px',
+                          fontWeight: 600, cursor: 'pointer', transition: 'background 0.2s'
+                        }}
+                      >
+                        <Star size={18} fill="currentColor" /> Đánh giá Shop ngay
+                      </button>
                     </div>
                   )}
                 </>
