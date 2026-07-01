@@ -39,6 +39,19 @@ export default function SepayCheckoutPage() {
     return () => clearInterval(timer)
   }, [timeLeft, isSuccess])
 
+  // Listen to SSE events emitted from NotificationBell for robust real-time update
+  useEffect(() => {
+    const handlePaymentSuccess = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      if (customEvent.detail === orderCode) {
+        setIsSuccess(true);
+      }
+    };
+
+    window.addEventListener('payment-success', handlePaymentSuccess);
+    return () => window.removeEventListener('payment-success', handlePaymentSuccess);
+  }, [orderCode]);
+
   useEffect(() => {
     if (!orderCode || isSuccess || timeLeft === 0) return
 

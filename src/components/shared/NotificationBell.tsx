@@ -49,6 +49,14 @@ export default function NotificationBell() {
         setNotifications((prev) => [newNotification, ...prev]);
         setUnreadCount((prev) => prev + 1);
         
+        // Emit event for SepayCheckoutPage to catch real-time success without polling issues
+        if (newNotification.type === 'ORDER_STATUS' && newNotification.title === 'Thanh toán thành công') {
+          const match = newNotification.message.match(/TWINL\d+/);
+          if (match) {
+            window.dispatchEvent(new CustomEvent('payment-success', { detail: match[0] }));
+          }
+        }
+
         // Toast
         toast.info(newNotification.message, {
           position: "top-right",
