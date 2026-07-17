@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
-import { disputesApi, DisputeResponse } from '../../api/disputesApi'
-import { toast } from 'react-hot-toast'
+import { disputesApi } from '../../api/disputesApi'
+import type { DisputeResponse } from '../../api/disputesApi'
+import { toast } from 'react-toastify'
 
 export const AdminDisputesPage: React.FC = () => {
   const [disputes, setDisputes] = useState<DisputeResponse[]>([])

@@ -1,5 +1,11 @@
 import { axiosClient } from './axiosClient'
-import type { PaginatedResponse } from '../types/common'
+export interface PaginatedResponse<T> {
+  content: T[]
+  totalPages: number
+  totalElements: number
+  size: number
+  number: number
+}
 
 export interface DisputeRequestPayload {
   reason: string

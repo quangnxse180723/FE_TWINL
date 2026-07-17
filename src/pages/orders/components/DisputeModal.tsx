@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
-import { uploadApi } from '../../../api/uploadApi'
-import { toast } from 'react-hot-toast'
+import { sellerApi } from '../../../api/seller/sellerApi'
+import { toast } from 'react-toastify'
 
 interface DisputeModalProps {
   isOpen: boolean
@@ -43,10 +43,8 @@ export const DisputeModal: React.FC<DisputeModalProps> = ({ isOpen, onClose, onS
       let imageUrls: string[] = []
       
       if (images.length > 0) {
-        for (const file of images) {
-          const res = await uploadApi.uploadImage(file)
-          imageUrls.push(res.url)
-        }
+        const res = await sellerApi.uploadImages(images)
+        imageUrls = res
       }
 
       await onSubmit(reason, description, imageUrls)

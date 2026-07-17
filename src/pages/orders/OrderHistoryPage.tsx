@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
-import { ShoppingBag, User, KeyRound, Store, Package, CheckCircle2, Truck, Clock, XCircle, AlertCircle, RotateCcw, Star, X } from 'lucide-react'
-import { toast } from 'react-hot-toast'
+import { ShoppingBag, User, KeyRound, Store, Package, CheckCircle2, Truck, Clock, XCircle, AlertCircle, RotateCcw, Star, X, AlertTriangle, ChevronLeft, ChevronRight } from 'lucide-react'
+import { toast } from 'react-toastify'
 import orderApi from '../../api/orders/orderApi'
 import { disputesApi } from '../../api/disputesApi'
 import { DisputeModal } from './components/DisputeModal'
@@ -32,6 +32,24 @@ const TABS: { key: TabKey; label: string; icon: React.ReactNode }[] = [
   { key: 'CANCELED',  label: 'Đã huỷ',       icon: <XCircle size={14} /> },
   { key: 'RETURNED',  label: 'Trả hàng',     icon: <RotateCcw size={14} /> },
 ]
+
+const STATUS_BADGE: Record<string, string> = {
+  PENDING:   'order-badge--pending',
+  ASSIGNED:  'order-badge--assigned',
+  PICKED_UP: 'order-badge--picked_up',
+  DELIVERED: 'order-badge--delivered',
+  COMPLETED: 'order-badge--completed',
+  CANCELLED: 'order-badge--cancelled',
+}
+
+const STATUS_LABEL: Record<string, string> = {
+  PENDING:   'Chờ xử lý',
+  ASSIGNED:  'Đã giao Shipper',
+  PICKED_UP: 'Đang giao hàng',
+  DELIVERED: 'Đã giao hàng',
+  COMPLETED: 'Hoàn thành',
+  CANCELLED: 'Đã hủy',
+}
 
 export default function OrderHistoryPage() {
   const navigate = useNavigate()
@@ -88,19 +106,7 @@ export default function OrderHistoryPage() {
     }
   }
 
-  const handleReportMissing = async (id: number) => {
-    const reason = window.prompt('Vui lòng nhập lý do (tùy chọn):')
-    if (reason === null) return
-    try {
-      await orderApi.reportMissing(id, reason)
-      toast.success('Đã gửi báo cáo khiếu nại!')
-      fetchOrders(page)
-    } catch {
-      toast.error('Có lỗi xảy ra, vui lòng thử lại.')
-    }
-  }
-
-  const handleDisputeSubmit = async (reason: string, description: string, evidenceImages: string[]) => {
+    const handleDisputeSubmit = async (reason: string, description: string, evidenceImages: string[]) => {
     if (!disputeOrder) return
     setIsSubmittingDispute(true)
     try {
