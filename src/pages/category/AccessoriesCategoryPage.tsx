@@ -22,9 +22,9 @@ export default function AccessoriesCategoryPage() {
   
   // Read category from URL initially
   const queryParams = new URLSearchParams(location.search)
-  const initialCategory = queryParams.get('category') || ''
-  
-  const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory)
+  const urlCategory = queryParams.get('category') || '';
+  const [selectedCategory, setSelectedCategory] = useState(urlCategory)
+  const [selectedBrand, setSelectedBrand] = useState('')
 
   // Update selectedCategory if URL changes
   useEffect(() => {
@@ -34,23 +34,24 @@ export default function AccessoriesCategoryPage() {
 
   useEffect(() => {
     fetchProducts()
-  }, [searchKeyword, minPrice, maxPrice, selectedColor, selectedSize, conditionRange, selectedDefects, sortBy, page, selectedCategory])
+  }, [searchKeyword, minPrice, maxPrice, selectedColor, selectedSize, conditionRange, selectedDefects, sortBy, page, selectedCategory, selectedBrand])
 
   const fetchProducts = async () => {
     setLoading(true)
     setError('')
     try {
       const params: Record<string, unknown> = {
-        category: 'Phụ kiện',
+        category: selectedCategory || 'Phụ kiện',
         page,
         sizePage: 8,
       }
-      if (selectedCategory) params.category = selectedCategory
+      if (selectedCategory) params.gender = 'Phụ kiện'
       if (searchKeyword) params.search = searchKeyword
       if (minPrice) params.minPrice = minPrice
       if (maxPrice) params.maxPrice = maxPrice
       if (selectedColor) params.color = selectedColor
       if (selectedSize) params.size = selectedSize
+      if (selectedBrand) params.brand = selectedBrand
       if (conditionRange > 50) params.minCondition = conditionRange
       if (selectedDefects) params.defects = selectedDefects
       if (sortBy) params.sortBy = sortBy
@@ -97,6 +98,27 @@ export default function AccessoriesCategoryPage() {
               onChange={(e) => { setSearchKeyword(e.target.value); setPage(0) }}
             />
             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+          </div>
+
+          <h3 className="category__sidebar-title">THƯƠNG HIỆU</h3>
+          <div className="category__filter-group" style={{marginBottom: '24px'}}>
+            <select 
+              value={selectedBrand} 
+              onChange={(e) => { setSelectedBrand(e.target.value); setPage(0) }}
+              style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px', outline: 'none' }}
+            >
+              <option value="">Tất cả</option>
+              <option value="Nike">Nike</option>
+              <option value="Adidas">Adidas</option>
+              <option value="Puma">Puma</option>
+              <option value="Gucci">Gucci</option>
+              <option value="Dior">Dior</option>
+              <option value="Chanel">Chanel</option>
+              <option value="Zara">Zara</option>
+              <option value="H&M">H&M</option>
+              <option value="Uniqlo">Uniqlo</option>
+              <option value="Khác">Khác</option>
+            </select>
           </div>
 
           <h3 className="category__sidebar-title">KHOẢNG GIÁ (VNĐ)</h3>
@@ -190,6 +212,7 @@ export default function AccessoriesCategoryPage() {
               setMaxPrice('');
               setSelectedColor('');
               setSelectedSize('');
+              setSelectedBrand('');
               setSortBy('');
               setSelectedCategory('');
               setPage(0);
