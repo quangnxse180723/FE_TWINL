@@ -97,7 +97,12 @@ export default function Header() {
 
   const toggleLang = () => {
     const newLang = currentLang === 'vi' ? 'en' : 'vi'
-    document.cookie = `googtrans=/vi/${newLang}; path=/`
+    if (newLang === 'vi') {
+      document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${window.location.hostname};`;
+    } else {
+      document.cookie = `googtrans=/vi/${newLang}; path=/`
+    }
     window.location.reload()
   }
 

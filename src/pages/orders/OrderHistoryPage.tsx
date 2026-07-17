@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
-import { ShoppingBag, User, KeyRound, Store, Package, CheckCircle2, Truck, Clock, XCircle, AlertCircle, ChevronLeft, ChevronRight, RotateCcw, Star, X } from 'lucide-react'
+import { ShoppingBag, User, KeyRound, Store, Package, CheckCircle2, Truck, Clock, XCircle, AlertCircle, RotateCcw, Star, X } from 'lucide-react'
+import { toast } from 'react-hot-toast'
 import orderApi from '../../api/orders/orderApi'
+import { disputesApi } from '../../api/disputesApi'
+import { DisputeModal } from './components/DisputeModal'
 import { PATHS } from '../../routes/paths'
 import { API_BASE_URL } from '../../config/constants'
 import type { RootState } from '../../store'
@@ -30,28 +33,6 @@ const TABS: { key: TabKey; label: string; icon: React.ReactNode }[] = [
   { key: 'RETURNED',  label: 'Trả hàng',     icon: <RotateCcw size={14} /> },
 ]
 
-const STATUS_BADGE: Record<string, string> = {
-  PENDING:   'order-badge--pending',
-  ASSIGNED:  'order-badge--assigned',
-  PICKED_UP: 'order-badge--picked_up',
-  DELIVERED: 'order-badge--delivered',
-  COMPLETED: 'order-badge--completed',
-  CANCELED:  'order-badge--canceled',
-  DISPUTED:  'order-badge--disputed',
-  RETURNED:  'order-badge--returned',
-}
-
-const STATUS_LABEL: Record<string, string> = {
-  PENDING:   'Chờ xử lý',
-  ASSIGNED:  'Đã giao Shipper',
-  PICKED_UP: 'Đang giao hàng',
-  DELIVERED: 'Đã giao hàng',
-  COMPLETED: 'Hoàn thành',
-  CANCELED:  'Đã huỷ',
-  DISPUTED:  'Khiếu nại',
-  RETURNED:  'Trả hàng',
-}
-
 export default function OrderHistoryPage() {
   const navigate = useNavigate()
   const user = useSelector((state: RootState) => state.auth.user)
@@ -63,6 +44,8 @@ export default function OrderHistoryPage() {
   const [activeTab, setActiveTab] = useState<TabKey>('ALL')
   const [confirmOrder, setConfirmOrder] = useState<number | null>(null)
   const [reviewOrder, setReviewOrder] = useState<any | null>(null)
+  const [disputeOrder, setDisputeOrder] = useState<number | null>(null)
+  const [isSubmittingDispute, setIsSubmittingDispute] = useState(false)
 
   const avatarSrc = (() => {
     const url = user?.avatarUrl
@@ -71,45 +54,36 @@ export default function OrderHistoryPage() {
     return `${API_BASE_URL}${url}`
   })()
 
-  useEffect(() => {
-    const fetch = async () => {
-      try {
-        setLoading(true)
-        setError('')
-        const response = await orderApi.list(page, sizePage)
-        setData(response.data)
-      } catch {
-        setError('Không thể tải lịch sử đơn hàng.')
-      } finally {
-        setLoading(false)
-      }
+  const fetchOrders = async (pageIndex: number) => {
+    try {
+      setLoading(true)
+      setError('')
+      const response = await orderApi.list(pageIndex, sizePage)
+      setData(response.data)
+    } catch {
+      setError('Không thể tải lịch sử đơn hàng.')
+    } finally {
+      setLoading(false)
     }
-    fetch()
+  }
+
+  useEffect(() => {
+    fetchOrders(page)
   }, [page, sizePage])
 
   const executeConfirmReceipt = async () => {
-    console.log('executeConfirmReceipt called with confirmOrder:', confirmOrder)
     if (!confirmOrder) return
     try {
-      console.log('calling API...')
       await orderApi.confirmReceipt(confirmOrder)
-      console.log('API success')
       const targetOrder = data?.content?.find(o => o.id === confirmOrder)
-      console.log('targetOrder found:', targetOrder)
       setConfirmOrder(null)
       if (targetOrder) {
-        console.log('setting reviewOrder')
         setReviewOrder(targetOrder)
-      } else {
-        console.log('targetOrder is null!')
       }
-      // Reload order data
-      const response = await orderApi.list(page, sizePage)
-      setData(response.data)
-      console.log('data reloaded')
+      fetchOrders(page)
     } catch (err) {
       console.error('API error:', err)
-      alert('Có lỗi xảy ra, vui lòng thử lại.')
+      toast.error('Có lỗi xảy ra, vui lòng thử lại.')
       setConfirmOrder(null)
     }
   }
@@ -119,10 +93,25 @@ export default function OrderHistoryPage() {
     if (reason === null) return
     try {
       await orderApi.reportMissing(id, reason)
-      alert('Đã gửi báo cáo khiếu nại!')
-      window.location.reload()
+      toast.success('Đã gửi báo cáo khiếu nại!')
+      fetchOrders(page)
     } catch {
-      alert('Có lỗi xảy ra, vui lòng thử lại.')
+      toast.error('Có lỗi xảy ra, vui lòng thử lại.')
+    }
+  }
+
+  const handleDisputeSubmit = async (reason: string, description: string, evidenceImages: string[]) => {
+    if (!disputeOrder) return
+    setIsSubmittingDispute(true)
+    try {
+      await disputesApi.createDispute(disputeOrder, { reason, description, evidenceImages })
+      toast.success('Gửi yêu cầu trả hàng thành công!')
+      setDisputeOrder(null)
+      fetchOrders(page)
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Có lỗi xảy ra khi gửi yêu cầu')
+    } finally {
+      setIsSubmittingDispute(false)
     }
   }
 
@@ -152,6 +141,15 @@ export default function OrderHistoryPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {disputeOrder && (
+        <DisputeModal
+          isOpen={!!disputeOrder}
+          onClose={() => setDisputeOrder(null)}
+          onSubmit={handleDisputeSubmit}
+          isSubmitting={isSubmittingDispute}
+        />
       )}
 
       {/* ── Review Shop Modal ── */}
@@ -318,21 +316,12 @@ export default function OrderHistoryPage() {
                               </button>
                               <button
                                 type="button"
-                                className="order-btn order-btn--danger"
-                                onClick={() => handleReportMissing(order.id)}
+                                className="order-btn order-btn--outline"
+                                onClick={() => setDisputeOrder(order.id)}
                               >
-                                Chưa nhận hàng
+                                <AlertTriangle size={14} /> Trả hàng / Hoàn tiền
                               </button>
                             </>
-                          )}
-                          {order.status === 'COMPLETED' && (
-                            <button
-                              type="button"
-                              className="order-btn order-btn--outline"
-                              onClick={() => alert('Tính năng trả hàng sẽ sớm có mặt!')}
-                            >
-                              <RotateCcw size={14} /> Trả hàng
-                            </button>
                           )}
                           <Link
                             className="order-btn order-btn--primary"

@@ -38,6 +38,7 @@ import AdminProductFormPage from '../admin/pages/AdminProductFormPage'
 import AdminUsersPage from '../admin/pages/AdminUsersPage'
 import AdminOrdersPage from '../admin/pages/AdminOrdersPage'
 import AdminWithdrawalsPage from '../admin/pages/AdminWithdrawalsPage'
+import { AdminDisputesPage } from '../admin/pages/AdminDisputesPage'
 import { AdminCategoriesPage } from '../admin/pages/AdminCategoriesPage'
 import StaffGuard from '../staff/components/StaffGuard'
 import StaffLayout from '../staff/layout/StaffLayout'
@@ -108,6 +109,7 @@ export default function AppRoutes() {
         <Route path={PATHS.adminUsers.replace('/admin/', '')} element={<AdminUsersPage />} />
         <Route path={PATHS.adminOrders.replace('/admin/', '')} element={<AdminOrdersPage />} />
         <Route path={PATHS.adminWithdrawals.replace('/admin/', '')} element={<AdminWithdrawalsPage />} />
+        <Route path={PATHS.adminDisputes.replace('/admin/', '')} element={<AdminDisputesPage />} />
         <Route path={PATHS.adminOutfitSets.replace('/admin/', '')} element={<AdminOutfitSetsPage />} />
         <Route path={PATHS.adminOutfitSetNew.replace('/admin/', '')} element={<AdminOutfitSetFormPage />} />
         <Route path={PATHS.adminOutfitSetEdit.replace('/admin/', '')} element={<AdminOutfitSetFormPage />} />
