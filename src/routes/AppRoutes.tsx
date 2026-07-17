@@ -8,9 +8,9 @@ import AiResultPage from '../pages/home/AiResultPage'
 import LegitResultPage from '../pages/ai/LegitResultPage'
 import WomenCategoryPage from '../pages/category/WomenCategoryPage'
 import MenCategoryPage from '../pages/category/MenCategoryPage'
-
 import BrandsCategoryPage from '../pages/category/BrandsCategoryPage'
 import SportCategoryPage from '../pages/category/SportCategoryPage'
+import AccessoriesCategoryPage from '../pages/category/AccessoriesCategoryPage'
 import ProductDetailPage from '../pages/products/ProductDetailPage'
 import CartPage from '../pages/cart/CartPage'
 import ContactPage from '../pages/contact/ContactPage'
@@ -65,9 +65,9 @@ export default function AppRoutes() {
         <Route path={PATHS.legitResult} element={<LegitResultPage />} />
         <Route path={PATHS.women} element={<WomenCategoryPage />} />
         <Route path={PATHS.men} element={<MenCategoryPage />} />
-
         <Route path={PATHS.brands} element={<BrandsCategoryPage />} />
         <Route path={PATHS.sport} element={<SportCategoryPage />} />
+        <Route path={PATHS.accessories} element={<AccessoriesCategoryPage />} />
         <Route path={PATHS.cart} element={<CartPage />} />
         <Route path={PATHS.vnpayReturn} element={<VnpayReturnPage />} />
         <Route path={PATHS.sepayCheckout} element={<SepayCheckoutPage />} />

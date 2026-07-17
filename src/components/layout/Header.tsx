@@ -120,6 +120,7 @@ export default function Header() {
     { to: PATHS.women,      label: 'Nữ' },
     { to: PATHS.men,        label: 'Nam' },
     { to: PATHS.sport,      label: 'Thể thao' },
+    { to: PATHS.accessories,label: 'Phụ kiện' },
     { to: PATHS.outfitSets, label: 'Phối Đồ' },
     { to: PATHS.contact,    label: 'Liên hệ' },
   ]
@@ -144,7 +145,7 @@ export default function Header() {
           {/* CENTER – Navigation Pill */}
           <nav className="fh__nav-pill" aria-label="Main navigation">
             {navLinks.map(({ to, label }) => {
-              const hasDropdown = ['Nữ', 'Nam', 'Thể thao'].includes(label)
+              const hasDropdown = ['Nữ', 'Nam', 'Thể thao', 'Phụ kiện'].includes(label)
               return (
                 <div 
                   key={to} 
