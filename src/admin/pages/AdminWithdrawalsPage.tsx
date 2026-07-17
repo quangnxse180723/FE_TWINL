@@ -12,11 +12,12 @@ export default function AdminWithdrawalsPage() {
   const [rejectReason, setRejectReason] = useState('');
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
   const [processingId, setProcessingId] = useState<number | null>(null);
+  const [filter, setFilter] = useState<'PENDING' | 'HISTORY'>('PENDING');
 
   const fetchWithdrawals = async () => {
     setIsLoading(true);
     try {
-      const data = await walletApi.getPendingWithdrawals();
+      const data = await walletApi.getAllWithdrawals();
       setWithdrawals(data);
     } catch (error) {
       toast.error('Lỗi khi tải danh sách yêu cầu rút tiền');
@@ -74,13 +75,47 @@ export default function AdminWithdrawalsPage() {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
   };
 
+  const filteredWithdrawals = withdrawals.filter(w => {
+    if (filter === 'PENDING') return w.status === 'PENDING';
+    return w.status === 'SUCCESS' || w.status === 'FAILED';
+  });
+
+  const getStatusBadge = (status: string) => {
+    switch(status) {
+      case 'PENDING':
+        return <span className="px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-700 border border-amber-200">Chờ duyệt</span>;
+      case 'SUCCESS':
+        return <span className="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700 border border-green-200">Thành công</span>;
+      case 'FAILED':
+        return <span className="px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700 border border-red-200">Đã từ chối</span>;
+      default:
+        return <span>{status}</span>;
+    }
+  };
+
   return (
     <div className="admin-page">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Yêu cầu Rút tiền</h1>
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800 mb-2">Yêu cầu Rút tiền</h1>
+          <div className="flex bg-gray-100 p-1 rounded-lg w-max">
+            <button
+              onClick={() => setFilter('PENDING')}
+              className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${filter === 'PENDING' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+            >
+              Chờ duyệt
+            </button>
+            <button
+              onClick={() => setFilter('HISTORY')}
+              className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${filter === 'HISTORY' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+            >
+              Lịch sử
+            </button>
+          </div>
+        </div>
         <div className="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2">
           <Banknote size={18} />
-          {withdrawals.length} Yêu cầu chờ duyệt
+          {withdrawals.filter(w => w.status === 'PENDING').length} Yêu cầu chờ duyệt
         </div>
       </div>
 
@@ -89,10 +124,10 @@ export default function AdminWithdrawalsPage() {
           <div className="flex justify-center items-center p-12">
             <Loader2 className="animate-spin text-blue-600" size={32} />
           </div>
-        ) : withdrawals.length === 0 ? (
+        ) : filteredWithdrawals.length === 0 ? (
           <div className="text-center p-12 text-gray-500">
             <CreditCard size={48} className="mx-auto text-gray-300 mb-4" />
-            <p className="text-lg font-medium">Hiện không có yêu cầu rút tiền nào.</p>
+            <p className="text-lg font-medium">Không có dữ liệu.</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -103,11 +138,12 @@ export default function AdminWithdrawalsPage() {
                   <th className="p-4 font-semibold">Số tiền</th>
                   <th className="p-4 font-semibold w-[250px]">Thông tin ngân hàng</th>
                   <th className="p-4 font-semibold">Ngày yêu cầu</th>
-                  <th className="p-4 font-semibold text-right">Thao tác</th>
+                  <th className="p-4 font-semibold">Trạng thái</th>
+                  {filter === 'PENDING' && <th className="p-4 font-semibold text-right">Thao tác</th>}
                 </tr>
               </thead>
               <tbody>
-                {withdrawals.map((item) => (
+                {filteredWithdrawals.map((item) => (
                   <tr key={item.id} className="border-b border-gray-50 hover:bg-gray-50/50">
                     <td className="p-4">
                       <p className="font-semibold text-gray-800">{item.sellerName}</p>
@@ -127,24 +163,29 @@ export default function AdminWithdrawalsPage() {
                       {new Date(item.createdAt).toLocaleString('vi-VN')}
                     </td>
                     <td className="p-4">
-                      <div className="flex justify-end gap-2">
-                        <button
-                          onClick={() => handleApprove(item.id)}
-                          disabled={processingId === item.id}
-                          className="flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
-                        >
-                          {processingId === item.id ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle size={16} />}
-                          Duyệt
-                        </button>
-                        <button
-                          onClick={() => handleRejectClick(item.id)}
-                          disabled={processingId === item.id}
-                          className="flex items-center gap-1 bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
-                        >
-                          <XCircle size={16} /> Từ chối
-                        </button>
-                      </div>
+                      {getStatusBadge(item.status)}
                     </td>
+                    {filter === 'PENDING' && (
+                      <td className="p-4">
+                        <div className="flex justify-end gap-2">
+                          <button
+                            onClick={() => handleApprove(item.id)}
+                            disabled={processingId === item.id}
+                            className="flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
+                          >
+                            {processingId === item.id ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle size={16} />}
+                            Duyệt
+                          </button>
+                          <button
+                            onClick={() => handleRejectClick(item.id)}
+                            disabled={processingId === item.id}
+                            className="flex items-center gap-1 bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
+                          >
+                            <XCircle size={16} /> Từ chối
+                          </button>
+                        </div>
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>

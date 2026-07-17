@@ -46,7 +46,7 @@ export const walletApi = {
     await axiosClient.post('/api/v1/wallet/withdraw', { amount });
   },
 
-  getPendingWithdrawals: async (): Promise<WithdrawalRequestResponse[]> => {
+  getAllWithdrawals: async (): Promise<WithdrawalRequestResponse[]> => {
     const { data } = await axiosClient.get<WithdrawalRequestResponse[]>('/api/v1/wallet/admin/withdrawals');
     return data;
   },

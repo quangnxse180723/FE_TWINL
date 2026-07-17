@@ -574,6 +574,7 @@ export default function SellerDashboardPage() {
                           <tr className="bg-gray-50 text-gray-500 text-sm border-b border-gray-100">
                             <th className="p-4 font-medium">Thời gian</th>
                             <th className="p-4 font-medium">Loại</th>
+                            <th className="p-4 font-medium">Trạng thái</th>
                             <th className="p-4 font-medium">Số tiền</th>
                             <th className="p-4 font-medium">Mô tả</th>
                           </tr>
@@ -586,12 +587,17 @@ export default function SellerDashboardPage() {
                               <tr key={txn.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
                                 <td className="p-4 text-sm text-gray-600">{new Date(txn.createdAt).toLocaleString('vi-VN')}</td>
                                 <td className="p-4">
-                                  <span className={`text-xs px-2 py-1 rounded-full font-medium ${txn.type === 'ESCROW_HOLD' ? 'bg-amber-100 text-amber-700' : txn.type === 'ESCROW_RELEASE' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>
-                                    {txn.type}
+                                  <span className={`text-xs px-2 py-1 rounded-full font-medium ${txn.type === 'ESCROW_HOLD' ? 'bg-amber-100 text-amber-700' : txn.type === 'ESCROW_RELEASE' ? 'bg-green-100 text-green-700' : txn.type === 'WITHDRAWAL' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'}`}>
+                                    {txn.type === 'ESCROW_HOLD' ? 'Tạm giữ tiền' : txn.type === 'ESCROW_RELEASE' ? 'Nhận tiền bán' : txn.type === 'WITHDRAWAL' ? 'Rút tiền' : txn.type}
                                   </span>
                                 </td>
-                                <td className={`p-4 font-semibold ${txn.type === 'ESCROW_RELEASE' ? 'text-green-600' : 'text-amber-600'}`}>
-                                  {txn.type === 'ESCROW_RELEASE' ? '+' : ''}{formatMoney(txn.amount)}
+                                <td className="p-4">
+                                  <span className={`text-xs px-2 py-1 rounded-full font-medium ${txn.status === 'SUCCESS' ? 'bg-green-100 text-green-700' : txn.status === 'FAILED' ? 'bg-red-100 text-red-700' : txn.status === 'PENDING' ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-700'}`}>
+                                    {txn.status === 'SUCCESS' ? 'Thành công' : txn.status === 'FAILED' ? 'Thất bại' : txn.status === 'PENDING' ? 'Chờ xử lý' : txn.status}
+                                  </span>
+                                </td>
+                                <td className={`p-4 font-semibold ${txn.type === 'ESCROW_RELEASE' ? 'text-green-600' : txn.type === 'WITHDRAWAL' ? 'text-blue-600' : 'text-amber-600'}`}>
+                                  {txn.type === 'ESCROW_RELEASE' ? '+' : txn.type === 'WITHDRAWAL' ? '-' : ''}{formatMoney(txn.amount)}
                                 </td>
                                 <td className="p-4 text-sm text-gray-600">
                                   {txn.description}
