@@ -25,12 +25,25 @@ export default function WomenCategoryPage() {
   const urlCategory = queryParams.get('category') || '';
   const [selectedCategory, setSelectedCategory] = useState(urlCategory)
   const [selectedBrand, setSelectedBrand] = useState('')
+  const [brands, setBrands] = useState<string[]>([])
 
   // Update selectedCategory if URL changes
   useEffect(() => {
     const currentParam = new URLSearchParams(location.search).get('category') || ''
     setSelectedCategory(currentParam)
   }, [location.search])
+
+  useEffect(() => {
+    const fetchBrands = async () => {
+      try {
+        const res = await productsApi.getBrands();
+        setBrands(res.data.data);
+      } catch (err) {
+        console.error('Failed to fetch brands', err);
+      }
+    };
+    fetchBrands();
+  }, []);
 
   useEffect(() => {
     fetchProducts()
@@ -109,16 +122,9 @@ export default function WomenCategoryPage() {
               style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px', outline: 'none' }}
             >
               <option value="">Tất cả</option>
-              <option value="Nike">Nike</option>
-              <option value="Adidas">Adidas</option>
-              <option value="Puma">Puma</option>
-              <option value="Gucci">Gucci</option>
-              <option value="Dior">Dior</option>
-              <option value="Chanel">Chanel</option>
-              <option value="Zara">Zara</option>
-              <option value="H&M">H&M</option>
-              <option value="Uniqlo">Uniqlo</option>
-              <option value="Khác">Khác</option>
+              {brands.map((brand) => (
+                <option key={brand} value={brand}>{brand}</option>
+              ))}
             </select>
           </div>
 

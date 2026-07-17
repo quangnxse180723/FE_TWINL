@@ -4,10 +4,9 @@ import productsApi, { type Product } from '../../api/products/productsApi'
 import { PATHS } from '../../routes/paths'
 import '../../styles/pages/category.css'
 
-const brandOptions = ['ZARA', 'HM', 'HERMES', 'GUCCI', 'CHANEL', 'NIKE', 'ADIDAS']
-
 export default function BrandsCategoryPage() {
   const [products, setProducts] = useState<Product[]>([])
+  const [brands, setBrands] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [selectedBrand, setSelectedBrand] = useState('')
@@ -33,8 +32,20 @@ export default function BrandsCategoryPage() {
   }, [location.search])
 
   useEffect(() => {
+    const fetchBrands = async () => {
+      try {
+        const res = await productsApi.getBrands();
+        setBrands(res.data.data);
+      } catch (err) {
+        console.error('Failed to fetch brands', err);
+      }
+    };
+    fetchBrands();
+  }, []);
+
+  useEffect(() => {
     fetchProducts()
-  }, [selectedBrand, selectedCategory, selectedStyle, selectedSize, conditionRange, selectedDefects, sortBy, page])
+  }, [selectedCategory, selectedBrand, selectedStyle, selectedSize, conditionRange, selectedDefects, sortBy, page])
 
   const fetchProducts = async () => {
     setLoading(true)
@@ -91,7 +102,7 @@ export default function BrandsCategoryPage() {
           <div className="category__search-wrapper" style={{marginBottom: 16}}>
             <select style={{width: '100%', padding: '10px', border: '1px solid #dcdcdc', borderRadius: '4px', fontSize: '13px', background: '#f9f9f9', outline: 'none'}} value={selectedBrand} onChange={(e) => { setSelectedBrand(e.target.value); setPage(0) }}>
               <option value="">Tất cả</option>
-              {brandOptions.map((brand) => (
+              {brands.map((brand) => (
                 <option key={brand} value={brand}>{brand}</option>
               ))}
             </select>

@@ -62,6 +62,10 @@ const productsApi = {
     return axiosClient.get<ProductsResponse>('/api/products', { params });
   },
 
+  getBrands: () => {
+    return axiosClient.get<{message: string, data: string[]}>('/api/products/brands');
+  },
+
   getProductById: (id: number) => {
     return axiosClient.get<Product>(`/api/products/${id}`);
   },
