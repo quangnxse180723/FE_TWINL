@@ -44,6 +44,10 @@ import StaffOrdersPage from '../staff/pages/StaffOrdersPage'
 import ShipperGuard from '../shipper/components/ShipperGuard'
 import ShipperLayout from '../shipper/layout/ShipperLayout'
 import ShipperOrdersPage from '../shipper/pages/ShipperOrdersPage'
+import OutfitSetsPage from '../pages/outfitsets/OutfitSetsPage'
+import OutfitSetDetailPage from '../pages/outfitsets/OutfitSetDetailPage'
+import AdminOutfitSetsPage from '../pages/admin/outfitsets/AdminOutfitSetsPage'
+import AdminOutfitSetFormPage from '../pages/admin/outfitsets/AdminOutfitSetFormPage'
 
 export default function AppRoutes() {
   const location = useLocation()
@@ -78,6 +82,8 @@ export default function AppRoutes() {
         <Route path={PATHS.sellerDashboard} element={<SellerDashboardPage />} />
         <Route path={PATHS.shop} element={<ShopPage />} />
         <Route path={PATHS.notifications} element={<NotificationsPage />} />
+        <Route path={PATHS.outfitSets} element={<OutfitSetsPage />} />
+        <Route path={PATHS.outfitSetDetail} element={<OutfitSetDetailPage />} />
       </Route>
       <Route element={<AuthLayout />}>
         <Route path={PATHS.login} element={<LoginPage />} />
@@ -100,6 +106,9 @@ export default function AppRoutes() {
         <Route path={PATHS.adminCategories.replace('/admin/', '')} element={<AdminCategoriesPage />} />
         <Route path={PATHS.adminUsers.replace('/admin/', '')} element={<AdminUsersPage />} />
         <Route path={PATHS.adminOrders.replace('/admin/', '')} element={<AdminOrdersPage />} />
+        <Route path={PATHS.adminOutfitSets.replace('/admin/', '')} element={<AdminOutfitSetsPage />} />
+        <Route path={PATHS.adminOutfitSetNew.replace('/admin/', '')} element={<AdminOutfitSetFormPage />} />
+        <Route path={PATHS.adminOutfitSetEdit.replace('/admin/', '')} element={<AdminOutfitSetFormPage />} />
       </Route>
       <Route
         path={PATHS.staff}

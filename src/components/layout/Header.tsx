@@ -117,10 +117,11 @@ export default function Header() {
   }, [])
 
   const navLinks = [
-    { to: PATHS.women,   label: 'Nữ' },
-    { to: PATHS.men,     label: 'Nam' },
-    { to: PATHS.sport,   label: 'Thể thao' },
-    { to: PATHS.contact, label: 'Liên hệ' },
+    { to: PATHS.women,      label: 'Nữ' },
+    { to: PATHS.men,        label: 'Nam' },
+    { to: PATHS.sport,      label: 'Thể thao' },
+    { to: PATHS.outfitSets, label: 'Phối Đồ' },
+    { to: PATHS.contact,    label: 'Liên hệ' },
   ]
 
   const isActive = (path: string) => location.pathname === path

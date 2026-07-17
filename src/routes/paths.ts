@@ -36,4 +36,9 @@ export const PATHS = {
   sellerDashboard: '/seller/dashboard',
   shop: '/shop/:sellerId',
   notifications: '/notifications',
+  outfitSets: '/outfit-sets',
+  outfitSetDetail: '/outfit-sets/:id',
+  adminOutfitSets: '/admin/outfit-sets',
+  adminOutfitSetNew: '/admin/outfit-sets/new',
+  adminOutfitSetEdit: '/admin/outfit-sets/:id/edit',
 }

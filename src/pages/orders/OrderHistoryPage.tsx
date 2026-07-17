@@ -88,16 +88,27 @@ export default function OrderHistoryPage() {
   }, [page, sizePage])
 
   const executeConfirmReceipt = async () => {
+    console.log('executeConfirmReceipt called with confirmOrder:', confirmOrder)
     if (!confirmOrder) return
     try {
+      console.log('calling API...')
       await orderApi.confirmReceipt(confirmOrder)
+      console.log('API success')
       const targetOrder = data?.content?.find(o => o.id === confirmOrder)
+      console.log('targetOrder found:', targetOrder)
       setConfirmOrder(null)
-      if (targetOrder) setReviewOrder(targetOrder)
+      if (targetOrder) {
+        console.log('setting reviewOrder')
+        setReviewOrder(targetOrder)
+      } else {
+        console.log('targetOrder is null!')
+      }
       // Reload order data
       const response = await orderApi.list(page, sizePage)
       setData(response.data)
-    } catch {
+      console.log('data reloaded')
+    } catch (err) {
+      console.error('API error:', err)
       alert('Có lỗi xảy ra, vui lòng thử lại.')
       setConfirmOrder(null)
     }
@@ -136,8 +147,8 @@ export default function OrderHistoryPage() {
             <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '8px' }}>Xác nhận nhận hàng</h3>
             <p style={{ color: '#4b5563', marginBottom: '24px', fontSize: '14px' }}>Bạn có chắc chắn đã nhận được đơn hàng này và sản phẩm không có vấn đề gì?</p>
             <div style={{ display: 'flex', gap: '12px' }}>
-              <button onClick={() => setConfirmOrder(null)} style={{ flex: 1, padding: '10px', background: '#f3f4f6', color: '#374151', border: 'none', borderRadius: '8px', fontWeight: 500, cursor: 'pointer' }}>Huỷ</button>
-              <button onClick={executeConfirmReceipt} style={{ flex: 1, padding: '10px', background: '#16a34a', color: '#fff', border: 'none', borderRadius: '8px', fontWeight: 500, cursor: 'pointer' }}>Đã nhận hàng</button>
+              <button type="button" onClick={() => setConfirmOrder(null)} style={{ flex: 1, padding: '10px', background: '#f3f4f6', color: '#374151', border: 'none', borderRadius: '8px', fontWeight: 500, cursor: 'pointer' }}>Huỷ</button>
+              <button type="button" onClick={executeConfirmReceipt} style={{ flex: 1, padding: '10px', background: '#16a34a', color: '#fff', border: 'none', borderRadius: '8px', fontWeight: 500, cursor: 'pointer' }}>Đã nhận hàng</button>
             </div>
           </div>
         </div>
@@ -147,7 +158,7 @@ export default function OrderHistoryPage() {
       {reviewOrder && (
         <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
           <div style={{ background: '#fff', padding: '24px', borderRadius: '16px', width: '90%', maxWidth: '400px', textAlign: 'center', position: 'relative' }}>
-            <button onClick={() => setReviewOrder(null)} style={{ position: 'absolute', top: '16px', right: '16px', background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280' }}><X size={20} /></button>
+            <button type="button" onClick={() => setReviewOrder(null)} style={{ position: 'absolute', top: '16px', right: '16px', background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280' }}><X size={20} /></button>
             <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: '#fef3c7', color: '#d97706', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
               <Star size={32} fill="currentColor" />
             </div>

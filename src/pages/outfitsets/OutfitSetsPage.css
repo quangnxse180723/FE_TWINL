@@ -1,0 +1,316 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap');
+
+/* ── OUTFIT SETS PAGE ─────────────────────────────────── */
+.outfit-page {
+  min-height: 100vh;
+  background: #faf9f6;
+  font-family: 'Inter', sans-serif;
+}
+
+.outfit-page__loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 60vh;
+  font-size: 14px;
+  color: #888;
+  letter-spacing: 2px;
+}
+
+/* ── HERO ─────────────────────────────────── */
+.outfit-hero {
+  background: #0d0d0d;
+  padding: 100px 40px 80px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.outfit-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 0%, rgba(212, 175, 55, 0.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.outfit-hero__inner {
+  position: relative;
+  z-index: 1;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.outfit-hero__label {
+  font-size: 11px;
+  letter-spacing: 4px;
+  color: #d4af37;
+  margin-bottom: 20px;
+  text-transform: uppercase;
+}
+
+.outfit-hero__title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(48px, 7vw, 80px);
+  font-weight: 400;
+  color: #fff;
+  line-height: 1.1;
+  margin: 0 0 24px;
+}
+
+.outfit-hero__sub {
+  font-size: 15px;
+  color: #aaa;
+  line-height: 1.7;
+  margin-bottom: 32px;
+}
+
+.outfit-hero__badges {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.hero-badge {
+  display: inline-block;
+  border: 1px solid #333;
+  color: #ccc;
+  font-size: 12px;
+  padding: 8px 16px;
+  border-radius: 100px;
+  letter-spacing: 0.5px;
+}
+
+.hero-badge--gold {
+  border-color: #d4af37;
+  color: #d4af37;
+  background: rgba(212, 175, 55, 0.07);
+}
+
+/* ── GRID ─────────────────────────────────── */
+.outfit-grid-section {
+  padding: 72px 0 100px;
+}
+
+.outfit-grid-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 32px;
+}
+
+.outfit-empty {
+  text-align: center;
+  font-size: 14px;
+  color: #aaa;
+  padding: 80px 0;
+  letter-spacing: 1px;
+}
+
+.outfit-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+}
+
+/* Featured card (first one) spans 2 columns */
+.outfit-card--featured {
+  grid-column: span 2;
+}
+
+.outfit-card {
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border: 1px solid #efefef;
+  transition: transform 0.3s, box-shadow 0.3s;
+  overflow: hidden;
+}
+
+.outfit-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 48px rgba(0,0,0,0.07);
+}
+
+/* Image area */
+.outfit-card__image-wrap {
+  position: relative;
+  aspect-ratio: 4/3;
+  background: #f0ede8;
+  overflow: hidden;
+}
+
+.outfit-card--featured .outfit-card__image-wrap {
+  aspect-ratio: 16/9;
+}
+
+.outfit-card__cover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.outfit-card:hover .outfit-card__cover {
+  transform: scale(1.04);
+}
+
+/* Mosaic fallback */
+.outfit-card__no-image {
+  width: 100%;
+  height: 100%;
+}
+
+.outfit-card__mosaic {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  height: 100%;
+  gap: 2px;
+}
+
+.mosaic-cell img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.mosaic-placeholder {
+  width: 100%;
+  height: 100%;
+  background: #e5e0d8;
+}
+
+/* Tag + discount badge */
+.outfit-card__tag {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(4px);
+  color: #fff;
+  font-size: 10px;
+  letter-spacing: 1px;
+  padding: 5px 10px;
+  text-transform: uppercase;
+}
+
+.outfit-card__discount-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: #d4af37;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 6px 12px;
+}
+
+/* Card body */
+.outfit-card__body {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+}
+
+.outfit-card__meta {
+  display: flex;
+  gap: 8px;
+}
+
+.outfit-card__count {
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: #999;
+  text-transform: uppercase;
+}
+
+.outfit-card__name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 26px;
+  font-weight: 600;
+  color: #0d0d0d;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.outfit-card--featured .outfit-card__name {
+  font-size: 32px;
+}
+
+.outfit-card__desc {
+  font-size: 13px;
+  color: #666;
+  line-height: 1.6;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.outfit-card__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.outfit-card__price {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.price-label {
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: #bbb;
+  text-transform: uppercase;
+}
+
+.price-val {
+  font-size: 16px;
+  font-weight: 600;
+  color: #0d0d0d;
+}
+
+.outfit-card__cta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: #0d0d0d;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+/* ── RESPONSIVE ─────────────────────────────────── */
+@media (max-width: 900px) {
+  .outfit-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .outfit-card--featured {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 600px) {
+  .outfit-grid {
+    grid-template-columns: 1fr;
+  }
+  .outfit-card--featured {
+    grid-column: span 1;
+  }
+  .outfit-hero {
+    padding: 60px 24px 48px;
+  }
+}
