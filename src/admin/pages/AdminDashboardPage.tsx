@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { adminBusinessApi } from '../api/adminBusinessApi'
-import { Banknote, ShoppingBag, UserPlus, Package, MoreHorizontal, AlertTriangle } from 'lucide-react'
+import { Banknote, ShoppingBag, Package, MoreHorizontal, AlertTriangle } from 'lucide-react'
 import {
   AreaChart,
   Area,
@@ -104,22 +104,22 @@ export default function AdminDashboardPage() {
           </div>
           <div className="admin-card__meta" style={{ marginTop: '16px', color: '#64748b', fontSize: 13 }}>Tổng Đơn Hàng</div>
           <div className="admin-card__value" style={{ fontSize: '24px', marginTop: '4px' }}>{d?.metrics.totalOrders.toLocaleString()}</div>
-          <div style={{ fontSize: '12px', color: '#64748b', marginTop: '8px', display: 'flex', gap: '8px' }}>
-            <span style={{ color: '#16a34a' }}>{d?.metrics.ordersSuccess}</span> •
-            <span style={{ color: '#0284c7' }}>{d?.metrics.ordersShipping}</span> •
-            <span style={{ color: '#64748b' }}>{d?.metrics.ordersPending}</span> •
-            <span style={{ color: '#dc2626' }}>{d?.metrics.ordersCancelled}</span>
+          <div style={{ fontSize: '11px', color: '#64748b', marginTop: '8px', display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+            <span style={{ color: '#16a34a' }}>Thành công: {d?.metrics.ordersSuccess}</span><span style={{ color: '#cbd5e1' }}>|</span>
+            <span style={{ color: '#0284c7' }}>Đang giao: {d?.metrics.ordersShipping}</span><span style={{ color: '#cbd5e1' }}>|</span>
+            <span style={{ color: '#64748b' }}>Chờ: {d?.metrics.ordersPending}</span><span style={{ color: '#cbd5e1' }}>|</span>
+            <span style={{ color: '#dc2626' }}>Huỷ: {d?.metrics.ordersCancelled}</span>
           </div>
         </div>
-        {/* Users */}
+        {/* Sold Orders (Replaced from New Users) */}
         <div className="admin-card">
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <div className="admin-card__icon" style={{ background: '#f1f5f9', color: '#475569', padding: '12px', borderRadius: '8px' }}><UserPlus size={20} /></div>
-            <div className="admin-card__trend" style={{ color: '#16a34a', fontWeight: 600 }}>↗ {d?.metrics.usersTrend}</div>
+            <div className="admin-card__icon" style={{ background: '#f1f5f9', color: '#475569', padding: '12px', borderRadius: '8px' }}><Package size={20} /></div>
+            <div className="admin-card__trend" style={{ color: '#16a34a', fontWeight: 600 }}>↗ {d?.metrics.ordersTrend}</div>
           </div>
-          <div className="admin-card__meta" style={{ marginTop: '16px', color: '#64748b', fontSize: 13 }}>Người Dùng Mới</div>
-          <div className="admin-card__value" style={{ fontSize: '24px', marginTop: '4px' }}>{d?.metrics.newUsers.toLocaleString()}</div>
-          <div style={{ fontSize: '12px', color: '#64748b', marginTop: '8px' }}>+{d?.metrics.newUsersToday} hôm nay</div>
+          <div className="admin-card__meta" style={{ marginTop: '16px', color: '#64748b', fontSize: 13 }}>Đơn Hàng Đã Bán</div>
+          <div className="admin-card__value" style={{ fontSize: '24px', marginTop: '4px' }}>{d?.metrics.ordersSuccess?.toLocaleString()}</div>
+          <div style={{ fontSize: '12px', color: '#64748b', marginTop: '8px' }}>Đã giao thành công</div>
         </div>
         {/* Products */}
         <div className="admin-card">
