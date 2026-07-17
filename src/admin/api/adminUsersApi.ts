@@ -18,4 +18,8 @@ export const adminUsersApi = {
     const { data } = await axiosClient.patch<AdminUser>(`/api/users/${id}/status`, payload)
     return data
   },
+  getUserStats: async (id: number) => {
+    const { data } = await axiosClient.get<{walletBalance: number, totalOrdersPurchased: number, totalOrdersSold: number}>(`/api/users/${id}/stats`)
+    return data
+  }
 }

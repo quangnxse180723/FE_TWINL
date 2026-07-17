@@ -33,6 +33,7 @@ export default function AdminUsersPage() {
   const queryClient = useQueryClient()
   const [formMode, setFormMode] = useState<FormMode>(null)
   const [editingUser, setEditingUser] = useState<AdminUser | null>(null)
+  const [userStats, setUserStats] = useState<{walletBalance: number, totalOrdersPurchased: number, totalOrdersSold: number} | null>(null)
   const [formState, setFormState] = useState<UserFormState>(emptyFormState)
   const [formError, setFormError] = useState<string | null>(null)
   const [roleFilter, setRoleFilter] = useState<RoleFilter>('ALL')
@@ -72,10 +73,17 @@ export default function AdminUsersPage() {
     setFormError(null)
   }
 
-  const handleOpenView = (user: AdminUser) => {
+  const handleOpenView = async (user: AdminUser) => {
     setFormMode('view')
     setEditingUser(user)
+    setUserStats(null)
     setFormError(null)
+    try {
+      const stats = await adminUsersApi.getUserStats(user.id)
+      setUserStats(stats)
+    } catch (err) {
+      console.error('Failed to fetch user stats', err)
+    }
   }
 
   const handleOpenEdit = (user: AdminUser) => {
@@ -238,15 +246,34 @@ export default function AdminUsersPage() {
             <div>
               <p style={{ margin: '0 0 8px 0', color: '#6b7280', fontSize: '13px' }}>Số điện thoại</p>
               <p style={{ margin: '0 0 16px 0', fontWeight: 500, fontSize: '16px' }}>{editingUser.phone || '--'}</p>
-              
-              <p style={{ margin: '0 0 8px 0', color: '#6b7280', fontSize: '13px' }}>Địa chỉ</p>
-              <p style={{ margin: '0 0 16px 0', fontWeight: 500, fontSize: '16px' }}>{editingUser.address || '--'}</p>
 
               <p style={{ margin: '0 0 8px 0', color: '#6b7280', fontSize: '13px' }}>Giới tính</p>
               <p style={{ margin: '0 0 16px 0', fontWeight: 500, fontSize: '16px' }}>{editingUser.gender || '--'}</p>
 
               <p style={{ margin: '0 0 8px 0', color: '#6b7280', fontSize: '13px' }}>Ngày sinh</p>
-              <p style={{ margin: '0 0 16px 0', fontWeight: 500, fontSize: '16px' }}>{editingUser.dateOfBirth || '--'}</p>
+              <p style={{ margin: '0 0 16px 0', fontWeight: 500 }}>
+                {editingUser.dateOfBirth ? new Date(editingUser.dateOfBirth).toLocaleDateString('vi-VN') : '--'}
+              </p>
+
+              <p style={{ margin: '0 0 8px 0', color: '#6b7280', fontSize: '13px' }}>Địa chỉ</p>
+              <p style={{ margin: '0 0 16px 0', fontWeight: 500 }}>{editingUser.address || '--'}</p>
+
+              <hr style={{ border: 'none', borderTop: '1px solid #e5e7eb', margin: '20px 0' }} />
+              <h4 style={{ margin: '0 0 16px 0', fontSize: '15px' }}>Thống kê giao dịch</h4>
+              {userStats ? (
+                <>
+                  <p style={{ margin: '0 0 8px 0', color: '#6b7280', fontSize: '13px' }}>Số dư ví</p>
+                  <p style={{ margin: '0 0 16px 0', fontWeight: 700, fontSize: '18px', color: '#1a7a3e' }}>
+                    {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(userStats.walletBalance)}
+                  </p>
+                  <p style={{ margin: '0 0 8px 0', color: '#6b7280', fontSize: '13px' }}>Tổng đơn đã mua</p>
+                  <p style={{ margin: '0 0 16px 0', fontWeight: 500, fontSize: '16px' }}>{userStats.totalOrdersPurchased} đơn</p>
+                  <p style={{ margin: '0 0 8px 0', color: '#6b7280', fontSize: '13px' }}>Tổng đơn đã bán thành công</p>
+                  <p style={{ margin: '0 0 16px 0', fontWeight: 500, fontSize: '16px' }}>{userStats.totalOrdersSold} đơn</p>
+                </>
+              ) : (
+                <p style={{ margin: 0, fontSize: '14px', color: '#6b7280' }}>Đang tải thống kê...</p>
+              )}
             </div>
           </div>
           <div style={{ padding: '0 20px 20px', display: 'flex', gap: '10px' }}>
