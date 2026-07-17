@@ -127,6 +127,7 @@ export default function ShipperOrdersPage() {
   const queryClient = useQueryClient()
   const [page, setPage] = useState(0)
   const [selectedOrder, setSelectedOrder] = useState<AdminOrder | null>(null)
+  const [detailsOrder, setDetailsOrder] = useState<AdminOrder | null>(null)
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['shipper-orders', page],
@@ -253,17 +254,24 @@ export default function ShipperOrdersPage() {
                       {formatDateTime(order.deliveredAt)}
                     </td>
                     <td>
-                      {action ? (
+                      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                        {action ? (
+                          <button
+                            type="button"
+                            style={actionButtonStyle}
+                            onClick={() => setSelectedOrder(order)}
+                          >
+                            {action.label}
+                          </button>
+                        ) : null}
                         <button
                           type="button"
-                          style={actionButtonStyle}
-                          onClick={() => setSelectedOrder(order)}
+                          style={{...actionButtonStyle, background: '#f1f5f9', color: '#475569', border: '1px solid #cbd5e1'}}
+                          onClick={() => setDetailsOrder(order)}
                         >
-                          {action.label}
+                          Chi tiết
                         </button>
-                      ) : (
-                        <span style={{ color: '#94a3b8', fontSize: '0.82rem' }}>—</span>
-                      )}
+                      </div>
                     </td>
                   </tr>
                 )
@@ -309,6 +317,50 @@ export default function ShipperOrdersPage() {
           onSubmit={(orderId, status, note) => mutation.mutate({ orderId, status, note })}
           isLoading={mutation.isPending}
         />
+      )}
+
+      {/* Order Details Modal */}
+      {detailsOrder && (
+        <div style={overlayStyle} onClick={() => setDetailsOrder(null)}>
+          <div style={{...modalStyle, maxWidth: 600}} onClick={(e) => e.stopPropagation()}>
+            <div style={modalHeaderStyle}>
+              <h2 style={{ margin: 0, fontSize: '1.2rem', color: '#1e293b' }}>Chi tiết đơn hàng #{detailsOrder.code}</h2>
+              <button type="button" style={closeButtonStyle} onClick={() => setDetailsOrder(null)}>✕</button>
+            </div>
+            <div style={{ padding: '1.5rem', maxHeight: '70vh', overflowY: 'auto' }}>
+              <div style={{ marginBottom: '1.5rem' }}>
+                <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#334155', marginBottom: '0.5rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.5rem' }}>Thông tin người nhận</h3>
+                <div style={{...infoRowStyle, marginBottom: '0.25rem'}}><span style={infoLabelStyle}>Họ tên:</span><span style={infoValueStyle}>{detailsOrder.customerName}</span></div>
+                <div style={{...infoRowStyle, marginBottom: '0.25rem'}}><span style={infoLabelStyle}>Điện thoại:</span><span style={infoValueStyle}>{detailsOrder.customerPhone || '—'}</span></div>
+                <div style={{...infoRowStyle, marginBottom: '0.25rem'}}><span style={infoLabelStyle}>Địa chỉ:</span><span style={infoValueStyle}>{detailsOrder.shippingAddress || '—'}</span></div>
+                <div style={{...infoRowStyle, marginBottom: '0.25rem'}}><span style={infoLabelStyle}>Ghi chú đơn:</span><span style={infoValueStyle}>{detailsOrder.note || '—'}</span></div>
+              </div>
+
+              <div>
+                <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#334155', marginBottom: '0.5rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.5rem' }}>Sản phẩm ({detailsOrder.items?.length || 0})</h3>
+                {detailsOrder.items?.map((item, idx) => (
+                  <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.75rem 0', borderBottom: '1px solid #f1f5f9' }}>
+                    {item.imageUrl ? (
+                      <img src={item.imageUrl.startsWith('http') ? item.imageUrl : `http://localhost:8080${item.imageUrl}`} alt={item.productName || 'Product'} style={{ width: 50, height: 50, objectFit: 'cover', borderRadius: 8, border: '1px solid #e2e8f0' }} />
+                    ) : (
+                      <div style={{ width: 50, height: 50, borderRadius: 8, background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: '#94a3b8' }}>No IMG</div>
+                    )}
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: 500, color: '#1e293b', fontSize: '0.9rem' }}>{item.productName || `Sản phẩm #${item.productId}`}</div>
+                      <div style={{ color: '#64748b', fontSize: '0.8rem' }}>{formatPrice(item.unitPrice)} x {item.quantity}</div>
+                    </div>
+                    <div style={{ fontWeight: 600, color: '#0f172a' }}>{formatPrice(item.lineTotal)}</div>
+                  </div>
+                ))}
+              </div>
+              
+              <div style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '2px dashed #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontWeight: 600, color: '#334155' }}>Tổng cộng:</span>
+                <span style={{ fontSize: '1.25rem', fontWeight: 700, color: '#3b82f6' }}>{formatPrice(detailsOrder.totalAmount)}</span>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </section>
   )
