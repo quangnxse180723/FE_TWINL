@@ -29,6 +29,7 @@ export const PATHS = {
   adminCategories: '/admin/categories',
   adminUsers: '/admin/users',
   adminOrders: '/admin/orders',
+  adminWithdrawals: '/admin/withdrawals',
   staff: '/staff',
   staffOrders: '/staff/orders',
   shipper: '/shipper',

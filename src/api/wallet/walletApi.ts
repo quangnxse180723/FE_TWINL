@@ -10,6 +10,18 @@ export interface WalletTransactionResponse {
   orderCode?: string;
 }
 
+export interface WithdrawalRequestResponse {
+  id: number;
+  sellerName: string;
+  sellerEmail: string;
+  amount: number;
+  bankName: string;
+  bankAccountNumber: string;
+  bankAccountName: string;
+  createdAt: string;
+  status: string;
+}
+
 export interface WalletResponse {
   balance: number;
   escrowBalance: number;
@@ -28,5 +40,22 @@ export const walletApi = {
 
   updateBankAccount: async (bankData: { bankName: string; bankAccountNumber: string; bankAccountName: string }) => {
     await axiosClient.put('/api/v1/wallet/bank', bankData);
+  },
+
+  requestWithdrawal: async (amount: number) => {
+    await axiosClient.post('/api/v1/wallet/withdraw', { amount });
+  },
+
+  getPendingWithdrawals: async (): Promise<WithdrawalRequestResponse[]> => {
+    const { data } = await axiosClient.get<WithdrawalRequestResponse[]>('/api/v1/wallet/admin/withdrawals');
+    return data;
+  },
+
+  approveWithdrawal: async (id: number) => {
+    await axiosClient.post(`/api/v1/wallet/admin/withdrawals/${id}/approve`);
+  },
+
+  rejectWithdrawal: async (id: number, reason: string) => {
+    await axiosClient.post(`/api/v1/wallet/admin/withdrawals/${id}/reject`, { reason });
   }
 };

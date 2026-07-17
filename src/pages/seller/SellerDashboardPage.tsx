@@ -64,6 +64,11 @@ export default function SellerDashboardPage() {
   const [isEditingBank, setIsEditingBank] = useState(false);
   const [isSavingBank, setIsSavingBank] = useState(false);
   const [bankForm, setBankForm] = useState({ bankName: '', bankAccountNumber: '', bankAccountName: '' });
+  
+  // States cho Quản lý rút tiền
+  const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
+  const [withdrawAmount, setWithdrawAmount] = useState('');
+  const [isWithdrawing, setIsWithdrawing] = useState(false);
 
   // States cho Form Thêm Sản Phẩm
   const [formData, setFormData] = useState({
@@ -362,6 +367,31 @@ export default function SellerDashboardPage() {
     }
   };
 
+  const handleWithdraw = async () => {
+    const amount = Number(withdrawAmount);
+    if (!amount || amount <= 0) {
+      toast.error('Số tiền không hợp lệ');
+      return;
+    }
+    if (wallet && amount > wallet.balance) {
+      toast.error('Số dư không đủ');
+      return;
+    }
+    
+    setIsWithdrawing(true);
+    try {
+      await walletApi.requestWithdrawal(amount);
+      toast.success('Đã gửi yêu cầu rút tiền thành công!');
+      setIsWithdrawModalOpen(false);
+      setWithdrawAmount('');
+      fetchData();
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Có lỗi xảy ra khi yêu cầu rút tiền');
+    } finally {
+      setIsWithdrawing(false);
+    }
+  };
+
   return (
     <div className="seller-page">
       <div className="seller-layout">
@@ -460,12 +490,23 @@ export default function SellerDashboardPage() {
               {activeTab === 'wallet' && (
                 <div className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-6 text-white shadow-sm">
-                      <div className="flex items-center gap-2 mb-2 text-blue-100">
-                        <WalletIcon size={20} /> <span className="font-medium">Số dư khả dụng</span>
+                    <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-6 text-white shadow-sm flex flex-col justify-between">
+                      <div>
+                        <div className="flex items-center gap-2 mb-2 text-blue-100">
+                          <WalletIcon size={20} /> <span className="font-medium">Số dư khả dụng</span>
+                        </div>
+                        <div className="text-3xl font-bold mb-4">{formatMoney(wallet?.balance)}</div>
                       </div>
-                      <div className="text-3xl font-bold mb-4">{formatMoney(wallet?.balance)}</div>
-                      <p className="text-sm text-blue-100 bg-black/10 inline-block px-3 py-1 rounded-full">Có thể rút bất cứ lúc nào</p>
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm text-blue-100 bg-black/10 inline-block px-3 py-1 rounded-full">Có thể rút bất cứ lúc nào</p>
+                        <button 
+                          onClick={() => setIsWithdrawModalOpen(true)}
+                          disabled={!wallet?.balance || wallet.balance <= 0}
+                          className="bg-white text-blue-600 px-4 py-1.5 rounded-lg font-medium text-sm hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          Rút tiền
+                        </button>
+                      </div>
                     </div>
                     <div className="bg-gradient-to-br from-amber-500 to-amber-600 rounded-2xl p-6 text-white shadow-sm">
                       <div className="flex items-center gap-2 mb-2 text-amber-100">
@@ -728,6 +769,71 @@ export default function SellerDashboardPage() {
                         </div>
                       ))
                     )}
+                  </div>
+                </div>
+              )}
+
+              {/* TẠO MODAL RÚT TIỀN */}
+              {isWithdrawModalOpen && (
+                <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+                  <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
+                    <h3 className="text-xl font-bold text-gray-800 mb-4">Tạo lệnh rút tiền</h3>
+                    
+                    {!wallet?.bankAccountNumber ? (
+                      <div className="bg-amber-50 text-amber-800 p-4 rounded-xl text-sm mb-4">
+                        Vui lòng cập nhật tài khoản ngân hàng trước khi rút tiền.
+                      </div>
+                    ) : (
+                      <>
+                        <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 mb-4">
+                          <p className="text-sm text-gray-500 mb-1">Rút về tài khoản:</p>
+                          <p className="font-semibold text-gray-800">{wallet.bankName} - {wallet.bankAccountNumber}</p>
+                          <p className="text-sm text-gray-600">{wallet.bankAccountName}</p>
+                        </div>
+                        
+                        <div className="mb-6">
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Số tiền muốn rút (VNĐ)</label>
+                          <div className="relative">
+                            <input
+                              type="number"
+                              value={withdrawAmount}
+                              onChange={(e) => setWithdrawAmount(e.target.value)}
+                              className="w-full px-4 py-3 border border-gray-300 rounded-xl outline-none focus:border-blue-500 font-semibold text-lg"
+                              placeholder="Nhập số tiền..."
+                              max={wallet.balance}
+                            />
+                            <div className="absolute right-3 top-1/2 -translate-y-1/2 flex gap-2">
+                              <button 
+                                onClick={() => setWithdrawAmount(String(wallet.balance))}
+                                className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded font-medium hover:bg-blue-200"
+                              >
+                                Tối đa
+                              </button>
+                            </div>
+                          </div>
+                          <p className="text-sm text-gray-500 mt-2">
+                            Số dư khả dụng: <span className="font-semibold text-gray-800">{formatMoney(wallet.balance)}</span>
+                          </p>
+                        </div>
+                      </>
+                    )}
+
+                    <div className="flex justify-end gap-3">
+                      <button 
+                        onClick={() => setIsWithdrawModalOpen(false)}
+                        className="px-5 py-2.5 text-gray-600 font-medium hover:bg-gray-100 rounded-xl transition-colors"
+                      >
+                        Hủy
+                      </button>
+                      <button 
+                        onClick={handleWithdraw}
+                        disabled={isWithdrawing || !wallet?.bankAccountNumber || !withdrawAmount || Number(withdrawAmount) <= 0 || Number(withdrawAmount) > (wallet.balance || 0)}
+                        className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-5 py-2.5 rounded-xl font-medium transition-colors flex items-center"
+                      >
+                        {isWithdrawing ? <Loader2 className="animate-spin mr-2" size={18} /> : null}
+                        Xác nhận rút
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}

@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import { PATHS } from '../../routes/paths'
-import { LayoutDashboard, BarChart3, Package, Layers, Users, ShoppingCart, Shirt } from 'lucide-react'
+import { LayoutDashboard, BarChart3, Package, Layers, Users, ShoppingCart, Shirt, Banknote } from 'lucide-react'
 
 const links = [
   { to: PATHS.admin, label: 'Tổng quan', icon: <LayoutDashboard size={20} /> },
@@ -10,6 +10,7 @@ const links = [
   { to: PATHS.adminCategories, label: 'Danh mục', icon: <Layers size={20} /> },
   { to: PATHS.adminUsers, label: 'Tài khoản', icon: <Users size={20} /> },
   { to: PATHS.adminOrders, label: 'Đơn hàng', icon: <ShoppingCart size={20} /> },
+  { to: PATHS.adminWithdrawals, label: 'Yêu cầu rút tiền', icon: <Banknote size={20} /> },
 ]
 
 export default function AdminSidebar({ isSidebarOpen = true }: { isSidebarOpen?: boolean }) {
