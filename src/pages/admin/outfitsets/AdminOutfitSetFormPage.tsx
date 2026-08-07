@@ -118,7 +118,7 @@ export default function AdminOutfitSetFormPage() {
     try {
       const fd = new FormData()
       fd.append('files', coverImageFile)
-      fd.append('productType', 'CLOTHING')
+      fd.append('productType', 'OUTFIT_SET')
       const res = await fetch(`${API_BASE_URL}/api/v1/ai/autofill`, { method: 'POST', body: fd })
       if (!res.ok) throw new Error('AI trả về lỗi')
       const data = await res.json()
