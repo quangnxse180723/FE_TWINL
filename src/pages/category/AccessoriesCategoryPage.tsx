@@ -198,7 +198,8 @@ export default function AccessoriesCategoryPage() {
           <h3 className="category__sidebar-title">TÌNH TRẠNG LỖI</h3>
           <div className="category__size-grid" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
             {['MINT', 'MINOR_FLAW', 'STAINED', 'TORN', 'FADED', 'OTHER'].map((defect) => {
-              const defectLabel = { MINT: 'Không lỗi', MINOR_FLAW: 'Sờn nhẹ', STAINED: 'Bẩn/Ố', TORN: 'Rách nhỏ', FADED: 'Phai màu', OTHER: 'Trầy xước' }[defect as keyof typeof defectLabel];
+              const defectLabels: Record<string, string> = { MINT: 'Không lỗi', MINOR_FLAW: 'Sờn nhẹ', STAINED: 'Bẩn/Ố', TORN: 'Rách nhỏ', FADED: 'Phai màu', OTHER: 'Trầy xước' };
+              const defectLabel = defectLabels[defect];
               return (
                 <div 
                   key={defect}
