@@ -91,8 +91,7 @@ export default function AdminProductFormPage() {
   const legitFileRefs = useRef<Partial<Record<LegitSlotKey, HTMLInputElement | null>>>({})
 
   const totalValidImages = Object.values(legitSlots).filter(s => (s.file || s.preview) && s.valid !== false).length
-  const validLegitSlots = [legitSlots.front, legitSlots.back, legitSlots.tag].filter(s => (s.file || s.preview) && s.valid !== false).length
-  const isImageRequirementMet = productType === 'ACCESSORY' ? totalValidImages >= 1 : validLegitSlots >= 3
+  const isImageRequirementMet = totalValidImages >= 1
 
   const LEGIT_SLOTS: { key: LegitSlotKey; icon: string; title: string; hint: string; required: boolean }[] = productType === 'ACCESSORY' ? [
     { key: 'front', icon: '📷', title: 'Ảnh 1', hint: 'Bắt buộc (Tối thiểu 1 ảnh)', required: true },
@@ -103,8 +102,8 @@ export default function AdminProductFormPage() {
     { key: 'opt3',  icon: '📷', title: 'Ảnh 6', hint: 'Tùy chọn', required: false },
   ] : [
     { key: 'front', icon: '👕', title: 'Mặt trước', hint: 'Bắt buộc', required: true },
-    { key: 'back',  icon: '👕', title: 'Mặt sau', hint: 'Bắt buộc', required: true },
-    { key: 'tag',   icon: '🏷️', title: 'Mác/Logo/Size', hint: 'Bắt buộc', required: true },
+    { key: 'back',  icon: '👕', title: 'Mặt sau', hint: 'Không bắt buộc', required: false },
+    { key: 'tag',   icon: '🏷️', title: 'Mác/Logo/Size', hint: 'Không bắt buộc', required: false },
     { key: 'opt1',  icon: '📷', title: 'Ảnh phụ 1', hint: 'Không bắt buộc', required: false },
     { key: 'opt2',  icon: '📷', title: 'Ảnh phụ 2', hint: 'Không bắt buộc', required: false },
     { key: 'opt3',  icon: '📷', title: 'Ảnh phụ 3', hint: 'Không bắt buộc', required: false },

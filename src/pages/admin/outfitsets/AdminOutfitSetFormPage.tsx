@@ -211,18 +211,17 @@ export default function AdminOutfitSetFormPage() {
                 onChange={e => setDescription(e.target.value)} placeholder="Mô tả phong cách, cách phối..." />
             </div>
             <div style={{ gridColumn: 'span 2' }}>
-              <label style={labelStyle}>Ảnh bìa (Tải từ máy hoặc nhập URL)</label>
+              <label style={labelStyle}>Ảnh bìa (Tải từ máy)</label>
               <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
                 <div style={{ flex: 1 }}>
-                  <input style={{ ...inputStyle, marginBottom: 8 }} value={coverImageFile ? '' : coverImageUrl} onChange={e => { setCoverImageUrl(e.target.value); setCoverImageFile(null) }} placeholder="https://... (URL)" disabled={!!coverImageFile} />
                   <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', background: '#f5f5f5', border: '1px solid #ddd', padding: '8px 12px', fontSize: 13, width: 'fit-content' }}>
                     <Upload size={16} /> Tải ảnh lên
-                    <input type="file" accept="image/*" hidden onChange={e => { if (e.target.files?.[0]) setCoverImageFile(e.target.files[0]) }} />
+                    <input type="file" accept="image/*" hidden onChange={e => { if (e.target.files?.[0]) { setCoverImageFile(e.target.files[0]); setCoverImageUrl(''); } }} />
                   </label>
-                  {coverImageFile && (
+                  {(coverImageFile || coverImageUrl) && (
                     <div style={{ fontSize: 12, color: '#059669', marginTop: 4 }}>
-                      Đã chọn: {coverImageFile.name} 
-                      <span onClick={() => setCoverImageFile(null)} style={{ marginLeft: 8, color: '#dc2626', cursor: 'pointer' }}>[Xóa]</span>
+                      Đã chọn ảnh 
+                      <span onClick={() => { setCoverImageFile(null); setCoverImageUrl(''); }} style={{ marginLeft: 8, color: '#dc2626', cursor: 'pointer' }}>[Xóa]</span>
                     </div>
                   )}
                 </div>
