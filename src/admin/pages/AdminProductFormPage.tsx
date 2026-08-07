@@ -473,14 +473,12 @@ export default function AdminProductFormPage() {
                 <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
                   <div
                     className="h-full bg-gradient-to-r from-emerald-700 to-emerald-400 rounded-full transition-all duration-300"
-                    style={{ width: `${Math.min(100, productType === 'ACCESSORY' ? (totalValidImages / 1) * 100 : (validLegitSlots / 3) * 100)}%` }}
+                    style={{ width: `${Math.min(100, (totalValidImages / 1) * 100)}%` }}
                   />
                 </div>
                 <div className="flex justify-between items-center mt-1">
                   <p className="text-[10px] text-gray-400">
-                    {productType === 'ACCESSORY'
-                      ? `${totalValidImages}/1 ảnh tối thiểu`
-                      : `${validLegitSlots}/3 ảnh bắt buộc`}
+                    {totalValidImages}/1 ảnh bắt buộc
                   </p>
                 </div>
               </div>
