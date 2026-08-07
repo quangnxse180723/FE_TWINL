@@ -37,6 +37,7 @@ import AdminProductsPage from '../admin/pages/AdminProductsPage'
 import AdminProductFormPage from '../admin/pages/AdminProductFormPage'
 import AdminUsersPage from '../admin/pages/AdminUsersPage'
 import AdminOrdersPage from '../admin/pages/AdminOrdersPage'
+import AdminWalletsPage from '../admin/pages/AdminWalletsPage'
 import AdminWithdrawalsPage from '../admin/pages/AdminWithdrawalsPage'
 import { AdminDisputesPage } from '../admin/pages/AdminDisputesPage'
 import { AdminCategoriesPage } from '../admin/pages/AdminCategoriesPage'
@@ -108,6 +109,7 @@ export default function AppRoutes() {
         <Route path={PATHS.adminCategories.replace('/admin/', '')} element={<AdminCategoriesPage />} />
         <Route path={PATHS.adminUsers.replace('/admin/', '')} element={<AdminUsersPage />} />
         <Route path={PATHS.adminOrders.replace('/admin/', '')} element={<AdminOrdersPage />} />
+        <Route path={PATHS.adminWallets.replace('/admin/', '')} element={<AdminWalletsPage />} />
         <Route path={PATHS.adminWithdrawals.replace('/admin/', '')} element={<AdminWithdrawalsPage />} />
         <Route path={PATHS.adminDisputes.replace('/admin/', '')} element={<AdminDisputesPage />} />
         <Route path={PATHS.adminOutfitSets.replace('/admin/', '')} element={<AdminOutfitSetsPage />} />

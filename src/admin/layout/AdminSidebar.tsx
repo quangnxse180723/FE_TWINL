@@ -10,6 +10,7 @@ const links = [
   { to: PATHS.adminCategories, label: 'Danh mục', icon: <Layers size={20} /> },
   { to: PATHS.adminUsers, label: 'Tài khoản', icon: <Users size={20} /> },
   { to: PATHS.adminOrders, label: 'Đơn hàng', icon: <ShoppingCart size={20} /> },
+  { to: PATHS.adminWallets, label: 'Quản lý Giải ngân', icon: <Banknote size={20} /> },
   { to: PATHS.adminWithdrawals, label: 'Yêu cầu rút tiền', icon: <Banknote size={20} /> },
   { to: PATHS.adminDisputes, label: 'Khiếu nại / Hoàn tiền', icon: <ShieldAlert size={20} /> },
 ]

@@ -10,6 +10,16 @@ export interface WalletTransactionResponse {
   orderCode?: string;
 }
 
+export interface AdminWalletResponse {
+  userId: number;
+  sellerName: string;
+  sellerEmail: string;
+  balance: number;
+  escrowBalance: number;
+  bankName?: string;
+  bankAccountNumber?: string;
+}
+
 export interface WithdrawalRequestResponse {
   id: number;
   sellerName: string;
@@ -57,5 +67,15 @@ export const walletApi = {
 
   rejectWithdrawal: async (id: number, reason: string) => {
     await axiosClient.post(`/api/v1/wallet/admin/withdrawals/${id}/reject`, { reason });
+  },
+
+  getAllWallets: async (): Promise<AdminWalletResponse[]> => {
+    const { data } = await axiosClient.get<AdminWalletResponse[]>('/api/v1/wallet/admin/wallets');
+    return data;
+  },
+
+  getWalletTransactions: async (userId: number): Promise<WalletTransactionResponse[]> => {
+    const { data } = await axiosClient.get<WalletTransactionResponse[]>(`/api/v1/wallet/admin/wallets/${userId}/transactions`);
+    return data;
   }
 };
