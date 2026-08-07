@@ -3,7 +3,9 @@ import { useNavigate, useParams } from 'react-router-dom'
 import outfitSetsApi, { type OutfitSet } from '../../../api/outfitSetsApi'
 import productsApi, { type Product } from '../../../api/products/productsApi'
 import { PATHS } from '../../../routes/paths'
-import { Plus, X, GripVertical } from 'lucide-react'
+import { Plus, X, GripVertical, Sparkles, Upload } from 'lucide-react'
+import { adminProductsApi } from '../../../admin/api/adminProductsApi'
+import { API_BASE_URL } from '../../../config/constants'
 import { toast } from 'react-toastify'
 
 interface ItemEntry {
@@ -39,6 +41,8 @@ export default function AdminOutfitSetFormPage() {
   const [showProductPicker, setShowProductPicker] = useState(false)
   const [saving, setSaving] = useState(false)
   const [loadingExisting, setLoadingExisting] = useState(isEdit)
+  const [coverImageFile, setCoverImageFile] = useState<File | null>(null)
+  const [isAutoFilling, setIsAutoFilling] = useState(false)
 
   // Load admin products (no seller = system products)
   useEffect(() => {
@@ -105,6 +109,31 @@ export default function AdminOutfitSetFormPage() {
     setItems(prev => prev.map(i => i.productId === productId ? { ...i, role } : i))
   }
 
+  const handleAutoFill = async () => {
+    if (!coverImageFile) {
+      toast.warn('Vui lòng tải ảnh lên trước khi dùng AI')
+      return
+    }
+    setIsAutoFilling(true)
+    try {
+      const fd = new FormData()
+      fd.append('files', coverImageFile)
+      fd.append('productType', 'CLOTHING')
+      const res = await fetch(`${API_BASE_URL}/api/v1/ai/autofill`, { method: 'POST', body: fd })
+      if (!res.ok) throw new Error('AI trả về lỗi')
+      const data = await res.json()
+      
+      if (data.name) setName(data.name)
+      if (data.description) setDescription(data.description)
+      if (data.style) setStyleTag(data.style)
+      toast.success('AI đã tự điền thông tin!')
+    } catch (err: any) {
+      toast.error(err.message || 'AI phân tích thất bại')
+    } finally {
+      setIsAutoFilling(false)
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!name.trim()) { toast.error('Vui lòng nhập tên bộ set'); return }
@@ -112,8 +141,16 @@ export default function AdminOutfitSetFormPage() {
 
     setSaving(true)
     try {
+      let finalCoverUrl = coverImageUrl
+      if (coverImageFile) {
+        const urls = await adminProductsApi.uploadImages([coverImageFile])
+        if (urls && urls.length > 0) {
+          finalCoverUrl = urls[0]
+        }
+      }
+
       const payload = {
-        name, description, coverImageUrl, styleTag,
+        name, description, coverImageUrl: finalCoverUrl, styleTag,
         discountTwoItems: discountTwo,
         discountThresholdLow: discountLow,
         discountThresholdHigh: discountHigh,
@@ -174,13 +211,36 @@ export default function AdminOutfitSetFormPage() {
                 onChange={e => setDescription(e.target.value)} placeholder="Mô tả phong cách, cách phối..." />
             </div>
             <div style={{ gridColumn: 'span 2' }}>
-              <label style={labelStyle}>URL ảnh bìa (để trống để dùng ảnh mosaic tự động)</label>
-              <input style={inputStyle} value={coverImageUrl} onChange={e => setCoverImageUrl(e.target.value)} placeholder="https://..." />
+              <label style={labelStyle}>Ảnh bìa (Tải từ máy hoặc nhập URL)</label>
+              <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                <div style={{ flex: 1 }}>
+                  <input style={{ ...inputStyle, marginBottom: 8 }} value={coverImageFile ? '' : coverImageUrl} onChange={e => { setCoverImageUrl(e.target.value); setCoverImageFile(null) }} placeholder="https://... (URL)" disabled={!!coverImageFile} />
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', background: '#f5f5f5', border: '1px solid #ddd', padding: '8px 12px', fontSize: 13, width: 'fit-content' }}>
+                    <Upload size={16} /> Tải ảnh lên
+                    <input type="file" accept="image/*" hidden onChange={e => { if (e.target.files?.[0]) setCoverImageFile(e.target.files[0]) }} />
+                  </label>
+                  {coverImageFile && (
+                    <div style={{ fontSize: 12, color: '#059669', marginTop: 4 }}>
+                      Đã chọn: {coverImageFile.name} 
+                      <span onClick={() => setCoverImageFile(null)} style={{ marginLeft: 8, color: '#dc2626', cursor: 'pointer' }}>[Xóa]</span>
+                    </div>
+                  )}
+                </div>
+                {(coverImageUrl || coverImageFile) && (
+                  <img src={coverImageFile ? URL.createObjectURL(coverImageFile) : coverImageUrl} alt="Preview" style={{ width: 100, height: 100, objectFit: 'cover', border: '1px solid #eee' }} />
+                )}
+              </div>
             </div>
           </div>
-          <div style={{ marginTop: 16, display: 'flex', alignItems: 'center', gap: 10 }}>
-            <input type="checkbox" id="active" checked={active} onChange={e => setActive(e.target.checked)} />
-            <label htmlFor="active" style={{ fontSize: 14, cursor: 'pointer' }}>Hiển thị bộ set này</label>
+          <div style={{ marginTop: 24, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <input type="checkbox" id="active" checked={active} onChange={e => setActive(e.target.checked)} />
+              <label htmlFor="active" style={{ fontSize: 14, cursor: 'pointer' }}>Hiển thị bộ set này</label>
+            </div>
+            <button type="button" onClick={handleAutoFill} disabled={isAutoFilling || !coverImageFile} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'linear-gradient(to right, #0f766e, #22c55e)', color: '#fff', border: 'none', padding: '10px 16px', borderRadius: 6, fontSize: 13, fontWeight: 600, cursor: (isAutoFilling || !coverImageFile) ? 'not-allowed' : 'pointer', opacity: (isAutoFilling || !coverImageFile) ? 0.6 : 1 }}>
+              <Sparkles size={16} className={isAutoFilling ? 'animate-spin' : ''} />
+              {isAutoFilling ? 'Đang phân tích...' : 'Tự điền bằng AI'}
+            </button>
           </div>
         </section>
 
