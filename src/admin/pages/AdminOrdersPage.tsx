@@ -187,7 +187,20 @@ function InfoItem({ label, value }: { label: string; value: string }) {
 
 // ─── Order Details Modal ───────────────────────────────────────────────────
 
-function OrderDetailsModal({ order, onClose }: { order: AdminOrder; onClose: () => void }) {
+function OrderDetailsModal({ order, onClose, onSuccess }: { order: AdminOrder; onClose: () => void; onSuccess?: () => void }) {
+  const [error, setError] = useState('')
+  const cancelMutation = useMutation({
+    mutationFn: () => adminOrdersApi.cancel(order.id),
+    onSuccess: () => {
+      onSuccess?.()
+      onClose()
+    },
+    onError: (err: any) => {
+      const msg = err?.response?.data?.message ?? 'Huỷ đơn thất bại.'
+      setError(msg)
+    }
+  })
+
   return (
     <div style={overlayStyle} onClick={onClose}>
       <div style={{ ...modalStyle, maxWidth: 650 }} onClick={(e) => e.stopPropagation()}>
@@ -260,10 +273,25 @@ function OrderDetailsModal({ order, onClose }: { order: AdminOrder; onClose: () 
               </div>
             </div>
           </div>
+          {error && <div style={errorStyle}>{error}</div>}
         </div>
 
         <div style={modalFooterStyle}>
           <button type="button" style={cancelButtonStyle} onClick={onClose}>Đóng</button>
+          {(order.status === 'PENDING' || order.status === 'ASSIGNED' || order.status === 'PICKED_UP') && (
+            <button 
+              type="button" 
+              style={{ ...cancelButtonStyle, background: '#fee2e2', color: '#b91c1c', border: '1px solid #fca5a5' }} 
+              onClick={() => {
+                if (window.confirm('Bạn có chắc chắn muốn hủy đơn hàng này?')) {
+                  cancelMutation.mutate()
+                }
+              }}
+              disabled={cancelMutation.isPending}
+            >
+              {cancelMutation.isPending ? 'Đang hủy...' : 'Hủy đơn hàng'}
+            </button>
+          )}
         </div>
       </div>
     </div>
@@ -276,13 +304,14 @@ export default function AdminOrdersPage() {
   const queryClient = useQueryClient()
   const [page, setPage] = useState(0)
   const [sizePage] = useState(12)
+  const [status, setStatus] = useState('ALL')
   const [assignTarget, setAssignTarget] = useState<AdminOrder | null>(null)
   const [viewTarget, setViewTarget] = useState<AdminOrder | null>(null)
   const [successMsg, setSuccessMsg] = useState('')
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['admin-orders', page, sizePage],
-    queryFn: () => adminOrdersApi.list(page, sizePage),
+    queryKey: ['admin-orders', page, sizePage, status],
+    queryFn: () => adminOrdersApi.list(page, sizePage, status),
   })
 
   const handleAssignSuccess = () => {
@@ -296,8 +325,34 @@ export default function AdminOrdersPage() {
       <div className="admin-page__header">
         <div>
           <h1>Quản lý Đơn hàng</h1>
-          <p>Theo dõi và gán Shipper cho các đơn hàng đang chờ xử lý.</p>
+          <p>Theo dõi và xử lý các đơn hàng trên hệ thống.</p>
         </div>
+      </div>
+
+      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem', overflowX: 'auto', paddingBottom: '0.25rem' }}>
+        {['ALL', 'PENDING', 'SHIPPING', 'DELIVERED', 'CANCELED'].map((s) => (
+          <button
+            key={s}
+            onClick={() => { setStatus(s); setPage(0); }}
+            style={{
+              padding: '0.4rem 1.1rem',
+              borderRadius: 20,
+              border: `1px solid ${status === s ? '#3b82f6' : '#e2e8f0'}`,
+              background: status === s ? '#eff6ff' : '#fff',
+              color: status === s ? '#2563eb' : '#64748b',
+              fontWeight: 600,
+              fontSize: '0.82rem',
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+              transition: 'all 0.2s'
+            }}
+          >
+            {s === 'ALL' ? 'Tất cả' :
+             s === 'PENDING' ? 'Chờ xử lý' :
+             s === 'SHIPPING' ? 'Đang giao' :
+             s === 'DELIVERED' ? 'Đã giao' : 'Đã hủy'}
+          </button>
+        ))}
       </div>
 
       {successMsg && (
@@ -446,6 +501,11 @@ export default function AdminOrdersPage() {
         <OrderDetailsModal
           order={viewTarget}
           onClose={() => setViewTarget(null)}
+          onSuccess={() => {
+            queryClient.invalidateQueries({ queryKey: ['admin-orders'] })
+            setSuccessMsg('✅ Đã hủy đơn hàng thành công!')
+            setTimeout(() => setSuccessMsg(''), 3000)
+          }}
         />
       )}
     </section>
