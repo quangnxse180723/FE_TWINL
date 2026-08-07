@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import outfitSetsApi, { type OutfitSet } from '../../api/outfitSetsApi'
 import { PATHS } from '../../routes/paths'
 import { ArrowRight, Tag } from 'lucide-react'
+import bannerPhoiDo from '../../assets/images/banner-phoidо.jpg'
 import './OutfitSetsPage.css'
 
 export default function OutfitSetsPage() {
@@ -31,15 +32,17 @@ export default function OutfitSetsPage() {
     <div className="outfit-page">
       {/* Hero */}
       <section className="outfit-hero">
+        <img src={bannerPhoiDo} alt="Bộ Phối Đồ" className="outfit-hero__bg-img" />
+        <div className="outfit-hero__grid-deco" aria-hidden="true" />
         <div className="outfit-hero__inner">
           <p className="outfit-hero__label">B2C EXCLUSIVE</p>
-          <h1 className="outfit-hero__title">Bộ Phối Đồ<br />Được Tuyển Chọn</h1>
+          <h1 className="outfit-hero__title">Bộ Phối Đồ<br /><em>Được Tuyển Chọn</em></h1>
           <p className="outfit-hero__sub">
             Các bộ trang phục do TWINL phối sẵn — Mua lẻ hoặc mua nguyên set để nhận ưu đãi hấp dẫn.
           </p>
           <div className="outfit-hero__badges">
-            <span className="hero-badge">🛍 Mua 2 món → Giảm 5%</span>
-            <span className="hero-badge hero-badge--gold">✦ Mua nguyên set → Giảm 8–10%</span>
+            <span className="hero-badge">🚸 Mua 2 món → Giảm 5%</span>
+            <span className="hero-badge hero-badge--gold">✶ Mua nguyên set → Giảm 8–10%</span>
           </div>
         </div>
       </section>
@@ -47,6 +50,15 @@ export default function OutfitSetsPage() {
       {/* Grid */}
       <section className="outfit-grid-section">
         <div className="outfit-grid-container">
+          <div className="outfit-section-header">
+            <div>
+              <h2>Bộ sưu tập</h2>
+              <p>Tuyển chọn thủ công bởi đội ngũ TWINL</p>
+            </div>
+            {sets.length > 0 && (
+              <span className="outfit-section-count">{sets.length} bộ set</span>
+            )}
+          </div>
           {sets.length === 0 ? (
             <div className="outfit-empty">Chưa có bộ set nào. Hãy quay lại sau nhé!</div>
           ) : (
@@ -62,7 +74,6 @@ export default function OutfitSetsPage() {
                       <img src={set.coverImageUrl} alt={set.name} className="outfit-card__cover" />
                     ) : (
                       <div className="outfit-card__no-image">
-                        {/* Preview mosaic từ ảnh sản phẩm */}
                         <div className="outfit-card__mosaic">
                           {set.items.slice(0, 4).map(item => (
                             <div key={item.id} className="mosaic-cell">
@@ -84,23 +95,23 @@ export default function OutfitSetsPage() {
                     <div className="outfit-card__discount-badge">
                       <span>−{set.discountThresholdHigh}%</span>
                     </div>
-                  </div>
 
-                  <div className="outfit-card__body">
-                    <div className="outfit-card__meta">
-                      <span className="outfit-card__count">{set.itemCount} sản phẩm</span>
-                    </div>
-                    <h2 className="outfit-card__name">{set.name}</h2>
-                    {set.description && (
-                      <p className="outfit-card__desc">{set.description}</p>
-                    )}
-                    <div className="outfit-card__footer">
-                      <div className="outfit-card__price">
-                        <span className="price-label">Tổng gốc</span>
-                        <span className="price-val">{formatPrice(set.totalPrice)}</span>
+                    <div className="outfit-card__body">
+                      <div className="outfit-card__meta">
+                        <span className="outfit-card__count">{set.itemCount} sản phẩm</span>
                       </div>
-                      <div className="outfit-card__cta">
-                        Xem bộ <ArrowRight size={14} />
+                      <h2 className="outfit-card__name">{set.name}</h2>
+                      {set.description && (
+                        <p className="outfit-card__desc">{set.description}</p>
+                      )}
+                      <div className="outfit-card__footer">
+                        <div className="outfit-card__price">
+                          <span className="price-label">Tổng giá</span>
+                          <span className="price-val">{formatPrice(set.totalPrice)}</span>
+                        </div>
+                        <div className="outfit-card__cta">
+                          Xem bộ <ArrowRight size={14} />
+                        </div>
                       </div>
                     </div>
                   </div>

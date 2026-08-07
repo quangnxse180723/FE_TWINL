@@ -49,14 +49,6 @@ type LegitSlotState = {
   file: File | null; preview: string | null; originalUrl?: string
   validating: boolean; valid: boolean | null; errorMsg: string
 }
-const LEGIT_SLOTS: { key: LegitSlotKey; icon: string; title: string; hint: string; required: boolean }[] = [
-  { key: 'front', icon: '👕', title: 'Mặt trước', hint: 'Bắt buộc', required: true },
-  { key: 'back',  icon: '👕', title: 'Mặt sau', hint: 'Bắt buộc', required: true },
-  { key: 'tag',   icon: '🏷️', title: 'Mác/Logo/Size', hint: 'Bắt buộc', required: true },
-  { key: 'opt1',  icon: '📷', title: 'Ảnh phụ 1', hint: 'Không bắt buộc', required: false },
-  { key: 'opt2',  icon: '📷', title: 'Ảnh phụ 2', hint: 'Không bắt buộc', required: false },
-  { key: 'opt3',  icon: '📷', title: 'Ảnh phụ 3', hint: 'Không bắt buộc', required: false },
-]
 const emptyLegitSlot = (): LegitSlotState => ({ file: null, preview: null, validating: false, valid: null, errorMsg: '' })
 
 // Typewriter effect hook
@@ -90,15 +82,33 @@ export default function AdminProductFormPage() {
   const [isAutoFilling, setIsAutoFilling] = useState(false)
   const [aiSuggested, setAiSuggested] = useState<Record<string, boolean>>({})
   const [aiResult, setAiResult] = useState<AiAutoFillResult>({})
-  
+  const [productType, setProductType] = useState<'CLOTHING' | 'ACCESSORY'>('CLOTHING')
+
   const [legitSlots, setLegitSlots] = useState<Record<LegitSlotKey, LegitSlotState>>({
     front: emptyLegitSlot(), back: emptyLegitSlot(), tag: emptyLegitSlot(),
     opt1: emptyLegitSlot(), opt2: emptyLegitSlot(), opt3: emptyLegitSlot(),
   })
   const legitFileRefs = useRef<Partial<Record<LegitSlotKey, HTMLInputElement | null>>>({})
-  const validLegitSlots = [legitSlots.front, legitSlots.back, legitSlots.tag].filter(s => (s.file || s.preview) && s.valid !== false).length
 
-  const isEdit = Boolean(id)
+  const totalValidImages = Object.values(legitSlots).filter(s => (s.file || s.preview) && s.valid !== false).length
+  const validLegitSlots = [legitSlots.front, legitSlots.back, legitSlots.tag].filter(s => (s.file || s.preview) && s.valid !== false).length
+  const isImageRequirementMet = productType === 'ACCESSORY' ? totalValidImages >= 1 : validLegitSlots >= 3
+
+  const LEGIT_SLOTS: { key: LegitSlotKey; icon: string; title: string; hint: string; required: boolean }[] = productType === 'ACCESSORY' ? [
+    { key: 'front', icon: '📷', title: 'Ảnh 1', hint: 'Bắt buộc (Tối thiểu 1 ảnh)', required: true },
+    { key: 'back',  icon: '📷', title: 'Ảnh 2', hint: 'Tùy chọn', required: false },
+    { key: 'tag',   icon: '📷', title: 'Ảnh 3', hint: 'Tùy chọn', required: false },
+    { key: 'opt1',  icon: '📷', title: 'Ảnh 4', hint: 'Tùy chọn', required: false },
+    { key: 'opt2',  icon: '📷', title: 'Ảnh 5', hint: 'Tùy chọn', required: false },
+    { key: 'opt3',  icon: '📷', title: 'Ảnh 6', hint: 'Tùy chọn', required: false },
+  ] : [
+    { key: 'front', icon: '👕', title: 'Mặt trước', hint: 'Bắt buộc', required: true },
+    { key: 'back',  icon: '👕', title: 'Mặt sau', hint: 'Bắt buộc', required: true },
+    { key: 'tag',   icon: '🏷️', title: 'Mác/Logo/Size', hint: 'Bắt buộc', required: true },
+    { key: 'opt1',  icon: '📷', title: 'Ảnh phụ 1', hint: 'Không bắt buộc', required: false },
+    { key: 'opt2',  icon: '📷', title: 'Ảnh phụ 2', hint: 'Không bắt buộc', required: false },
+    { key: 'opt3',  icon: '📷', title: 'Ảnh phụ 3', hint: 'Không bắt buộc', required: false },
+  ]
 
   // Typewriter targets
   const [twName, setTwName] = useState('')
@@ -112,6 +122,8 @@ export default function AdminProductFormPage() {
   useEffect(() => {
     if (twDescEffect.displayed) setForm(p => ({ ...p, description: twDescEffect.displayed }))
   }, [twDescEffect.displayed])
+
+  const isEdit = Boolean(id)
 
   const { data } = useQuery({
     queryKey: ['admin-product', id],
@@ -204,6 +216,7 @@ export default function AdminProductFormPage() {
     try {
       const fd = new FormData()
       files.slice(0, 3).forEach(f => fd.append('files', f))
+      fd.append('productType', productType)
       const res = await fetch(`${API_BASE_URL}/api/v1/ai/autofill`, { method: 'POST', body: fd })
       if (!res.ok) throw new Error('AI trả về lỗi')
       const data: AiAutoFillResult = await res.json()
@@ -213,27 +226,36 @@ export default function AdminProductFormPage() {
       if (data.description) setTwDesc(data.description)
 
       let detectedCategoryId = form.categoryId;
-      if (data.categoryId && data.category) {
-        const numId = data.categoryId;
-        const exists = categories.some(cat => cat.id === numId || cat.children?.some(c => c.id === numId));
-        if (!exists) {
-          queryClient.setQueryData(['categories'], (prev: any) => {
-            return [...(prev || []), { id: numId, name: data.category, children: [] }];
-          });
-        }
-        detectedCategoryId = numId;
-      } else if (data.category) {
+      if (data.category) {
+        // 1. Tìm trong danh mục hiện có
+        let found = false;
         for (const cat of categories) {
           if (cat.name.toLowerCase() === data.category.toLowerCase()) {
             detectedCategoryId = cat.id;
+            found = true;
             break;
           }
           if (cat.children) {
-            const childMatch = cat.children.find(c => c.name.toLowerCase() === data.category?.toLowerCase());
+            const childMatch = cat.children.find(c => c.name.toLowerCase() === data.category!.toLowerCase());
             if (childMatch) {
               detectedCategoryId = childMatch.id;
+              found = true;
               break;
             }
+          }
+        }
+        // 2. Chưa có → tạo mới trong DB
+        if (!found && data.category) {
+          try {
+            // Xác định parentId: phụ kiện dưới "Phụ kiện", quần áo dưới parent phù hợp
+            const accessoryParent = categories.find(c => c.name === 'Phụ kiện');
+            const parentId = productType === 'ACCESSORY' && accessoryParent ? accessoryParent.id : null;
+            const newCat = await categoriesApi.create({ name: data.category, parentId });
+            detectedCategoryId = newCat.id;
+            queryClient.invalidateQueries({ queryKey: ['categories'] });
+            toast.info(`✨ Đã tạo danh mục mới: "${data.category}"`);
+          } catch {
+            toast.warn(`Không thể tạo danh mục "${data.category}" tự động.`);
           }
         }
       }
@@ -293,10 +315,17 @@ export default function AdminProductFormPage() {
     e.preventDefault()
     if (!form.categoryId) { setFormError('Vui lòng chọn danh mục trước khi lưu.'); return }
     
-    const requiredSlots = [legitSlots.front, legitSlots.back, legitSlots.tag]
-    if (requiredSlots.some(s => !s.preview)) {
-      toast.error('Vui lòng chụp đủ 3 ảnh bắt buộc (mặt trước, sau, mác).')
-      return
+    if (productType === 'ACCESSORY') {
+      if (!isImageRequirementMet) {
+        toast.error('Vui lòng tải lên tối thiểu 1 ảnh phụ kiện.')
+        return
+      }
+    } else {
+      const requiredSlots = [legitSlots.front, legitSlots.back, legitSlots.tag]
+      if (requiredSlots.some(s => !s.preview)) {
+        toast.error('Vui lòng chụp đủ 3 ảnh bắt buộc (mặt trước, sau, mác).')
+        return
+      }
     }
     if (!sizes.trim()) {
       toast.error('Vui lòng nhập kích thước sản phẩm.')
@@ -445,12 +474,14 @@ export default function AdminProductFormPage() {
                 <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
                   <div
                     className="h-full bg-gradient-to-r from-emerald-700 to-emerald-400 rounded-full transition-all duration-300"
-                    style={{ width: `${(validLegitSlots / 3) * 100}%` }}
+                    style={{ width: `${Math.min(100, productType === 'ACCESSORY' ? (totalValidImages / 1) * 100 : (validLegitSlots / 3) * 100)}%` }}
                   />
                 </div>
                 <div className="flex justify-between items-center mt-1">
                   <p className="text-[10px] text-gray-400">
-                    {`${validLegitSlots}/3 ảnh bắt buộc`}
+                    {productType === 'ACCESSORY'
+                      ? `${totalValidImages}/1 ảnh tối thiểu`
+                      : `${validLegitSlots}/3 ảnh bắt buộc`}
                   </p>
                 </div>
               </div>
@@ -458,11 +489,15 @@ export default function AdminProductFormPage() {
 
             {/* AI Auto Fill Button */}
             <div className="pt-5 border-t border-gray-100">
-              <button type="button" onClick={handleAutoFill} disabled={isAutoFilling || validLegitSlots < 3} className="w-full bg-gradient-to-r from-teal-800 to-green-500 hover:from-teal-700 hover:to-green-400 text-white rounded-xl py-3 px-4 font-bold text-sm flex items-center justify-center gap-2 shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+              <button type="button" onClick={handleAutoFill} disabled={isAutoFilling || !isImageRequirementMet} className="w-full bg-gradient-to-r from-teal-800 to-green-500 hover:from-teal-700 hover:to-green-400 text-white rounded-xl py-3 px-4 font-bold text-sm flex items-center justify-center gap-2 shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed">
                   <Sparkles size={16} className={isAutoFilling ? "animate-spin" : ""} />
                   {isAutoFilling ? 'AI đang phân tích...' : '2. Nhờ AI điền thông tin'}
               </button>
-              <p className="text-[10px] text-gray-400 mt-2 text-center">AI sẽ đọc chi tiết từ các ảnh kiểm định trên để viết mô tả cho bạn.</p>
+              <p className="text-[10px] text-gray-400 mt-2 text-center">
+                {productType === 'ACCESSORY'
+                  ? 'AI sẽ đọc chi tiết từ các ảnh phụ kiện trên để viết mô tả cho bạn.'
+                  : 'AI sẽ đọc chi tiết từ các ảnh kiểm định trên để viết mô tả cho bạn.'}
+              </p>
             </div>
           </div>
 
@@ -475,6 +510,39 @@ export default function AdminProductFormPage() {
                   <Sparkles size={14} /> AI đang điền...
                 </div>
               )}
+            </div>
+
+            {/* Loại sản phẩm Toggle */}
+            <div className="apf-field" style={{ marginBottom: '24px' }}>
+              <label>Loại sản phẩm đăng bán</label>
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <button
+                  type="button"
+                  onClick={() => { setProductType('CLOTHING'); setSizes(''); setForm(p => ({ ...p, defects: ['MINT'] })); }}
+                  style={{
+                    flex: 1, padding: '12px', borderRadius: '8px', fontWeight: 600, fontSize: '14px',
+                    border: productType === 'CLOTHING' ? '2px solid #059669' : '1px solid #dcdcdc',
+                    background: productType === 'CLOTHING' ? '#ecfdf5' : '#fff',
+                    color: productType === 'CLOTHING' ? '#065f46' : '#555',
+                    cursor: 'pointer', transition: 'all 0.2s'
+                  }}
+                >
+                  👕 Quần Áo
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setProductType('ACCESSORY'); setSizes('One Size'); setForm(p => ({ ...p, defects: ['MINT'] })); }}
+                  style={{
+                    flex: 1, padding: '12px', borderRadius: '8px', fontWeight: 600, fontSize: '14px',
+                    border: productType === 'ACCESSORY' ? '2px solid #059669' : '1px solid #dcdcdc',
+                    background: productType === 'ACCESSORY' ? '#ecfdf5' : '#fff',
+                    color: productType === 'ACCESSORY' ? '#065f46' : '#555',
+                    cursor: 'pointer', transition: 'all 0.2s'
+                  }}
+                >
+                  💍 Phụ Kiện
+                </button>
+              </div>
             </div>
 
             {/* Tên sản phẩm */}
@@ -491,7 +559,7 @@ export default function AdminProductFormPage() {
                   value={form.name}
                   onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
                   className={aiSuggested.name ? 'ai-filled' : ''}
-                  placeholder="Ví dụ: Áo khoác da vintage 90s"
+                  placeholder={productType === 'ACCESSORY' ? 'Ví dụ: Túi xách da vintage, Mũ bucket...' : 'Ví dụ: Áo khoác da vintage 90s'}
                   required
                 />
               )}
@@ -514,7 +582,8 @@ export default function AdminProductFormPage() {
                 />
               </div>
 
-              {/* Phong cách */}
+              {/* Phong cách - ẩn với phụ kiện */}
+              {productType !== 'ACCESSORY' && (
               <div className="apf-field">
                 <label>
                   Phong cách
@@ -528,6 +597,7 @@ export default function AdminProductFormPage() {
                   placeholder="Streetwear, Minimal, Vintage..."
                 />
               </div>
+              )}
             </div>
 
             <div className="apf-field-row">
@@ -568,7 +638,6 @@ export default function AdminProductFormPage() {
                     setFormError(''); 
                     const selectedId = Number(e.target.value);
                     let detectedGender = form.gender;
-                    // Auto-detect gender based on category parent
                     for (const cat of categories) {
                       if (cat.id === selectedId) { detectedGender = cat.name; break; }
                       if (cat.children?.some(child => child.id === selectedId)) {
@@ -583,7 +652,10 @@ export default function AdminProductFormPage() {
                   required
                 >
                   <option value={0} disabled>Chọn danh mục</option>
-                  {categories.map(c => (
+                  {(productType === 'ACCESSORY'
+                    ? categories.filter(c => c.name === 'Phụ kiện')
+                    : categories.filter(c => c.name !== 'Phụ kiện')
+                  ).map(c => (
                     <optgroup key={c.id} label={c.name}>
                       {c.children && c.children.length > 0 ? (
                         c.children.map(child => (
@@ -622,14 +694,23 @@ export default function AdminProductFormPage() {
                   {aiSuggested.condition && <span className="apf-ai-tag">✦ AI Gợi ý</span>}
                 </label>
                 <div className="apf-chips">
-                  {[
-                    { value: 'MINT', label: 'Không lỗi' },
-                    { value: 'MINOR_FLAW', label: 'Sờn nhẹ' },
-                    { value: 'STAINED', label: 'Bẩn/Ố vàng' },
-                    { value: 'MISSING_BUTTON', label: 'Mất cúc' },
-                    { value: 'TORN', label: 'Rách nhỏ' },
-                    { value: 'FADED', label: 'Phai màu' }
-                  ].map((defect) => (
+                  {(() => {
+                    return productType === 'ACCESSORY' ? [
+                      { value: 'MINT', label: 'Không lỗi' },
+                      { value: 'MINOR_FLAW', label: 'Sờn nhẹ' },
+                      { value: 'STAINED', label: 'Bẩn/Ố vàng' },
+                      { value: 'TORN', label: 'Rách nhỏ' },
+                      { value: 'FADED', label: 'Phai màu' },
+                      { value: 'OTHER', label: 'Trầy xước' }
+                    ] : [
+                      { value: 'MINT', label: 'Không lỗi' },
+                      { value: 'MINOR_FLAW', label: 'Sờn nhẹ' },
+                      { value: 'STAINED', label: 'Bẩn/Ố vàng' },
+                      { value: 'MISSING_BUTTON', label: 'Mất cúc' },
+                      { value: 'TORN', label: 'Rách nhỏ' },
+                      { value: 'FADED', label: 'Phai màu' }
+                    ];
+                  })().map((defect) => (
                     <label 
                       key={defect.value}
                       className={`apf-chip ${form.defects?.includes(defect.value) || (!form.defects?.length && defect.value === 'MINT') ? 'apf-chip--selected' : ''}`}
@@ -658,16 +739,44 @@ export default function AdminProductFormPage() {
 
             <div className="apf-field-row">
               {/* Size */}
-              <div className="apf-field">
-                <label>Size (phân cách bằng dấu phẩy) <span className="text-red-500">*</span></label>
-                <input
-                  required
-                  type="text"
-                  value={sizes}
-                  onChange={e => setSizes(e.target.value)}
-                  placeholder="S, M, L, XL"
-                />
-              </div>
+              {(() => {
+                return productType === 'ACCESSORY' ? (
+                  <div className="apf-field">
+                    <label>Kích thước phụ kiện <span className="text-red-500">*</span></label>
+                    <div style={{ display: 'flex', gap: '8px', marginBottom: '8px', flexWrap: 'wrap' }}>
+                      {['One Size', 'Free Size', 'S', 'M', 'L', 'XL'].map(sz => (
+                        <button
+                          key={sz} type="button"
+                          onClick={() => setSizes(sz)}
+                          style={{
+                            padding: '4px 12px', fontSize: '12px', borderRadius: '100px',
+                            border: sizes === sz ? '1px solid #059669' : '1px solid #d1d5db',
+                            background: sizes === sz ? '#059669' : '#fff',
+                            color: sizes === sz ? '#fff' : '#374151',
+                            cursor: 'pointer'
+                          }}
+                        >{sz}</button>
+                      ))}
+                    </div>
+                    <input
+                      required type="text" value={sizes}
+                      onChange={e => setSizes(e.target.value)}
+                      placeholder="Hoặc nhập tuỳ ý: One Size, 25cm..."
+                    />
+                  </div>
+                ) : (
+                  <div className="apf-field">
+                    <label>Size (phân cách bằng dấu phẩy) <span className="text-red-500">*</span></label>
+                    <input
+                      required
+                      type="text"
+                      value={sizes}
+                      onChange={e => setSizes(e.target.value)}
+                      placeholder="S, M, L, XL"
+                    />
+                  </div>
+                );
+              })()}
 
               {/* Trạng thái đăng bán */}
               <div className="apf-field">
@@ -681,27 +790,32 @@ export default function AdminProductFormPage() {
             </div>
 
             {/* Số đo chi tiết */}
-            <div className="apf-field">
-              <label>Số đo chi tiết (tuỳ chọn - tính bằng cm)</label>
-              <div className="apf-field-row" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
-                <div>
-                  <label style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px', display: 'block' }}>Dài</label>
-                  <input type="number" value={form.length ?? ''} onChange={e => setForm(p => ({ ...p, length: Number(e.target.value) || null }))} placeholder="Ví dụ: 124" />
+            {(() => {
+              if (productType === 'ACCESSORY') return null;
+              return (
+                <div className="apf-field">
+                  <label>Số đo chi tiết (tuỳ chọn - tính bằng cm)</label>
+                  <div className="apf-field-row" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
+                    <div>
+                      <label style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px', display: 'block' }}>Dài</label>
+                      <input type="number" value={form.length ?? ''} onChange={e => setForm(p => ({ ...p, length: Number(e.target.value) || null }))} placeholder="Ví dụ: 124" />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px', display: 'block' }}>Vai</label>
+                      <input type="number" value={form.shoulder ?? ''} onChange={e => setForm(p => ({ ...p, shoulder: Number(e.target.value) || null }))} placeholder="Ví dụ: 53" />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px', display: 'block' }}>Ngực</label>
+                      <input type="number" value={form.chest ?? ''} onChange={e => setForm(p => ({ ...p, chest: Number(e.target.value) || null }))} placeholder="Ví dụ: 116" />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px', display: 'block' }}>Eo</label>
+                      <input type="number" value={form.waist ?? ''} onChange={e => setForm(p => ({ ...p, waist: Number(e.target.value) || null }))} placeholder="Ví dụ: 116" />
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <label style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px', display: 'block' }}>Vai</label>
-                  <input type="number" value={form.shoulder ?? ''} onChange={e => setForm(p => ({ ...p, shoulder: Number(e.target.value) || null }))} placeholder="Ví dụ: 53" />
-                </div>
-                <div>
-                  <label style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px', display: 'block' }}>Ngực</label>
-                  <input type="number" value={form.chest ?? ''} onChange={e => setForm(p => ({ ...p, chest: Number(e.target.value) || null }))} placeholder="Ví dụ: 116" />
-                </div>
-                <div>
-                  <label style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px', display: 'block' }}>Eo</label>
-                  <input type="number" value={form.waist ?? ''} onChange={e => setForm(p => ({ ...p, waist: Number(e.target.value) || null }))} placeholder="Ví dụ: 116" />
-                </div>
-              </div>
-            </div>
+              );
+            })()}
             {/* Mô tả */}
             <div className="apf-field">
               <label>

@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { toast } from 'react-toastify'
@@ -7,7 +8,10 @@ import type { RootState } from '../../store'
 import { PATHS } from '../../routes/paths'
 import '../../styles/pages/home.css'
 
+import dealImg from '../../assets/images/deal.jpg'
+
 export default function HomePage() {
+  const [showDealPopup, setShowDealPopup] = useState(true)
   
   const user = useSelector((state: RootState) => state.auth.user)
   const navigate = useNavigate()
@@ -220,6 +224,18 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* ── DEAL POPUP MODAL ─────────────────────────────────────── */}
+      {showDealPopup && (
+        <div className="hp-deal-modal" onClick={() => setShowDealPopup(false)}>
+          <div className="hp-deal-modal__content" onClick={e => e.stopPropagation()}>
+            <button className="hp-deal-modal__close" onClick={() => setShowDealPopup(false)}>
+              &times;
+            </button>
+            <img src={dealImg} alt="Hot Deal Promotion" />
+          </div>
+        </div>
+      )}
 
     </div>
   )

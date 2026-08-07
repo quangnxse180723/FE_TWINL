@@ -81,6 +81,7 @@ export default function SellerDashboardPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [colors, setColors] = useState<{id: number, name: string}[]>([]);
   const [defects, setDefects] = useState<string[]>([]);
+  const [productType, setProductType] = useState<'CLOTHING' | 'ACCESSORY'>('CLOTHING');
 
   // AI Auto-fill states
   const [isAutoFilling, setIsAutoFilling] = useState(false);
@@ -93,14 +94,6 @@ export default function SellerDashboardPage() {
     file: File | null; preview: string | null
     validating: boolean; valid: boolean | null; errorMsg: string
   }
-  const LEGIT_SLOTS: { key: LegitSlotKey; icon: string; title: string; hint: string; required: boolean }[] = [
-    { key: 'front', icon: '👕', title: 'Mặt trước', hint: 'Bắt buộc', required: true },
-    { key: 'back',  icon: '👕', title: 'Mặt sau', hint: 'Bắt buộc', required: true },
-    { key: 'tag',   icon: '🏷️', title: 'Mác/Logo/Size', hint: 'Bắt buộc', required: true },
-    { key: 'opt1',  icon: '📷', title: 'Ảnh phụ 1', hint: 'Không bắt buộc', required: false },
-    { key: 'opt2',  icon: '📷', title: 'Ảnh phụ 2', hint: 'Không bắt buộc', required: false },
-    { key: 'opt3',  icon: '📷', title: 'Ảnh phụ 3', hint: 'Không bắt buộc', required: false },
-  ]
   const emptyLegitSlot = (): LegitSlotState => ({ file: null, preview: null, validating: false, valid: null, errorMsg: '' })
   const [legitSlots, setLegitSlots] = useState<Record<LegitSlotKey, LegitSlotState>>({
     front: emptyLegitSlot(), back: emptyLegitSlot(), tag: emptyLegitSlot(),
@@ -108,7 +101,25 @@ export default function SellerDashboardPage() {
   })
   const legitFileRefs = useRef<Partial<Record<LegitSlotKey, HTMLInputElement | null>>>({})
 
-  const validLegitSlots = [legitSlots.front, legitSlots.back, legitSlots.tag].filter(s => s.file && s.valid !== false).length
+  const totalValidImages = Object.values(legitSlots).filter(s => (s.file || s.preview) && s.valid !== false).length;
+  const validLegitSlots = [legitSlots.front, legitSlots.back, legitSlots.tag].filter(s => (s.file || s.preview) && s.valid !== false).length;
+  const isImageRequirementMet = productType === 'ACCESSORY' ? totalValidImages >= 1 : validLegitSlots >= 3;
+
+  const LEGIT_SLOTS: { key: LegitSlotKey; icon: string; title: string; hint: string; required: boolean }[] = productType === 'ACCESSORY' ? [
+    { key: 'front', icon: '📷', title: 'Ảnh 1', hint: 'Bắt buộc (Tối thiểu 1 ảnh)', required: true },
+    { key: 'back',  icon: '📷', title: 'Ảnh 2', hint: 'Tùy chọn', required: false },
+    { key: 'tag',   icon: '📷', title: 'Ảnh 3', hint: 'Tùy chọn', required: false },
+    { key: 'opt1',  icon: '📷', title: 'Ảnh 4', hint: 'Tùy chọn', required: false },
+    { key: 'opt2',  icon: '📷', title: 'Ảnh 5', hint: 'Tùy chọn', required: false },
+    { key: 'opt3',  icon: '📷', title: 'Ảnh 6', hint: 'Tùy chọn', required: false },
+  ] : [
+    { key: 'front', icon: '👕', title: 'Mặt trước', hint: 'Bắt buộc', required: true },
+    { key: 'back',  icon: '👕', title: 'Mặt sau', hint: 'Bắt buộc', required: true },
+    { key: 'tag',   icon: '🏷️', title: 'Mác/Logo/Size', hint: 'Bắt buộc', required: true },
+    { key: 'opt1',  icon: '📷', title: 'Ảnh phụ 1', hint: 'Không bắt buộc', required: false },
+    { key: 'opt2',  icon: '📷', title: 'Ảnh phụ 2', hint: 'Không bắt buộc', required: false },
+    { key: 'opt3',  icon: '📷', title: 'Ảnh phụ 3', hint: 'Không bắt buộc', required: false },
+  ]
   const [twName, setTwName] = useState('');
   const [twDesc, setTwDesc] = useState('');
   const twNameEffect = useTypewriter(twName, 20);
@@ -186,6 +197,7 @@ export default function SellerDashboardPage() {
     try {
       const fd = new FormData();
       files.slice(0, 3).forEach(f => fd.append('files', f));
+      fd.append('productType', productType);
       const res = await fetch(`${API_BASE_URL}/api/v1/ai/autofill`, { method: 'POST', body: fd });
       if (!res.ok) throw new Error('AI trả về lỗi');
       const data: AiAutoFillResult = await res.json();
@@ -195,25 +207,35 @@ export default function SellerDashboardPage() {
       if (data.description) setTwDesc(data.description);
 
       let detectedCategoryId = formData.categoryId;
-      if (data.categoryId && data.category) {
-        const strId = data.categoryId.toString();
-        const exists = categories.some(cat => cat.id.toString() === strId || cat.children?.some(c => c.id.toString() === strId));
-        if (!exists) {
-          setCategories(prev => [...prev, { id: data.categoryId!, name: data.category!, parentId: null, children: [] }]);
-        }
-        detectedCategoryId = strId;
-      } else if (data.category) {
+      if (data.category) {
+        // 1. Tìm trong danh mục hiện có
+        let found = false;
         for (const cat of categories) {
           if (cat.name.toLowerCase() === data.category.toLowerCase()) {
             detectedCategoryId = cat.id.toString();
+            found = true;
             break;
           }
           if (cat.children) {
-            const childMatch = cat.children.find(c => c.name.toLowerCase() === data.category?.toLowerCase());
+            const childMatch = cat.children.find(c => c.name.toLowerCase() === data.category!.toLowerCase());
             if (childMatch) {
               detectedCategoryId = childMatch.id.toString();
+              found = true;
               break;
             }
+          }
+        }
+        // 2. Chưa có → tạo mới trong DB
+        if (!found && data.category) {
+          try {
+            const accessoryParent = categories.find(c => c.name === 'Phụ kiện');
+            const parentId = productType === 'ACCESSORY' && accessoryParent ? accessoryParent.id : null;
+            const newCat = await categoriesApi.create({ name: data.category, parentId });
+            detectedCategoryId = newCat.id.toString();
+            setCategories(prev => [...prev, newCat]);
+            toast.info(`✨ Đã tạo danh mục mới: "${data.category}"`);
+          } catch {
+            toast.warn(`Không thể tạo danh mục "${data.category}" tự động.`);
           }
         }
       }
@@ -299,10 +321,17 @@ export default function SellerDashboardPage() {
   const handleCreateProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     const filesToUpload = Object.values(legitSlots).map(s => s.file).filter(Boolean) as File[];
-    const requiredFiles = [legitSlots.front.file, legitSlots.back.file, legitSlots.tag.file].filter(Boolean);
-    if (requiredFiles.length < 3) {
-      toast.error('Vui lòng chụp đủ 3 ảnh bắt buộc (mặt trước, sau, mác).');
-      return;
+    if (productType === 'ACCESSORY') {
+      if (filesToUpload.length < 1) {
+        toast.error('Vui lòng tải lên tối thiểu 1 ảnh phụ kiện.');
+        return;
+      }
+    } else {
+      const requiredFiles = [legitSlots.front.file, legitSlots.back.file, legitSlots.tag.file].filter(Boolean);
+      if (requiredFiles.length < 3) {
+        toast.error('Vui lòng chụp đủ 3 ảnh bắt buộc (mặt trước, sau, mác).');
+        return;
+      }
     }
     if (!sizes.trim()) {
       toast.error('Vui lòng nhập kích thước sản phẩm.');
@@ -941,12 +970,14 @@ export default function SellerDashboardPage() {
                             <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
                               <div
                                 className="h-full bg-gradient-to-r from-emerald-700 to-emerald-400 rounded-full transition-all duration-300"
-                                style={{ width: `${(validLegitSlots / 3) * 100}%` }}
+                                style={{ width: `${Math.min(100, productType === 'ACCESSORY' ? (totalValidImages / 1) * 100 : (validLegitSlots / 3) * 100)}%` }}
                               />
                             </div>
                             <div className="flex justify-between items-center mt-1">
                               <p className="text-[10px] text-gray-400">
-                                {`${validLegitSlots}/3 ảnh bắt buộc`}
+                                {productType === 'ACCESSORY'
+                                  ? `${totalValidImages}/1 ảnh tối thiểu`
+                                  : `${validLegitSlots}/3 ảnh bắt buộc`}
                               </p>
                             </div>
                           </div>
@@ -954,11 +985,15 @@ export default function SellerDashboardPage() {
 
                         {/* AI Auto Fill Button */}
                         <div className="pt-5 border-t border-gray-100">
-                          <button type="button" onClick={handleAutoFill} disabled={isAutoFilling || validLegitSlots < 3} className="w-full bg-gradient-to-r from-teal-800 to-green-500 hover:from-teal-700 hover:to-green-400 text-white rounded-xl py-3 px-4 font-bold text-sm flex items-center justify-center gap-2 shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                          <button type="button" onClick={handleAutoFill} disabled={isAutoFilling || !isImageRequirementMet} className="w-full bg-gradient-to-r from-teal-800 to-green-500 hover:from-teal-700 hover:to-green-400 text-white rounded-xl py-3 px-4 font-bold text-sm flex items-center justify-center gap-2 shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed">
                               <Sparkles size={16} className={isAutoFilling ? "animate-spin" : ""} />
                               {isAutoFilling ? 'AI đang phân tích...' : '2. Nhờ AI điền thông tin'}
                           </button>
-                          <p className="text-[10px] text-gray-400 mt-2 text-center">AI sẽ đọc chi tiết từ các ảnh kiểm định trên để viết mô tả cho bạn.</p>
+                          <p className="text-[10px] text-gray-400 mt-2 text-center">
+                            {productType === 'ACCESSORY'
+                              ? 'AI sẽ đọc chi tiết từ các ảnh phụ kiện trên để viết mô tả cho bạn.'
+                              : 'AI sẽ đọc chi tiết từ các ảnh kiểm định trên để viết mô tả cho bạn.'}
+                          </p>
                         </div>
                       </div>
 
@@ -970,6 +1005,34 @@ export default function SellerDashboardPage() {
                         </div>
 
                         <div className="space-y-5">
+                          {/* Loại sản phẩm Toggle */}
+                          <div className="mb-4">
+                            <label className="text-sm font-medium text-gray-700 block mb-2">Loại sản phẩm đăng bán</label>
+                            <div className="flex gap-3">
+                              <button
+                                type="button"
+                                onClick={() => { setProductType('CLOTHING'); setSizes(''); setDefects([]); }}
+                                className={`flex-1 py-3 px-4 rounded-lg font-bold text-sm transition-all ${
+                                  productType === 'CLOTHING' 
+                                    ? 'bg-green-50 border-2 border-green-600 text-green-700' 
+                                    : 'bg-white border border-gray-300 text-gray-600 hover:bg-gray-50'
+                                }`}
+                              >
+                                👕 Quần Áo
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => { setProductType('ACCESSORY'); setSizes('One Size'); setDefects([]); }}
+                                className={`flex-1 py-3 px-4 rounded-lg font-bold text-sm transition-all ${
+                                  productType === 'ACCESSORY' 
+                                    ? 'bg-green-50 border-2 border-green-600 text-green-700' 
+                                    : 'bg-white border border-gray-300 text-gray-600 hover:bg-gray-50'
+                                }`}
+                              >
+                                💍 Phụ Kiện
+                              </button>
+                            </div>
+                          </div>
                           {/* Tên */}
                           <div>
                             <label className="text-sm font-medium text-gray-700 flex items-center gap-2 mb-1.5">
@@ -977,7 +1040,7 @@ export default function SellerDashboardPage() {
                                 {aiSuggested.name && <span className="bg-green-50 text-green-600 border border-green-200 text-[10px] px-2 py-0.5 rounded-full font-bold leading-none">✦ AI Gợi ý</span>}
                             </label>
                             {isAutoFilling && !twNameEffect.done ? <div className="h-[42px] w-full bg-gradient-to-r from-gray-100 to-gray-200 rounded-lg animate-pulse" /> : 
-                            <input required type="text" name="name" value={formData.name} onChange={handleInputChange} placeholder="Ví dụ: Áo khoác dạ vintage" className={`w-full px-4 py-2.5 border rounded-lg outline-none transition-colors ${aiSuggested.name ? 'bg-green-50/30 border-green-300 focus:border-green-500' : 'border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100'}`} />}
+                            <input required type="text" name="name" value={formData.name} onChange={handleInputChange} placeholder={productType === 'ACCESSORY' ? 'Ví dụ: Túi xách da vintage, Mũ bucket...' : 'Ví dụ: Áo khoác dạ vintage'} className={`w-full px-4 py-2.5 border rounded-lg outline-none transition-colors ${aiSuggested.name ? 'bg-green-50/30 border-green-300 focus:border-green-500' : 'border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100'}`} />}
                           </div>
 
                           <div className="grid grid-cols-2 gap-5">
@@ -1017,7 +1080,10 @@ export default function SellerDashboardPage() {
                                 setFormData(prev => ({ ...prev, categoryId: selectedId, gender: detectedGender }));
                               }} className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all bg-white">
                                 <option value="" disabled>Chọn danh mục</option>
-                                {categories.map((category) => (
+                                {(productType === 'ACCESSORY'
+                                  ? categories.filter(c => c.name === 'Phụ kiện')
+                                  : categories.filter(c => c.name !== 'Phụ kiện')
+                                ).map((category) => (
                                   <optgroup key={category.id} label={category.name}>
                                     {category.children && category.children.length > 0 ? (
                                       category.children.map(child => (
@@ -1031,7 +1097,8 @@ export default function SellerDashboardPage() {
                               </select>
                             </div>
 
-                            {/* Phong cách */}
+                            {/* Phong cách - ẩn với phụ kiện */}
+                            {productType !== 'ACCESSORY' && (
                             <div>
                               <label className="text-sm font-medium text-gray-700 flex items-center gap-2 mb-1.5">
                                   Phong cách 
@@ -1039,6 +1106,7 @@ export default function SellerDashboardPage() {
                               </label>
                               <input type="text" name="style" value={formData.style} onChange={handleInputChange} placeholder="Streetwear, Minimal..." className={`w-full px-4 py-2.5 border rounded-lg outline-none transition-colors ${aiSuggested.style ? 'bg-green-50/30 border-green-300 focus:border-green-500' : 'border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100'}`} />
                             </div>
+                            )}
 
                             {/* Stock */}
                             <div>
@@ -1078,14 +1146,27 @@ export default function SellerDashboardPage() {
                                 {aiSuggested.condition && <span className="bg-green-50 text-green-600 border border-green-200 text-[10px] px-2 py-0.5 rounded-full font-bold leading-none">✦ AI Gợi ý</span>}
                               </label>
                               <div className="flex flex-wrap gap-2">
-                                {[
-                                  { value: 'MINT', label: 'Không lỗi' },
-                                  { value: 'MINOR_FLAW', label: 'Sờn nhẹ' },
-                                  { value: 'STAINED', label: 'Bẩn/Ố vàng' },
-                                  { value: 'MISSING_BUTTON', label: 'Mất cúc' },
-                                  { value: 'TORN', label: 'Rách nhỏ' },
-                                  { value: 'FADED', label: 'Phai màu' }
-                                ].map((defect) => (
+                                {(() => {
+                                  const isAccessory = productType === 'ACCESSORY';
+                                  const defectList = isAccessory
+                                    ? [
+                                        { value: 'MINT', label: 'Không lỗi' },
+                                        { value: 'MINOR_FLAW', label: 'Sờn nhẹ' },
+                                        { value: 'STAINED', label: 'Bẩn/Ố vàng' },
+                                        { value: 'TORN', label: 'Rách nhỏ' },
+                                        { value: 'FADED', label: 'Phai màu' },
+                                        { value: 'OTHER', label: 'Trầy xước' },
+                                      ]
+                                    : [
+                                        { value: 'MINT', label: 'Không lỗi' },
+                                        { value: 'MINOR_FLAW', label: 'Sờn nhẹ' },
+                                        { value: 'STAINED', label: 'Bẩn/Ố vàng' },
+                                        { value: 'MISSING_BUTTON', label: 'Mất cúc' },
+                                        { value: 'TORN', label: 'Rách nhỏ' },
+                                        { value: 'FADED', label: 'Phai màu' },
+                                      ];
+                                  return defectList;
+                                })().map((defect) => (
                                   <label 
                                     key={defect.value}
                                     className={`px-3 py-1.5 text-xs font-medium rounded-full cursor-pointer transition-all border ${
@@ -1117,34 +1198,71 @@ export default function SellerDashboardPage() {
                             </div>
                           </div>
 
-                          {/* Kích thước */}
-                          <div className="mt-5">
-                            <label className="text-sm font-medium text-gray-700 flex items-center gap-2 mb-1.5">Kích thước (phân cách dấu phẩy) <span className="text-red-500">*</span></label>
-                            <input required type="text" value={sizes} onChange={(e) => setSizes(e.target.value)} placeholder="Ví dụ: S, M, L, XL" className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all" />
-                          </div>
+                          {/* Kích thước — thích nghi theo loại SP */}
+                          {(() => {
+                            const isAccessory = productType === 'ACCESSORY';
+                            return isAccessory ? (
+                              <div className="mt-5">
+                                <label className="text-sm font-medium text-gray-700 flex items-center gap-2 mb-2">
+                                  Kích thước phụ kiện <span className="text-red-500">*</span>
+                                  <span className="text-xs text-gray-400">(chọn hoặc nhập tự do)</span>
+                                </label>
+                                <div className="flex flex-wrap gap-2 mb-2">
+                                  {['One Size', 'Free Size', 'S', 'M', 'L', 'XL'].map(sz => (
+                                    <button
+                                      key={sz} type="button"
+                                      onClick={() => setSizes(sz)}
+                                      className={`px-3 py-1.5 text-xs font-medium rounded-full border transition-all ${
+                                        sizes === sz
+                                          ? 'bg-blue-600 text-white border-blue-600'
+                                          : 'border-gray-300 text-gray-600 hover:border-blue-400'
+                                      }`}
+                                    >{sz}</button>
+                                  ))}
+                                </div>
+                                <input
+                                  required type="text" value={sizes}
+                                  onChange={(e) => setSizes(e.target.value)}
+                                  placeholder="Hoặc nhập tuỳ ý: One Size, 25cm..."
+                                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all"
+                                />
+                              </div>
+                            ) : (
+                              <div className="mt-5">
+                                <label className="text-sm font-medium text-gray-700 flex items-center gap-2 mb-1.5">Kích thước (phân cách dấu phẩy) <span className="text-red-500">*</span></label>
+                                <input required type="text" value={sizes} onChange={(e) => setSizes(e.target.value)} placeholder="Ví dụ: S, M, L, XL" className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all" />
+                              </div>
+                            );
+                          })()}
 
-                          {/* Số đo chi tiết */}
-                          <div className="mt-5">
-                            <label className="text-sm font-medium text-gray-700 flex items-center gap-2 mb-1.5">Số đo chi tiết (tuỳ chọn - tính bằng cm)</label>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                              <div>
-                                <label className="text-xs text-gray-500 mb-1 block">Dài</label>
-                                <input type="number" name="length" value={formData.length} onChange={handleInputChange} placeholder="Ví dụ: 124" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all" />
+                          {/* Số đo chi tiết — ẩn nếu là phụ kiện */}
+                          {(() => {
+                            const isAccessory = productType === 'ACCESSORY';
+                            if (isAccessory) return null;
+                            return (
+                              <div className="mt-5">
+                                <label className="text-sm font-medium text-gray-700 flex items-center gap-2 mb-1.5">Số đo chi tiết (tuỳ chọn - tính bằng cm)</label>
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                  <div>
+                                    <label className="text-xs text-gray-500 mb-1 block">Dài</label>
+                                    <input type="number" name="length" value={formData.length} onChange={handleInputChange} placeholder="Ví dụ: 124" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all" />
+                                  </div>
+                                  <div>
+                                    <label className="text-xs text-gray-500 mb-1 block">Vai</label>
+                                    <input type="number" name="shoulder" value={formData.shoulder} onChange={handleInputChange} placeholder="Ví dụ: 53" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all" />
+                                  </div>
+                                  <div>
+                                    <label className="text-xs text-gray-500 mb-1 block">Ngực</label>
+                                    <input type="number" name="chest" value={formData.chest} onChange={handleInputChange} placeholder="Ví dụ: 116" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all" />
+                                  </div>
+                                  <div>
+                                    <label className="text-xs text-gray-500 mb-1 block">Eo</label>
+                                    <input type="number" name="waist" value={formData.waist} onChange={handleInputChange} placeholder="Ví dụ: 116" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all" />
+                                  </div>
+                                </div>
                               </div>
-                              <div>
-                                <label className="text-xs text-gray-500 mb-1 block">Vai</label>
-                                <input type="number" name="shoulder" value={formData.shoulder} onChange={handleInputChange} placeholder="Ví dụ: 53" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all" />
-                              </div>
-                              <div>
-                                <label className="text-xs text-gray-500 mb-1 block">Ngực</label>
-                                <input type="number" name="chest" value={formData.chest} onChange={handleInputChange} placeholder="Ví dụ: 116" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all" />
-                              </div>
-                              <div>
-                                <label className="text-xs text-gray-500 mb-1 block">Eo</label>
-                                <input type="number" name="waist" value={formData.waist} onChange={handleInputChange} placeholder="Ví dụ: 116" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all" />
-                              </div>
-                            </div>
-                          </div>
+                            );
+                          })()}
 
                           {/* Màu sắc */}
                           <div>

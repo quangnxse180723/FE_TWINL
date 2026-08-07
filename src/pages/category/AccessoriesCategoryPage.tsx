@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import productsApi, { type Product } from '../../api/products/productsApi'
 import { PATHS } from '../../routes/paths'
 import '../../styles/pages/category.css'
+import bannerPhuKien from '../../assets/images/banner-phukien.png'
 
 export default function AccessoriesCategoryPage() {
   const [products, setProducts] = useState<Product[]>([])
@@ -93,9 +94,10 @@ export default function AccessoriesCategoryPage() {
   return (
     <section className="category">
       <div className="category__hero">
-        <div className="category__hero-content" style={{background: 'linear-gradient(135deg, #1e293b, #0f172a)', padding: '60px 0', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'}}>
-          <h1 style={{color: 'white', marginBottom: '10px'}}>Phụ Kiện</h1>
-          <p style={{color: '#94a3b8', margin: 0}}>Điểm nhấn hoàn hảo cho mọi trang phục</p>
+        <img src={bannerPhuKien} alt="Phụ Kiện" />
+        <div className="category__hero-content">
+          <h1>Phụ Kiện</h1>
+          <p>Điểm nhấn hoàn hảo cho mọi trang phục</p>
         </div>
       </div>
 
@@ -166,12 +168,13 @@ export default function AccessoriesCategoryPage() {
           </div>
 
           <h3 className="category__sidebar-title">SIZE</h3>
-          <div className="category__size-grid">
-            {['XS', 'S', 'M', 'L', 'XL', 'XXL'].map((size) => (
+          <div className="category__size-grid" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
+            {['One Size', 'Free Size', 'S', 'M', 'L', 'XL'].map((size) => (
               <div 
                 key={size}
                 onClick={() => { setSelectedSize(selectedSize === size ? '' : size); setPage(0) }}
                 className={`category__size-btn ${selectedSize === size ? 'is-active' : ''}`}
+                style={{ fontSize: '10px' }}
               >
                 {size}
               </div>
@@ -193,9 +196,9 @@ export default function AccessoriesCategoryPage() {
           </div>
 
           <h3 className="category__sidebar-title">TÌNH TRẠNG LỖI</h3>
-          <div className="category__size-grid">
-            {['MINT', 'MINOR_FLAW', 'STAINED', 'MISSING_BUTTON', 'TORN', 'FADED'].map((defect) => {
-              const defectLabel = { MINT: 'Không lỗi', MINOR_FLAW: 'Sờn nhẹ', STAINED: 'Bẩn/Ố', MISSING_BUTTON: 'Mất cúc', TORN: 'Rách nhỏ', FADED: 'Phai màu' }[defect];
+          <div className="category__size-grid" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
+            {['MINT', 'MINOR_FLAW', 'STAINED', 'TORN', 'FADED', 'OTHER'].map((defect) => {
+              const defectLabel = { MINT: 'Không lỗi', MINOR_FLAW: 'Sờn nhẹ', STAINED: 'Bẩn/Ố', TORN: 'Rách nhỏ', FADED: 'Phai màu', OTHER: 'Trầy xước' }[defect as keyof typeof defectLabel];
               return (
                 <div 
                   key={defect}
