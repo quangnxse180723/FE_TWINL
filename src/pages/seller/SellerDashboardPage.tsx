@@ -207,36 +207,18 @@ export default function SellerDashboardPage() {
       if (data.description) setTwDesc(data.description);
 
       let detectedCategoryId = formData.categoryId;
-      if (data.category) {
-        // 1. Tìm trong danh mục hiện có
-        let found = false;
-        for (const cat of categories) {
-          if (cat.name.toLowerCase() === data.category.toLowerCase()) {
-            detectedCategoryId = cat.id.toString();
-            found = true;
-            break;
-          }
-          if (cat.children) {
-            const childMatch = cat.children.find(c => c.name.toLowerCase() === data.category!.toLowerCase());
-            if (childMatch) {
-              detectedCategoryId = childMatch.id.toString();
-              found = true;
-              break;
-            }
-          }
-        }
-        // 2. Chưa có → tạo mới trong DB
-        if (!found && data.category) {
-          try {
-            const accessoryParent = categories.find(c => c.name === 'Phụ kiện');
-            const parentId = productType === 'ACCESSORY' && accessoryParent ? accessoryParent.id : null;
-            const newCat = await categoriesApi.create({ name: data.category, parentId });
-            detectedCategoryId = newCat.id.toString();
-            setCategories(prev => [...prev, newCat]);
-            toast.info(`✨ Đã tạo danh mục mới: "${data.category}"`);
-          } catch {
-            toast.warn(`Không thể tạo danh mục "${data.category}" tự động.`);
-          }
+      if (data.categoryId) {
+        detectedCategoryId = data.categoryId.toString();
+        
+        // Check if it's already in our categories list, if not we should refresh
+        const exists = categories.some(c => 
+          c.id.toString() === detectedCategoryId || c.children?.some(child => child.id.toString() === detectedCategoryId)
+        );
+        if (!exists) {
+          // Trigger a re-fetch of categories to get the newly created one
+          categoriesApi.list().then(updatedCategories => {
+            setCategories(updatedCategories);
+          }).catch(console.error);
         }
       }
 

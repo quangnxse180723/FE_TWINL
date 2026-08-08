@@ -59,7 +59,6 @@ export default function AccessoriesCategoryPage() {
         page,
         sizePage: 8,
       }
-      if (selectedCategory) params.gender = 'Phụ kiện'
       if (searchKeyword) params.search = searchKeyword
       if (minPrice) params.minPrice = minPrice
       if (maxPrice) params.maxPrice = maxPrice

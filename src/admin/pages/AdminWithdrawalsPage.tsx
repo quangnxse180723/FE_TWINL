@@ -71,11 +71,28 @@ export default function AdminWithdrawalsPage() {
     }
   };
 
-  const formatMoney = (amount: number) => {
+  const formatDateTime = (value: any) => {
+    if (!value) return '';
+    if (Array.isArray(value)) {
+      if (value.length >= 6) {
+        return new Date(value[0], value[1] - 1, value[2], value[3], value[4], value[5]).toLocaleString('vi-VN');
+      } else if (value.length >= 3) {
+        return new Date(value[0], value[1] - 1, value[2]).toLocaleString('vi-VN');
+      }
+    }
+    const date = new Date(value);
+    if (isNaN(date.getTime())) return '';
+    return date.toLocaleString('vi-VN');
+  };
+
+  const formatMoney = (amount: number | null | undefined) => {
+    if (amount == null) return '0 ₫';
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
   };
 
-  const filteredWithdrawals = withdrawals.filter(w => {
+  const safeWithdrawals = Array.isArray(withdrawals) ? withdrawals : [];
+
+  const filteredWithdrawals = safeWithdrawals.filter(w => {
     if (filter === 'PENDING') return w.status === 'PENDING';
     return w.status === 'SUCCESS' || w.status === 'FAILED';
   });
@@ -115,7 +132,7 @@ export default function AdminWithdrawalsPage() {
         </div>
         <div className="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2">
           <Banknote size={18} />
-          {withdrawals.filter(w => w.status === 'PENDING').length} Yêu cầu chờ duyệt
+          {safeWithdrawals.filter(w => w.status === 'PENDING').length} Yêu cầu chờ duyệt
         </div>
       </div>
 
@@ -160,7 +177,7 @@ export default function AdminWithdrawalsPage() {
                       </div>
                     </td>
                     <td className="p-4 text-sm text-gray-600">
-                      {new Date(item.createdAt).toLocaleString('vi-VN')}
+                      {formatDateTime(item.createdAt)}
                     </td>
                     <td className="p-4">
                       {getStatusBadge(item.status)}
