@@ -180,7 +180,13 @@ export default function AdminProductFormPage() {
       queryClient.invalidateQueries({ queryKey: ['admin-products'] })
       navigate(PATHS.adminProducts)
     },
-    onError: () => toast.error('Lưu sản phẩm thất bại, vui lòng thử lại.'),
+    onError: (err: any) => {
+      let errorMsg = err.response?.data?.message || err.response?.data?.error || 'Không xác định';
+      if (err.response?.data?.errors && Array.isArray(err.response.data.errors)) {
+        errorMsg = err.response.data.errors.map((e: any) => `${e.field}: ${e.defaultMessage}`).join(', ');
+      }
+      toast.error('Lưu sản phẩm thất bại: ' + errorMsg);
+    },
   })
 
   const handleLegitSlotChange = async (slotKey: LegitSlotKey, file: File | null) => {
