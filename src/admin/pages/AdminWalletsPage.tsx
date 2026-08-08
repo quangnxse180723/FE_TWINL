@@ -59,94 +59,93 @@ export default function AdminWalletsPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'SUCCESS':
-        return <span className="admin__badge admin__badge--success">Thành công</span>
+        return <span className="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-medium">Thành công</span>
       case 'PENDING':
-        return <span className="admin__badge admin__badge--warning">Chờ xử lý</span>
+        return <span className="bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full text-xs font-medium">Chờ xử lý</span>
       case 'FAILED':
-        return <span className="admin__badge admin__badge--danger">Thất bại</span>
+        return <span className="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs font-medium">Thất bại</span>
       default:
-        return <span className="admin__badge">{status}</span>
+        return <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded-full text-xs font-medium">{status}</span>
     }
   }
 
   return (
-    <div className="admin__page fade-in">
-      <div className="admin__page-header">
+    <div className="p-6 md:p-8 fade-in">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="admin__page-title">Quản lý Giải ngân</h1>
-          <p className="admin__page-subtitle">Theo dõi số dư và lịch sử giải ngân của tài khoản</p>
+          <h1 className="text-2xl font-bold text-gray-800">Quản lý Giải ngân</h1>
+          <p className="text-gray-500 mt-1">Theo dõi số dư và lịch sử giải ngân của tài khoản</p>
         </div>
-        <button className="btn btn--primary" onClick={fetchWallets}>
+        <button className="flex items-center gap-2 bg-white border border-gray-200 text-gray-700 px-4 py-2 rounded-xl hover:bg-gray-50 transition-colors shadow-sm" onClick={fetchWallets}>
           <RefreshCcw size={18} /> Cập nhật
         </button>
       </div>
 
-      <div className="admin__card">
-        <div className="admin__card-header" style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-          <div className="admin__search" style={{ flex: 1, maxWidth: '400px', display: 'flex', alignItems: 'center', background: 'var(--bg-secondary)', padding: '0.5rem 1rem', borderRadius: 'var(--radius-md)' }}>
-            <Search size={20} style={{ color: 'var(--text-muted)' }} />
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="p-4 border-b border-gray-100">
+          <div className="flex items-center gap-2 bg-gray-50 px-4 py-2.5 rounded-xl border border-gray-200 max-w-md">
+            <Search size={18} className="text-gray-400" />
             <input
               type="text"
               placeholder="Tìm kiếm theo tên, email..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              style={{ border: 'none', background: 'transparent', outline: 'none', paddingLeft: '0.5rem', width: '100%' }}
+              className="bg-transparent border-none outline-none w-full text-sm placeholder-gray-400"
             />
           </div>
         </div>
 
-        <div className="admin__table-container">
-          <table className="admin__table">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse min-w-[800px]">
             <thead>
-              <tr>
-                <th>Người dùng</th>
-                <th>Số dư khả dụng</th>
-                <th>Chờ giải ngân</th>
-                <th>Ngân hàng</th>
-                <th>Hành động</th>
+              <tr className="bg-gray-50 text-gray-600 text-sm border-b border-gray-100">
+                <th className="p-4 font-semibold">Người dùng</th>
+                <th className="p-4 font-semibold">Số dư khả dụng</th>
+                <th className="p-4 font-semibold">Chờ giải ngân</th>
+                <th className="p-4 font-semibold">Ngân hàng</th>
+                <th className="p-4 font-semibold">Hành động</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={5} style={{ textAlign: 'center', padding: '2rem' }}>Đang tải...</td>
+                  <td colSpan={5} className="text-center p-8 text-gray-500">Đang tải...</td>
                 </tr>
               ) : filteredWallets.length === 0 ? (
                 <tr>
-                  <td colSpan={5} style={{ textAlign: 'center', padding: '2rem' }}>Không tìm thấy ví nào</td>
+                  <td colSpan={5} className="text-center p-8 text-gray-500">Không tìm thấy ví nào</td>
                 </tr>
               ) : (
                 filteredWallets.map((wallet) => (
-                  <tr key={wallet.userId}>
-                    <td>
-                      <div style={{ fontWeight: '500' }}>{wallet.sellerName}</div>
-                      <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{wallet.sellerEmail}</div>
+                  <tr key={wallet.userId} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                    <td className="p-4">
+                      <div className="font-semibold text-gray-800">{wallet.sellerName}</div>
+                      <div className="text-sm text-gray-500">{wallet.sellerEmail}</div>
                     </td>
-                    <td>
-                      <span style={{ fontWeight: '600', color: 'var(--success-color)' }}>
+                    <td className="p-4">
+                      <span className="font-semibold text-green-600">
                         {formatPrice(wallet.balance)}
                       </span>
                     </td>
-                    <td>
-                      <span style={{ fontWeight: '600', color: 'var(--warning-color)' }}>
+                    <td className="p-4">
+                      <span className="font-semibold text-orange-500">
                         {formatPrice(wallet.escrowBalance)}
                       </span>
                     </td>
-                    <td>
+                    <td className="p-4">
                       {wallet.bankName ? (
                         <>
-                          <div style={{ fontSize: '0.9rem', fontWeight: '500' }}>{wallet.bankName}</div>
-                          <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{wallet.bankAccountNumber}</div>
+                          <div className="font-semibold text-sm text-gray-800">{wallet.bankName}</div>
+                          <div className="text-xs text-gray-500 font-mono mt-0.5">{wallet.bankAccountNumber}</div>
                         </>
                       ) : (
-                        <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Chưa cập nhật</span>
+                        <span className="text-sm text-gray-400 italic">Chưa cập nhật</span>
                       )}
                     </td>
-                    <td>
+                    <td className="p-4">
                       <button
-                        className="btn btn--outline"
-                        style={{ padding: '0.4rem 0.75rem', fontSize: '0.9rem' }}
                         onClick={() => handleViewHistory(wallet)}
+                        className="inline-flex items-center gap-1.5 text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
                       >
                         <History size={16} /> Lịch sử
                       </button>
@@ -159,86 +158,66 @@ export default function AdminWalletsPage() {
         </div>
       </div>
 
-      {/* Modal Lịch sử giao dịch */}
       {selectedUser && (
-        <div className="admin__modal" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div className="admin__modal-content" style={{ width: '900px', maxWidth: '95vw', maxHeight: '90vh', overflowY: 'auto', padding: '2rem', background: 'var(--bg-main)', borderRadius: 'var(--radius-lg)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={() => setSelectedUser(null)}>
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-3xl max-h-[85vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-6 border-b border-gray-100">
               <div>
-                <h2 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '0.25rem' }}>
-                  Lịch sử giao dịch - {selectedUser.sellerName}
-                </h2>
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>{selectedUser.sellerEmail}</p>
+                <h3 className="text-xl font-bold text-gray-800">Lịch sử giao dịch</h3>
+                <p className="text-sm text-gray-500 mt-1">
+                  Người dùng: <span className="font-medium text-gray-700">{selectedUser.sellerName}</span> ({selectedUser.sellerEmail})
+                </p>
               </div>
-              <button onClick={() => setSelectedUser(null)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-color)' }}>
-                <X size={24} />
+              <button 
+                onClick={() => setSelectedUser(null)}
+                className="text-gray-400 hover:bg-gray-100 hover:text-gray-600 p-2 rounded-full transition-colors"
+              >
+                <X size={20} />
               </button>
             </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
-              <div style={{ background: 'var(--bg-secondary)', padding: '1rem', borderRadius: 'var(--radius-md)' }}>
-                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Số dư khả dụng</div>
-                <div style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--success-color)' }}>{formatPrice(selectedUser.balance)}</div>
-              </div>
-              <div style={{ background: 'var(--bg-secondary)', padding: '1rem', borderRadius: 'var(--radius-md)' }}>
-                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Chờ giải ngân</div>
-                <div style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--warning-color)' }}>{formatPrice(selectedUser.escrowBalance)}</div>
-              </div>
-            </div>
-
-            <div className="admin__table-container">
-              <table className="admin__table">
-                <thead>
-                  <tr>
-                    <th>Thời gian</th>
-                    <th>Loại</th>
-                    <th>Số tiền</th>
-                    <th>Trạng thái</th>
-                    <th>Mô tả</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {txLoading ? (
-                    <tr>
-                      <td colSpan={5} style={{ textAlign: 'center', padding: '2rem' }}>Đang tải lịch sử...</td>
-                    </tr>
-                  ) : transactions.length === 0 ? (
-                    <tr>
-                      <td colSpan={5} style={{ textAlign: 'center', padding: '2rem' }}>Chưa có giao dịch nào</td>
-                    </tr>
-                  ) : (
-                    transactions.map((tx) => (
-                      <tr key={tx.id}>
-                        <td style={{ fontSize: '0.9rem' }}>{formatDate(tx.createdAt)}</td>
-                        <td>
-                          <span style={{ 
-                            fontSize: '0.75rem', 
-                            padding: '0.2rem 0.5rem', 
-                            borderRadius: '4px',
-                            background: 'var(--bg-secondary)',
-                            fontWeight: '600'
-                          }}>
-                            {tx.type}
-                          </span>
-                        </td>
-                        <td>
-                          <span style={{ 
-                            fontWeight: '600', 
-                            color: tx.amount > 0 ? 'var(--success-color)' : tx.amount < 0 ? 'var(--danger-color)' : 'var(--text-color)' 
-                          }}>
-                            {tx.amount > 0 ? '+' : ''}{formatPrice(tx.amount)}
-                          </span>
-                        </td>
-                        <td>{getStatusBadge(tx.status)}</td>
-                        <td style={{ fontSize: '0.9rem', maxWidth: '300px' }}>
-                          {tx.description}
-                          {tx.orderCode && <div style={{ fontSize: '0.8rem', color: 'var(--primary-color)', marginTop: '0.25rem' }}>Đơn: {tx.orderCode}</div>}
-                        </td>
+            
+            <div className="flex-1 overflow-y-auto p-6">
+              {txLoading ? (
+                <div className="text-center p-8 text-gray-500">Đang tải lịch sử...</div>
+              ) : transactions.length === 0 ? (
+                <div className="text-center p-8 text-gray-500">Chưa có giao dịch nào.</div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse text-sm">
+                    <thead>
+                      <tr className="bg-gray-50 text-gray-600 border-b border-gray-100">
+                        <th className="p-3 font-semibold">Thời gian</th>
+                        <th className="p-3 font-semibold">Loại</th>
+                        <th className="p-3 font-semibold text-right">Số tiền</th>
+                        <th className="p-3 font-semibold text-center">Trạng thái</th>
+                        <th className="p-3 font-semibold">Mô tả</th>
                       </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
+                    </thead>
+                    <tbody>
+                      {transactions.map((tx) => (
+                        <tr key={tx.id} className="border-b border-gray-50 hover:bg-gray-50/50">
+                          <td className="p-3 text-gray-600">{formatDate(tx.createdAt)}</td>
+                          <td className="p-3">
+                            <span className={`font-medium ${tx.type === 'DEPOSIT' || tx.type === 'REFUND' ? 'text-green-600' : 'text-blue-600'}`}>
+                              {tx.type}
+                            </span>
+                          </td>
+                          <td className="p-3 text-right">
+                            <span className={`font-semibold ${tx.amount > 0 ? 'text-green-600' : 'text-red-500'}`}>
+                              {tx.amount > 0 ? '+' : ''}{formatPrice(tx.amount)}
+                            </span>
+                          </td>
+                          <td className="p-3 text-center">{getStatusBadge(tx.status)}</td>
+                          <td className="p-3 text-gray-500 truncate max-w-[200px]" title={tx.description}>
+                            {tx.description}
+                            {tx.orderCode && <div className="text-xs text-blue-500 mt-1">Đơn: {tx.orderCode}</div>}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           </div>
         </div>
