@@ -141,7 +141,7 @@ export default function AdminProductFormPage() {
         style: data.style ?? '', stock: data.stock, sizes: data.sizes ?? [], colorIds: data.colorIds ?? [],
         conditionPercentage: data.conditionPercentage ?? 100, length: data.length ?? null,
         shoulder: data.shoulder ?? null, chest: data.chest ?? null, waist: data.waist ?? null,
-        defects: data.defects && data.defects.length > 0 ? data.defects : ['MINT']
+        defects: data.defects && data.defects.length > 0 ? data.defects.filter(d => ['MINT', 'MINOR_FLAW', 'STAINED', 'MISSING_BUTTON', 'TORN', 'FADED', 'OTHER'].includes(d)) : ['MINT']
       })
       setSizes((data.sizes ?? []).join(', '))
       setColorIds(data.colorIds ?? [])
@@ -252,7 +252,7 @@ export default function AdminProductFormPage() {
         gender: data.gender || prev.gender,
         price: data.estimatedPrice ? Number(data.estimatedPrice.toString().replace(/\D/g, '')) || prev.price : prev.price,
         conditionPercentage: data.conditionPercentage ?? prev.conditionPercentage,
-        defects: data.defects && data.defects.length > 0 ? data.defects : prev.defects,
+        defects: data.defects && data.defects.length > 0 ? data.defects.filter(d => ['MINT', 'MINOR_FLAW', 'STAINED', 'MISSING_BUTTON', 'TORN', 'FADED', 'OTHER'].includes(d)) : prev.defects,
         sizes: data.sizes && data.sizes.length > 0 ? data.sizes : prev.sizes,
         length: data.length ?? prev.length,
         shoulder: data.shoulder ?? prev.shoulder,
